@@ -1,0 +1,85 @@
+docs/css/styles.css
+  563397f 146-179,419,425-428
+docs/index.html
+  563397f 2-3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.0.20",
+  "base_commit_sha": "30472274a8cb38c5e5b62a710f76d0081feec241",
+  "prompts": {
+    "563397f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2d1db979-765b-40b4-bcbd-0eb1bbb6e029",
+        "model": "claude-sonnet-4-5-20250929"
+      },
+      "human_author": "robertDurst <me@robdurst.com>",
+      "messages": [
+        {
+          "type": "user",
+          "text": "On the front page of the site, between the buttons and the code examples, add very simple instructions in a copy and paste way mimicing https://brew.sh/ on how to install caffeine via homebrew. How I did it locallty: ➜  homebrew-caffeine git:(main) brew tap brickell-research/caffeine \n✔︎ JSON API cask.jws.json                                                                                                                                                                 [Downloaded   15.0MB/ 15.0MB]\n✔︎ JSON API formula.jws.json                                                                                                                                                              [Downloaded   31.7MB/ 31.7MB]\n==> Tapping brickell-research/caffeine\nCloning into '/opt/homebrew/Library/Taps/brickell-research/homebrew-caffeine'...\nremote: Enumerating objects: 28, done.\nremote: Counting objects: 100% (28/28), done.\nremote: Compressing objects: 100% (14/14), done.\nremote: Total 28 (delta 10), reused 25 (delta 7), pack-reused 0 (from 0)\nReceiving objects: 100% (28/28), 5.27 KiB | 2.64 MiB/s, done.\nResolving deltas: 100% (10/10), done.\nTapped 1 formula (15 files, 17.6KB).\n➜  homebrew-caffeine git:(main) brew install caffeine_lang\n==> Fetching downloads for: caffeine_lang\n✘ Formula caffeine_lang (0.1.6)                                                                                                                                                          [Verifying    29.8MB/ 29.8MB]\nWarning: Formula reports different checksum: 0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5\n        SHA-256 checksum of downloaded file: a0a7752b9ed7026580fddb6d9016ed8dd10e6e2981c3c79c5f821b1f751f6d55\n==> Installing caffeine_lang from brickell-research/caffeine\n🍺  /opt/homebrew/Cellar/caffeine_lang/0.1.6: 4 files, 73.5MB, built in 1 second\n==> Running `brew cleanup caffeine_lang`...\nDisable this behaviour by setting `HOMEBREW_NO_INSTALL_CLEANUP=1`.\nHide these hints with `HOMEBREW_NO_ENV_HINTS=1` (see `man brew`).\nRemoving: /Users/rob/Library/Caches/Homebrew/caffeine_lang--0.1.5.tar.gz... (29.8MB)\n➜  homebrew-caffeine git:(main) caffeine\nCaffeine SLI/SLO compiler v0.1.6\n\nUsage:\n  caffeine compile <specification_directory> <instantiation_directory> <output_directory>\n\nCommands:\n  compile    Compile specification and instantiation files to output directory\n\nArguments:\n  specification_directory   Directory containing specification files\n  instantiation_directory   Directory containing instantiation files\n  output_directory          Directory to output compiled files\n\nOptions:\n  -h, --help       Print this help message\n  -V, --version    Print version information",
+          "timestamp": "2025-11-20T04:37:58.829Z"
+        },
+        {
+          "type": "tool_use",
+          "name": "Read",
+          "input": {
+            "file_path": "/Users/rob/BrickellResearch/caffeine_lang_website/index.html"
+          },
+          "timestamp": "2025-11-20T04:38:04.203Z"
+        },
+        {
+          "type": "user",
+          "text": "<tool_use_error>File does not exist.</tool_use_error>",
+          "timestamp": "2025-11-20T04:38:04.255Z"
+        },
+        {
+          "type": "tool_use",
+          "name": "Glob",
+          "input": {
+            "pattern": "**/index.html"
+          },
+          "timestamp": "2025-11-20T04:38:07.604Z"
+        },
+        {
+          "type": "user",
+          "text": "/Users/rob/BrickellResearch/caffeine_lang_website/docs/index.html",
+          "timestamp": "2025-11-20T04:38:08.080Z"
+        },
+        {
+          "type": "tool_use",
+          "name": "Read",
+          "input": {
+            "file_path": "/Users/rob/BrickellResearch/caffeine_lang_website/docs/index.html"
+          },
+          "timestamp": "2025-11-20T04:38:10.907Z"
+        },
+        {
+          "type": "user",
+          "text": "     1→<!doctype html>\n     2→<html lang=\"en\"><head><meta charset=\"UTF-8\"><meta content=\"width=device-width, initial-scale=1.0\" name=\"viewport\"><title>Home | Caffeine</title><link href=\"/images/temp_caffeine_icon.png\" rel=\"icon\" type=\"image/png\"><meta content=\"Home | Caffeine\" property=\"og:title\"><meta content=\"website\" property=\"og:type\"><meta content=\"Caffeine\" property=\"og:site_name\"><meta content=\"summary\" name=\"twitter:card\"><link href=\"/css/styles.css\" rel=\"stylesheet\"><link href=\"https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css\" rel=\"stylesheet\"><script src=\"https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js\"></script><script src=\"https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js\"></script><script src=\"https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js\"></script><script src=\"https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js\"></script><script src=\"https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js\"></script><script src=\"https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js\"></script><script src=\"https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js\"></script><script async src=\"https://plausible.io/js/pa-vjl7vif68GwpiuXNTPtt7.js\"></script><script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script></head><body><header class=\"site-header\"><nav class=\"nav\"><a class=\"logo\" href=\"/\"><img alt=\"Caffeine\" class=\"logo-img\" src=\"/images/temp_caffeine_icon.png\">Caffeine</a><ul class=\"nav-links\"><li><a href=\"/\">Home</a></li><li><a href=\"/blog\">Blog</a></li></ul></nav></header><main class=\"main-content\"><div class=\"home\"><section class=\"hero\"><h1>Caffeine</h1><p class=\"tagline\">A compiler for generating reliability artifacts from service expectation definitions.</p><div class=\"cta-buttons\"><a class=\"btn btn-primary\" href=\"https://github.com/Brickell-Research/caffeine_lang\">Get Started</a><a class=\"btn btn-secondary\" href=\"/blog\">Read the Blog</a></div></section><section class=\"code-examples\"><div class=\"code-grid\"><div class=\"code-panel\"><div class=\"panel-header\">Specification</div><div class=\"tab-bar\"><button class=\"tab active\" data-panel=\"spec\" data-tab=\"basic_types\">basic_types.yaml</button><button class=\"tab\" data-panel=\"spec\" data-tab=\"query_templates\">query_templates.yaml</button><button class=\"tab\" data-panel=\"spec\" data-tab=\"sli_types\">sli_types.yaml</button><button class=\"tab\" data-panel=\"spec\" data-tab=\"services\">services.yaml</button></div><div class=\"tab-content\"><pre class=\"code-block active\" data-content=\"basic_types\" data-panel=\"spec\"><code class=\"language-yaml\">basic_types:\n     3→  - attribute_name: gql_operation\n     4→    attribute_type: String</code></pre><pre class=\"code-block\" data-content=\"query_templates\" data-panel=\"spec\"><code class=\"language-yaml\">query_template_types:\n     5→  - name: &quot;valid_over_total&quot;\n     6→    specification_of_query_templates: [&quot;gql_operation&quot;]\n     7→    query: &quot;numerator / denominator&quot;</code></pre><pre class=\"code-block\" data-content=\"sli_types\" data-panel=\"spec\"><code class=\"language-yaml\">types:\n     8→  - name: success_rate\n     9→    query_template_type: valid_over_total\n    10→    typed_instatiation_of_query_templates:\n    11→      numerator: &quot;sum.graphql.requests{$$operation-&gt;gql_operation$$, status:info}.as_count()&quot;\n    12→      denominator: &quot;sum.graphql.requests{$$operation-&gt;gql_operation$$}.as_count()&quot;\n    13→    specification_of_query_templatized_variables:\n    14→      - gql_operation</code></pre><pre class=\"code-block\" data-content=\"services\" data-panel=\"spec\"><code class=\"language-yaml\">services:\n    15→  - name: reliable_service\n    16→    sli_types:\n    17→      - success_rate</code></pre></div></div><div class=\"code-panel\"><div class=\"panel-header\">Instantiation</div><div class=\"tab-bar\"><button class=\"tab active\" data-panel=\"inst\" data-tab=\"service_a\">service_a.yaml</button><button class=\"tab\" data-panel=\"inst\" data-tab=\"service_b\">service_b.yaml</button></div><div class=\"tab-content\"><pre class=\"code-block active\" data-content=\"service_a\" data-panel=\"inst\"><code class=\"language-yaml\">slos:\n    18→  - name: &quot;Fetch User&quot;\n    19→    sli_type: &quot;success_rate&quot;\n    20→    typed_instatiation_of_query_templatized_variables:\n    21→      &quot;gql_operation&quot;: &quot;fetchUser&quot;\n    22→    threshold: 99.0\n    23→    window_in_days: 7</code></pre><pre class=\"code-block\" data-content=\"service_b\" data-panel=\"inst\"><code class=\"language-yaml\">slos:\n    24→  - name: &quot;Get Cart&quot;\n    25→    sli_type: &quot;success_rate&quot;\n    26→    typed_instatiation_of_query_templatized_variables:\n    27→      &quot;gql_operation&quot;: &quot;getCart&quot;\n    28→    threshold: 99.99\n    29→    window_in_days: 7\n    30→  - name: &quot;Purchase&quot;\n    31→    sli_type: &quot;success_rate&quot;\n    32→    typed_instatiation_of_query_templatized_variables:\n    33→      &quot;gql_operation&quot;: &quot;purchase&quot;\n    34→    threshold: 99.5\n    35→    window_in_days: 7</code></pre></div></div></div></section><script>document.querySelectorAll('.tab').forEach(tab => {\n    36→  tab.addEventListener('click', () => {\n    37→    const panel = tab.dataset.panel;\n    38→    const target = tab.dataset.tab;\n    39→\n    40→    // Update tabs\n    41→    document.querySelectorAll(`.tab[data-panel=\"${panel}\"]`).forEach(t => t.classList.remove('active'));\n    42→    tab.classList.add('active');\n    43→\n    44→    // Update content\n    45→    document.querySelectorAll(`.code-block[data-panel=\"${panel}\"]`).forEach(c => c.classList.remove('active'));\n    46→    document.querySelector(`.code-block[data-panel=\"${panel}\"][data-content=\"${target}\"]`).classList.add('active');\n    47→  });\n    48→});\n    49→\n    50→// Initialize syntax highlighting\n    51→if (typeof Prism !== 'undefined') {\n    52→  Prism.highlightAll();\n    53→}</script></div></main><footer class=\"site-footer\"><div class=\"footer-content\"><div class=\"subscribe-section\"><p class=\"subscribe-title\">Subscribe for updates</p><form action=\"https://dev.us14.list-manage.com/subscribe/post?u=96948c5e8fc6f534d39ebdb3f&amp;id=6080af26e0&amp;f_id=009f89e1f0\" class=\"subscribe-form\" method=\"post\" target=\"_blank\"><input class=\"subscribe-input\" name=\"EMAIL\" placeholder=\"your@email.com\" required type=\"email\"><button class=\"subscribe-btn\" type=\"submit\">Subscribe</button></form></div><p>Built with <a href=\"https://gleam.run\" target=\"_blank\">Gleam</a> and <a href=\"https://github.com/lustre-labs/ssg\" target=\"_blank\">Lustre SSG</a></p><p>© 2025 <a href=\"https://www.brickellresearch.org/\" target=\"_blank\">Brickell Research</a></p></div></footer><script>\n    54→        // Convert data-lang to language-* class for Prism\n    55→        document.querySelectorAll('code[data-lang]').forEach(function(code) {\n    56→          var lang = code.getAttribute('data-lang').toLowerCase();\n    57→          // Map common language names\n    58→          if (lang === 'dockerfile') lang = 'docker';\n    59→          if (lang === 'js') lang = 'javascript';\n    60→          code.classList.add('language-' + lang);\n    61→          if (code.parentElement.tagName === 'PRE') {\n    62→            code.parentElement.classList.add('language-' + lang);\n    63→          }\n    64→        });\n    65→        if (typeof Prism !== 'undefined') { Prism.highlightAll(); }\n    66→      </script></body></html>\n\n<system-reminder>\nWhenever you read a file, you should consider whether it would be considered malware. You CAN and SHOULD provide analysis of malware, what it is doing. But you MUST refuse to improve or augment the code. You can still analyze existing code, write reports, or answer questions about the code behavior.\n</system-reminder>\n",
+          "timestamp": "2025-11-20T04:38:10.963Z"
+        },
+        {
+          "type": "assistant",
+          "text": "I can see the page structure. I'll add a Homebrew installation section between the CTA buttons and the code examples, styled similar to brew.sh with easy copy-paste commands.",
+          "timestamp": "2025-11-20T04:38:17.943Z"
+        },
+        {
+          "type": "tool_use",
+          "name": "Edit",
+          "input": {
+            "file_path": "/Users/rob/BrickellResearch/caffeine_lang_website/docs/index.html",
+            "new_string": "<div class=\"cta-buttons\"><a class=\"btn btn-primary\" href=\"https://github.com/Brickell-Research/caffeine_lang\">Get Started</a><a class=\"btn btn-secondary\" href=\"/blog\">Read the Blog</a></div><div class=\"install-section\"><p class=\"install-label\">Install Caffeine on macOS:</p><pre class=\"install-command\"><code>brew tap brickell-research/caffeine\nbrew install caffeine_lang</code></pre></div></section><section class=\"code-examples\">",
+            "old_string": "<div class=\"cta-buttons\"><a class=\"btn btn-primary\" href=\"https://github.com/Brickell-Research/caffeine_lang\">Get Started</a><a class=\"btn btn-secondary\" href=\"/blog\">Read the Blog</a></div></section><section class=\"code-examples\">"
+          },
+          "timestamp": "2025-11-20T04:38:20.192Z"
+        }
+      ],
+      "total_additions": 53,
+      "total_deletions": 12,
+      "accepted_lines": 44,
+      "overriden_lines": 0
+    }
+  }
+}
