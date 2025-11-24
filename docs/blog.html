@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Blog | Caffeine</title><link href="/images/temp_caffeine_icon.png" rel="icon" type="image/png"><meta content="Blog | Caffeine" property="og:title"><meta content="website" property="og:type"><meta content="Caffeine" property="og:site_name"><meta content="summary" name="twitter:card"><link href="/css/styles.css" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script><script async src="https://plausible.io/js/pa-vjl7vif68GwpiuXNTPtt7.js"></script><script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script></head><body><div class="announcement-banner"><a class="banner-link" href="https://gleamgathering.com/" target="_blank"><span class="banner-text-full">📣 I will be speaking at Gleam Gathering! Join me for &quot;10,000 Lines Later: When a Tool Became a Compiler (and I Became a Gleamlin)&quot;</span><span class="banner-text-mobile">📣 Speaking at Gleam Gathering</span><span class="banner-arrow"> →</span></a></div><header class="site-header"><nav class="nav"><a class="logo" href="/"><img alt="Caffeine" class="logo-img" src="/images/temp_caffeine_icon.png">Caffeine</a><ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/blog">Blog</a></li></ul></nav></header><main class="main-content"><div><div class="blog-container"><div class="blog-main"><h1>Blog</h1><ul class="posts"><li class="post-item" data-tags="Gleam,Ruby,SRE,Terraform"><a href="/blog/origins"><h2>Origin Story</h2><p class="post-date">2025-11-22 · by Rob Durst · 17 min read</p><p class="post-summary">How Caffeine Came to Be</p><div class="post-tags"><span class="tag">Gleam</span><span class="tag">Ruby</span><span class="tag">SRE</span><span class="tag">Terraform</span></div></a></li><li class="post-item" data-tags="Gleam,Build tools"><a href="/blog/packaging-caffeine"><h2>Packaging Caffeine</h2><p class="post-date">2025-11-18 · by Rob Durst · 7 min read</p><p class="post-summary">A step-by-step guide to creating distributable binaries from Gleam code by targeting JavaScript and compiling with Deno.</p><div class="post-tags"><span class="tag">Gleam</span><span class="tag">Build tools</span></div></a></li></ul></div><aside class="blog-sidebar"><div><div class="filter-header"><h3>Filter by Tag</h3><div class="sort-controls"><button class="sort-btn active" data-sort="alpha">A-Z</button><button class="sort-btn" data-sort="count">#</button></div></div><div class="tag-filters"><button class="filter-tag" data-count="1" data-tag="Build tools">Build tools<span class="tag-count">(1)</span></button><button class="filter-tag" data-count="2" data-tag="Gleam">Gleam<span class="tag-count">(2)</span></button><button class="filter-tag" data-count="1" data-tag="Ruby">Ruby<span class="tag-count">(1)</span></button><button class="filter-tag" data-count="1" data-tag="SRE">SRE<span class="tag-count">(1)</span></button><button class="filter-tag" data-count="1" data-tag="Terraform">Terraform<span class="tag-count">(1)</span></button></div></div></aside></div><script src="/js/blog-filter.js"></script></div></main><footer class="site-footer"><div class="footer-content"><p>Built with <a href="https://gleam.run" target="_blank">Gleam</a> and <a href="https://github.com/lustre-labs/ssg" target="_blank">Lustre SSG</a></p><p>© 2025 <a href="https://brickellresearch.org/" target="_blank">Brickell Research</a></p></div></footer><script>
+        // Convert data-lang to language-* class for Prism
+        document.querySelectorAll('code[data-lang]').forEach(function(code) {
+          var lang = code.getAttribute('data-lang').toLowerCase();
+          // Map common language names
+          if (lang === 'dockerfile') lang = 'docker';
+          if (lang === 'js') lang = 'javascript';
+          code.classList.add('language-' + lang);
+          if (code.parentElement.tagName === 'PRE') {
+            code.parentElement.classList.add('language-' + lang);
+          }
+        });
+        if (typeof Prism !== 'undefined') { Prism.highlightAll(); }
+        // Generate Table of Contents
+        document.querySelectorAll('.post-content .toc').forEach(function(tocContainer) {
+          var headers = document.querySelectorAll('.post-content h2[id], .post-content h3[id], .post-content h4[id]');
+
+          if (headers.length === 0) return;
+
+          // Function to convert number to Roman numeral
+          function toRoman(num) {
+            var romans = [
+              ['X', 10], ['IX', 9], ['V', 5], ['IV', 4], ['I', 1]
+            ];
+            var result = '';
+            for (var i = 0; i < romans.length; i++) {
+              while (num >= romans[i][1]) {
+                result += romans[i][0];
+                num -= romans[i][1];
+              }
+            }
+            return result;
+          }
+
+          // Function to convert number to letter (1=a, 2=b, etc.)
+          function toLetter(num) {
+            return String.fromCharCode(96 + num); // 97 is 'a'
+          }
+
+          var tocTitle = document.createElement('div');
+          tocTitle.className = 'toc-title';
+          tocTitle.textContent = 'Table of Contents';
+
+          var tocList = document.createElement('ul');
+          var currentH2 = null;
+          var currentH3 = null;
+          var h2Count = 0;
+          var h3Count = 0;
+
+          headers.forEach(function(header) {
+            var level = header.tagName.toLowerCase();
+            var text = header.textContent.replace('#', '').trim();
+            var link = document.createElement('a');
+            link.href = '#' + header.id;
+
+            if (level === 'h2') {
+              h2Count++;
+              h3Count = 0; // Reset h3 counter for new h2 section
+              link.textContent = toRoman(h2Count) + '. ' + text;
+            } else if (level === 'h3') {
+              h3Count++;
+              link.textContent = toLetter(h3Count) + '. ' + text;
+            } else {
+              link.textContent = text;
+            }
+
+            var li = document.createElement('li');
+            li.appendChild(link);
+
+            if (level === 'h2') {
+              tocList.appendChild(li);
+              currentH2 = li;
+              currentH3 = null;
+            } else if (level === 'h3' && currentH2) {
+              if (!currentH2.querySelector('ul')) {
+                var ul = document.createElement('ul');
+                currentH2.appendChild(ul);
+              }
+              currentH2.querySelector('ul').appendChild(li);
+              currentH3 = li;
+            } else if (level === 'h4' && currentH3) {
+              if (!currentH3.querySelector('ul')) {
+                var ul = document.createElement('ul');
+                currentH3.appendChild(ul);
+              }
+              currentH3.querySelector('ul').appendChild(li);
+            }
+          });
+
+          tocContainer.appendChild(tocTitle);
+          tocContainer.appendChild(tocList);
+        });
+
+        // Add anchor links to headers
+        document.querySelectorAll('.post-content h2[id], .post-content h3[id], .post-content h4[id]').forEach(function(header) {
+          var anchor = document.createElement('span');
+          anchor.className = 'header-anchor';
+          anchor.innerHTML = '#';
+          anchor.setAttribute('aria-label', 'Copy link to ' + header.textContent);
+          header.insertBefore(anchor, header.firstChild);
+
+          // Make entire header clickable to copy URL
+          header.style.cursor = 'pointer';
+          header.addEventListener('click', function(e) {
+            var url = window.location.origin + window.location.pathname + '#' + header.id;
+
+            // Update URL bar
+            window.history.pushState(null, '', '#' + header.id);
+
+            // Copy to clipboard
+            navigator.clipboard.writeText(url).then(function() {
+              // Show feedback
+              var originalText = anchor.innerHTML;
+              anchor.innerHTML = '✓';
+              setTimeout(function() {
+                anchor.innerHTML = originalText;
+              }, 1000);
+            }).catch(function(err) {
+              console.error('Failed to copy:', err);
+            });
+          });
+        });
+      </script></body></html>

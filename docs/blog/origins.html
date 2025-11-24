@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Origin Story | Caffeine</title><link href="/images/temp_caffeine_icon.png" rel="icon" type="image/png"><meta content="Origin Story | Caffeine" property="og:title"><meta content="website" property="og:type"><meta content="Caffeine" property="og:site_name"><meta content="summary" name="twitter:card"><meta content="How Caffeine Came to Be" name="description"><meta content="How Caffeine Came to Be" property="og:description"><meta content="https://caffeine-lang.org/blog/origins" property="og:url"><link href="/css/styles.css" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script><script async src="https://plausible.io/js/pa-vjl7vif68GwpiuXNTPtt7.js"></script><script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script></head><body><div class="announcement-banner"><a class="banner-link" href="https://gleamgathering.com/" target="_blank"><span class="banner-text-full">📣 I will be speaking at Gleam Gathering! Join me for &quot;10,000 Lines Later: When a Tool Became a Compiler (and I Became a Gleamlin)&quot;</span><span class="banner-text-mobile">📣 Speaking at Gleam Gathering</span><span class="banner-arrow"> →</span></a></div><header class="site-header"><nav class="nav"><a class="logo" href="/"><img alt="Caffeine" class="logo-img" src="/images/temp_caffeine_icon.png">Caffeine</a><ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/blog">Blog</a></li></ul></nav></header><main class="main-content"><article class="blog-post"><header class="post-header"><h1>Origin Story</h1><p class="post-date">2025-11-22 · by Rob Durst</p></header><div class="post-content"><div class="toc"></div><p><strong>I&#39;m building <a href="https://github.com/Brickell-Research/caffeine_lang">Caffeine</a>, a compiler written in Gleam that compiles service expectations to reliability artifacts.
+This post documents the motivation and inspiration behind Caffeine, tracing a path from Terraform automation to typed functional compilation.</strong></p><hr><h2 id="Frontloading-the-Buzzwords">Frontloading the Buzzwords</h2><h3 id="SRE---Site-Reliability-Engineering">SRE - Site Reliability Engineering</h3><p>As initially designed, Caffeine is a tool that&#39;s most interesting to folks within the Site Reliability Engineering (<a href="https://en.wikipedia.org/wiki/Site_reliability_engineering">or SRE</a>) community. While I do currently don the title of SRE, I&#39;ve only done so
+<strong>officially</strong> since May 2024 (<a href="https://www.linkedin.com/in/robertdurst/details/experience/">see my LinkedIn</a>). Yet, I&#39;ve been unofficially filling this role for years.</p><p>Some proof from the web:</p><ul style="list-style-type:disc;"><li><p>2018 @ Stellar Development Foundation - A summer fuzz-testing internship (no blog post 😢)</p></li><li><p>2021 @ DocuSign - <a href="https://robdurst.com/why-defensive-coding-matters">My experience: Why defensive coding matters</a></p></li><li><p>2022 @ Spring Health - <a href="https://medium.com/spring-health-engineering/the-birth-of-the-performance-lab-at-spring-health-76b768c9c967">The Birth of the Performance Lab at Spring Health</a></p></li></ul><p>My official transition is documented in my 2025 EMEA SRECon talk: <a href="https://www.youtube.com/watch?v=f3lKbV32dyg">Run, Walk, Crawl, or How We Failed Our Way to SLO Readiness</a>.</p><h3 id="IAC---Infrastructure-as-Code">IAC - Infrastructure as Code</h3><p>As I mention in that talk, immediately upon moving to the SRE team, I was thrown into a large cloud infrastructure migration project. A significant part of this work was developing <a href="https://www.hashicorp.com/en/products/terraform">Terraform</a> modules for our new infrastructure. Over my first six months working with Terraform, I began to drink the <a href="https://en.wikipedia.org/wiki/Infrastructure_as_code">infrastructure-as-code</a> (IAC) Koolaid.</p><h3 id="ODD---Observability-Driven-Development">ODD - Observability Driven Development</h3><p>Another concept I&#39;d been introduced to at DocuSign was <a href="https://stackoverflow.blog/2022/10/12/how-observability-driven-development-creates-elite-performers/">observability driven development</a> (ODD): an emphasis on introducing sufficient telemetry instrumentation to understand how code actually performs.</p><p>This really clicked for me at DocuSign when, as a junior engineer, I was tasked with introducing changes to DocuSign&#39;s core service discovery service (aptly named <code>Discovery</code>). A mentor challenged me: <em>&quot;what is the minimum change you can push to production to understand the actual behavior of your proposed modifications?&quot;</em> Following this advice, my first few PRs focused strictly on instrumentation. After running it in production for a few days, I gained immense confidence about (a) what the changes would look like and (b) <strong>most importantly</strong> how to know if something went wrong.</p><p>It&#39;s no exaggeration to say this was a serious &quot;AHA!&quot; 🧠 moment in my engineering career.</p><h2 id="Datadog-+-Terraform-=-🔥-but-also-😅">Datadog + Terraform = 🔥 but also 😅</h2><p>At Spring, we use <a href="https://www.datadoghq.com/">Datadog</a> for observability. It&#39;s great. Upon diving into my ODD mentality, I quickly became not only a Datadog power user but unofficially garnered the nickname &quot;Datadog Rob&quot; for my telemetry obsession and willingness to help others <em>&quot;see the light&quot;</em>.</p><p>Yet while Datadog is an instrumental part of our observability stack, it&#39;s got its own quirks, complexities, and downsides. In my opinion, one con is its intimidating interface: it gives you a lot of ways to view your system&#39;s telemetry which is powerful, but also hinders adoption for casual users.</p><p>Focusing just on monitoring, I discovered teammates had begun exploring Datadog&#39;s <a href="https://registry.terraform.io/providers/DataDog/datadog/latest/docs">Terraform provider</a> to IAC their monitors 👀. This was by no means easy... requiring multiple verbose files to define even a single monitor:</p><p><strong>Note:</strong> Examples below use generic placeholders; any names resembling internal systems are illustrative only.</p><p><strong>providers.tf</strong></p><pre><code data-lang="tf">terraform {
+  required_providers {
+    datadog = {
+      source = &quot;DataDog/datadog&quot;
+    }
+  }
+}
+</code></pre><p><strong>main.tf</strong></p><pre><code data-lang="tf">resource &quot;datadog_monitor_json&quot; &quot;foobar_example_latency&quot; {
+  for_each = {
+    for index, monitor in var.latency_change_monitors :
+    monitor.resource_name =&gt; monitor
+  }
+  monitor = templatefile(&quot;${path.module}/${var.monitor_env}/monitors/templated/change-latency-template.tpl&quot;,
+    {
+      app_name          = coalesce(each.value.app_name, var.app_name),
+      team_name         = coalesce(each.value.team_name, var.team_name),
+      prod_service_name = coalesce(each.value.prod_service_name, var.prod_service_name),
+      resource_name     = each.value.resource_name,
+      alert_threshold   = each.value.alert_threshold,
+      tags              = concat(local.base_change_latency_tags, each.value.tags)
+  })
+}
+</code></pre><p><strong>terraform.tfvars</strong></p><pre><code data-lang="tf">latency_threshold_monitors = [
+  {
+    resource_name       = &quot;some_resource_thing&quot;
+    alert_threshold     = 2.5
+    require_full_window = true
+    window_minutes      = 10
+    tags                = []
+  },
+  ...
+]
+</code></pre><p><strong>variables.tf</strong></p><pre><code data-lang="tf">variable &quot;monitor_env&quot; {
+  type    = string
+  default = &quot;production&quot;
+}
+...
+</code></pre><p>And all of this on top of a template... which is assuming in my process of recollecting the origins of Caffeine here I didn&#39;t forget any steps. Surprisingly, IAC-ing monitors was already a big step forward in making Datadog easier to use (and having done some research into the APM tooling space, this has become a baseline feature for basically every vendor across a whole host of telemetry resources from monitors to alerts to dashboards).</p><p>Believe it or not, this wasn&#39;t quite a <a href="https://blog.codinghorror.com/falling-into-the-pit-of-success/">pit of success</a>. I know, surprising. Again, I promise it was actually a significant improvement over our current way of operating, but there was still a lot to be desired.</p><p>In pursuing improvements, the most obvious route was to see how much of the boilerplate could be generated. While LLMs could probably do a pretty decent job of automating net new monitor Terraform generation by leveraging documentation, user guidance, and a well structured repo, programmatic generation of code is actually a well studied problem... compilers anyone? Ok, I didn&#39;t quite go <strong>full compiler</strong> (not yet 😈). I did however begin writing Ruby to automatically generate Terraform, reducing the number of files users had to create/modify from ~5 to 2.</p><p>Creating a new monitor was now reduced to a template file like this:</p><pre><code data-lang="json">{
+	&quot;name&quot;: &quot;[${name}] {{workload.name}} has scaled considerably and is near max replicas!&quot;,
+	&quot;type&quot;: &quot;query alert&quot;,
+	&quot;query&quot;: &quot;some query&quot;,
+	&quot;message&quot;: &quot;some message&quot;,
+    &quot;tags&quot;: ${jsonencode(tags)},
+	&quot;options&quot;: {
+		&quot;thresholds&quot;: {
+			&quot;critical&quot;: ${alert_threshold}
+		},
+		&quot;notify_audit&quot;: false,
+		&quot;on_missing_data&quot;: &quot;show_and_notify_no_data&quot;,
+		&quot;include_tags&quot;: true,
+		&quot;evaluation_delay&quot;: 900,
+		&quot;new_group_delay&quot;: 60
+	},
+	&quot;priority&quot;: 3
+}
+</code></pre><p>And a variables file like this:</p><pre><code data-lang="json">{
+    &quot;monitors&quot; : [
+        {
+            &quot;name&quot; : &quot;Development&quot;,
+            &quot;filter_expression&quot; : &quot;&lt;your_filter_expression&gt;&quot;,
+            &quot;alert_threshold&quot; : 0,
+            &quot;window_minutes&quot; : &quot;10&quot;,
+            &quot;slack_channel&quot; : &quot;&lt;alert_channel&gt;&quot;
+        },
+
+        ...
+
+    ]
+}
+</code></pre><p>Here some of the benefits of tooling on top of IAC started to really surface:</p><p>1. Large-scale metadata changes were no longer ~15 clicks in an intimidating UI, but simple changes across 15 lines of code</p><p>2. &quot;Why did someone make this monitor and why&quot; became a question we could actually answer</p><p>3. Enforcing best practices became doable since we controlled the transformation layer</p><p>A marked improvement over our initial <strong>raw</strong> Terraform setup. Yet could we go further?</p><p><img alt="Spongebob and Patrick thinking" src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExY2U4OGNwbGxmZ2tkMTR3amIyZXo5MWhoeGt4dnR3ZzFudDZiMHNyeSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/TPl5N4Ci49ZQY/giphy.gif"></p><h2 id="ez-mon:-Partial-Monitor-Template-Generation-Automation">ez-mon: Partial Monitor Template Generation Automation</h2><p>While monitors could now be modified without navigating to Datadog&#39;s UI, creation still required a cumbersome process:</p><p>1. Navigate to Datadog&#39;s monitor feature</p><p>2. Create a monitor that seems reasonable</p><p>3. Export the monitor&#39;s template</p><p>4. Decide what should be a template variable, editing the template to accept these</p><p>Assuming the average person had the time, energy, and motivation to do this <em>and</em> would get it right on the first try was unrealistic. Thus <code>git init</code> and the next iteration began: <code>ez-mon</code>.</p><p>I leveraged a lot of the same code but expanded the autogeneration capabilities via a CLI tool that also leveraged directory structure to signify (a) team ownership and (b) relevant service. The documentation for the CLI was as follows:</p><pre><code data-lang="markdown">### Generate ###
+
+Command: generate
+Description: Net new alert creation. Creates the alert in-repo; it isn&#39;t applied (created in Datadog) until configured and `make apply` is run.
+
+Example:
+./bin/ez-mon generate \
+    --service &lt;service_name&gt; \
+    --pod &lt;pod_or_tier&gt; \
+    --resource &lt;resource_name&gt; \
+    --descriptor &lt;descriptor_or_env&gt; \
+    --runbook_link &lt;runbook_url&gt; \
+    --priority 2
+
+### Delete ###
+
+Command: delete
+Description: Deletes the alert from the repo, local state, and Datadog.
+
+Example:
+./bin/ez-mon delete \
+    --service &lt;service_name&gt; \
+    --pod &lt;pod_or_tier&gt; \
+    --resource &lt;resource_name&gt; \
+    --descriptor &lt;descriptor_or_env&gt;
+
+### Edit ###
+
+Command: modify
+Description: Opens an editor with the configuration of an existing monitor.
+
+Example:
+./bin/ez-mon modify \
+    --service &lt;service_name&gt; \
+    --pod &lt;pod_or_tier&gt; \
+    --resource &lt;resource_name&gt; \
+    --descriptor &lt;descriptor_or_env&gt;
+</code></pre><p>Unfortunately, creating a tool for monitor generation was challenging as the breadth of queries was too large to realistically pre-populate templates for. Cutting Datadog completely out of the picture proved impossible. Even with all the wins, folks being intimidated by Datadog still loomed.</p><p>The tool described above, <code>ez-mon</code>, more-or-less ran its course. The template approach was simple enough for motivated engineers, but if you basically have to create the monitor in Datadog anyway, why not just click the <code>create</code> button there?</p><h2 id="ez-slo:-A-More-Scoped-Domain-Appears">ez-slo: A More Scoped Domain Appears</h2><p>Eventually I found myself leading the effort to adopt SLOs (<a href="https://en.wikipedia.org/wiki/Service-level_objective">service level objectives</a>).</p><p>The TLDR: an SLO is an opinion over an SLI (<a href="https://en.wikipedia.org/wiki/Service_level_indicator">service level indicator</a>), which is a metric that emulates a user experience. Thus SLOs are basically a way to quantify how reliable a service is from the user&#39;s perspective. Datadog <a href="https://docs.datadoghq.com/service_management/service_level_objectives/">has an SLO feature</a> and <a href="https://registry.terraform.io/providers/DataDog/datadog/latest/docs/resources/service_level_objective">Terraform resources for these</a>.</p><p>And thus we now had a very interesting opportunity to see how we might leverage our learnings from <code>ez-mon</code> to create a net new tool: <code>ez-slo</code>. What makes SLOs different from monitors is that fundamentally (a) a team responsible for operating a production service likely has far fewer SLOs than monitors and (b) most SLOs take similar shapes. Thus, the breadth of <em>things</em> that we&#39;d want to enable templated generation of might be within a small enough scope (especially if we employ the <a href="https://en.wikipedia.org/wiki/Pareto_principle">Pareto principle</a>) to predefine types and keep a majority of our users from ever having to venture into Datadog&#39;s UI.</p><p>Note that there are actually a few tools in this space who came to similar conclusions:</p><ul style="list-style-type:disc;"><li><p><a href="https://github.com/OpenSLO">OpenSLO</a>: <em>a service level objective (SLO) language that declaratively defines reliability and performance targets using a simple YAML specification</em></p></li><li><p><a href="https://sloth.dev/">Sloth</a>: <em>stop using complex specs and processes to create Prometheus based SLOs. Fast, easy and reliable Prometheus SLO generator.</em></p></li><li><p><a href="https://www.nobl9.com/">Nobl9</a>: <em>a powerful service level management software. Manage SLAs, define and monitor SLOs, track latency, and manage service levels</em></p></li></ul><p>None of these quite fit the bill for us. OpenSLO is too verbose and lacks the opinionated defaults we want, Sloth focuses specifically on Prometheus, and Nobl9 is itself a SaaS product. However, seeing that others had come to a similar conclusion that SLO support tooling could be improved from click-ops or raw Terraform practices was validating.</p><p>Reusing many bits from <code>ez-mon</code>, we ended up with an exceptionally simplified user interface that only required specifying an SLI type and various template variable attributes.</p><pre><code data-lang="yaml">slos:
+## Feature View
+  - view: &quot;/path/to/feature/&quot;
+    slis:
+      - type: &quot;LCP_Latency&quot;
+        duration_threshold_seconds: 2.5
+        target: 99.9
+      - type: &quot;FE_Renders&quot;
+        target: 99.9
+</code></pre><p>Yes, that&#39;s really it! And the best part was under the covers we controlled things like rendering proper tags in Terraform, basic threshold enforcement, and opinionated window duration selection that made all the things I documented but folks commonly missed (or ignored) enforceable (and many times even without them knowing)... a true pit of success.</p><p>... and no shade on these devs who don&#39;t read my docs, I get RTFM&#39;d by my own team weekly ...</p><h2 id="Everything-Is-a-Compiler-Problem">Everything Is a Compiler Problem</h2><p>While a significant improvement over <code>ez-mon</code>, there were some serious drawbacks to how <code>ez-slo</code> encapsulated the configuration of SLI types in the backend Ruby code:</p><p>1. SLI types supported only lived in code (even with better docs, still pretty obscure).</p><p>2. Inconsistent required attributes make for a wonky interface.</p><p>3. Multi-level required attributes (one at SLO level and one per SLI level) was confusing.</p><p>4. Extensions required writing Ruby. While we are a Ruby shop, I wanted PMs (product manager) and EMs (engineering manager) alike to be able to use this tool.</p><p>I wrote <a href="https://github.com/Brickell-Research/caffeine_lang/blob/main/rfcs/001_Extensible_Architecture.md">an RFC</a> to formally define how to address these shortcomings.</p><p><strong>Overview section from that doc:</strong> <em>&quot;Fundamentally, ez-slo was a pipeline for the generation of reliability artifacts from SLO specifications. It differs from OpenSLO in that we seek a higher level of abstraction by default, lowering the barrier for entry and simultaneously improving
+consumability of configuration specifications through opinionated defaults following in the steps of the Rails Doctrine&#39;s convention over configuration. As originally written, the yaml specifications accomplished our goal, being a simple specification that autogenerates Datadog SLOs
+and a dashboard encompassing all these artifacts. We do NOT seek to propose breaking changes to this format. Instead we seek to redesign the internals in order to promote a more extensible and flexible architecture to support greater org wide adoption. Specifically, we aim to
+accomplish: clearer separation and isolation of compilation phases, type adoption from the ground up, move slo type, service, and team configuration to the frontend for better visibility and end-user malleability.
+Fundamentally we&#39;re writing a compiler here and we need to better structure this as such.&quot;</em></p><p>From the beginning it was always clear that what I was building was a compiler. Zooming out, we had the right structure:</p><p>1. <strong>frontend</strong>: .yaml configuration files</p><p>2. <strong>middle-end</strong>: manipulate user input, enforcing best practices and performing validations</p><p>3. <strong>backend</strong>: generate Terraform</p><p class="figure"><img alt="Compiler architecture of caffeine" src="/images/origins-slo_compiler_slide.png"></p><p>Visual of these ideas as presented at my 2025 EMEA SRECon Lightning Talk</p><p>Yet in developing <code>ez-slo</code>, I never really leaned into this until it was too late (<strong>it&#39;s embarrassing to admit, but I vibe coded myself into a corner</strong>).</p><p>When trying to extend <code>ez-slo</code> to implement the RFC, it became clear I needed to leverage a more formal compiler design. This was not my first foray into this world. While by no means anything more than a <em>self-proclaimed programming language enthusiast</em>, I do have some experience:</p><ul style="list-style-type:disc;"><li><p><a href="https://robdurst.com/Sailfish-Manual">Built my own programming language for an independent study in college</a></p></li><li><p><a href="https://robdurst.com/JavaScriptTypeInference">Performed research on inference of asynchronous JavaScript function signatures</a> in collaboration with <a href="https://prl.khoury.northeastern.edu/">Northeastern&#39;s Programming Language Research Lab</a></p></li><li><p><a href="https://robdurst.com/KeyOf">Briefly did some research on designing a type for Pyret</a> with <a href="https://users.cs.utah.edu/~blg/">Ben Greenman</a></p></li></ul><p>So I very excitedly decided it was time to build a compiler properly (and for something I&#39;d actually use at work)!</p><h2 id="⭐️-Enter-Gleam-⭐️">⭐️ Enter Gleam ⭐️</h2><p>For starters, I decided it&#39;d be nice to have types. Since Spring is a Ruby shop and at project onset I was developing something that would be maintained internally, this meant exploring <a href="https://github.com/sorbet/sorbet">sorbet</a>. My first thought was to retrofit types onto my existing implementation, going full <a href="https://en.wikipedia.org/wiki/Gradual_typing">gradual typing</a> on <code>ez-slo</code>. I got to a state of a &quot;fully typed&quot; <code>ez-slo</code>, however I came to quickly realize I wasn&#39;t actually much a fan of Sorbet. Even <a href="https://jez.io/">Jake Zimmerman</a>, a core contributor to Sorbet, <a href="https://blog.jez.io/history-of-sorbet-syntax/">admits Sorbet syntax isn&#39;t the prettiest</a>.</p><p>From there I tried <a href="https://docs.racket-lang.org/ts-guide/">typed Racket</a>, which I wanted to like, but got annoyed early on by the lack of tooling and library support. Haskell and OCaml were next on the list and I may have gone down those routes if not for the <a href="https://www.typetheoryforall.com/">Type Theory for All</a> podcast.</p><p>My wife and I were embarking on a long road trip to Jasper, Canada and with many hours to drive ahead (and hours of running to train for my first trail run), I downloaded episodes of this podcast.</p><p>During a run at the <a href="https://www.wyomingcarboncounty.com/things-to-do/parks-outdoors/seminoe-state-park">Seminoe State Park</a>...</p><p class="figure"><img alt="Seminoe State Park" src="/images/origins-seminoe_reserve.jpg"></p><p>Taken at night - not quitting my day job anytime soon to be a photographer</p><p>I was listening to an episode titled <a href="https://www.typetheoryforall.com/episodes/self-education-in-pl">Self-Education in PL</a>. During this episode, Ryan Brewer spoke very highly about a relatively new programming language called Gleam that seemed to fit exactly what I was looking for: a language that is typed and functional, but <em>friendly</em> and less formal (less scary) than Haskell and OCaml.</p><p>Taking a quick step back: before going down the route of a full compiler, I got sign-off from my manager at Spring to develop this project outside of work as an open source, properly licensed repository that I could then use for my SLO efforts at Spring. With that sign-off, I had free rein to choose whatever language, design, etc. I believed would yield the best working software.</p><p>With this all said and done, I began working on what I&#39;ve come to call Caffeine.</p><p>After a run through <a href="https://tour.gleam.run/">Gleam&#39;s online language tour</a> and with the fantastic <a href="https://tour.gleam.run/everything/">&quot;everything!&quot; page</a> open in my browser window, development on a compiler proper began.</p><h2 id="Towards-Simplicity">Towards Simplicity</h2><h3 id="Today:-so-complex-not-even-your-neighborhood-SRE-can-understand-it">Today: so complex not even your neighborhood SRE can understand it</h3><p>For a high-level explanation of how Caffeine works, there are two parts:</p><p>1. <strong>specifications:</strong> definition of SLI types available to the user</p><p>2. <strong>instantiations:</strong> invocations of service expectations via templated definitions leveraging the SLI types</p><p>Admittedly, there were a lot of pieces to get the specifications all set up, but once everything fit together and relevant type and service metadata information was provided to the compiler for a proper middle-end phase, we put together a GitHub Action and began using it at Spring.</p><p>It was awesome!</p><p>Yet in attempting to explain how it all worked, I found myself faced with the reality that the design was way too complex.</p><p><img alt="my coworkers&#39; reactions" src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExOXlmdTliZWFtcGR6cDgxamFkaW1jOWtmb3ZuODdyMzAwNW1nNTdpYyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/LyJ6KPlrFdKnK/giphy.gif"></p><p>In order to facilitate adoption beyond power users and early adopters, I needed to reduce the specification language&#39;s complexity. If we dive into how the specification looked, even a simple example highlights the complexity.</p><p>Let&#39;s start with a minimal instantiation example:</p><pre><code data-lang="yaml">slos:
+  - name: &quot;Some Service Operation&quot;
+    sli_type: &quot;success_rate&quot;
+    typed_instantiation_of_query_templated_variables:
+      &quot;gql_operation&quot;: &quot;SomeOperation&quot;
+    threshold: 99.0
+    window_in_days: 7
+</code></pre><p>This was actually the example from the first version of my website (screenshotted here for what one day will be nostalgic):</p><p class="figure"><img alt="website original example" src="/images/origins-website_original.png"></p><p>Landing page of caffeine-lang.run circa late November 2025</p><p>So here we have a service expectation definition (<em>or an SLO</em>) for a service named <code>&quot;Some Service Operation&quot;</code>. The threshold and window here are specific to the SLO and <strong>built-in</strong> required attributes. <code>sli_type</code> refers to the <code>&quot;success_rate&quot;</code> SLI type and <code>typed_instantiation_of_query_templated_variables</code> is a mapping of expected attribute names to values.</p><p>To resolve this, we first ensure this <code>sli_type</code> is supported for this service as per the services specification (<code>services.yaml</code>):</p><pre><code data-lang="yaml">services:
+  - name: reliable_service
+    sli_types:
+      - success_rate
+</code></pre><p>This just ensures the SLIs make sense for a given service, a simple semantic check.</p><p>Next we go to the <code>sli_types.yaml</code> to see how <code>success_rate</code> is defined:</p><pre><code data-lang="yaml">types:
+  - name: success_rate
+    query_template_type: valid_over_total
+    typed_instantiation_of_query_templates:
+      numerator: &quot;sum.app.requests{$$operation-&gt;gql_operation$$, status:info}.as_count()&quot;
+      denominator: &quot;sum.app.requests{$$operation-&gt;gql_operation$$}.as_count()&quot;
+    specification_of_query_templated_variables:
+      - gql_operation
+</code></pre><p>Here we have <code>specification_of_query_templated_variables</code> which defines the <code>gql_operation</code> attribute required for this type. As you can see, this is used as a template parameter for the actual queries defined within <code>typed_instantiation_of_query_templates</code>. So, we see what <code>success_rate</code> is, but what is <code>query_template_type</code> and thus what is the significance of <code>valid_over_total</code>? For that we look to the <code>query_templates.yaml</code> specification file:</p><pre><code data-lang="yaml">query_template_types:
+  - name: &quot;valid_over_total&quot;
+    specification_of_query_templates: [&quot;numerator&quot;, &quot;denominator&quot;]
+    query: &quot;numerator / denominator&quot;
+</code></pre><p>This basically just says we define the query as a ratio. <code>query</code> here is actually interpreted by a tiny DSL called Caffeine Query Language or CQL (<a href="https://github.com/Brickell-Research/caffeine_lang/blob/main/rfcs/002_Caffeine_Query_Language.md">defined here</a>).</p><p>And finally, we also provide type annotations to the compiler via the <code>basic_types.yaml</code> specification file:</p><pre><code data-lang="yaml">basic_types:
+  - attribute_name: gql_operation
+    attribute_type: String
+</code></pre><p>While this all worked and is implemented in Caffeine version <a href="https://github.com/Brickell-Research/caffeine_lang/releases/tag/v0.1.6">v0.1.6</a>, this was one of the simplest possible examples...</p><h3 id="Tomorrow:-so-simple-it-makes-&quot;no-code&quot;-blush">Tomorrow: so simple it makes &quot;no code&quot; blush</h3><p><em>&quot;so simple it makes &quot;no code&quot; blush&quot;</em> - ok, that&#39;s certainly an exaggeration... but it is an inspirational mindset to assume when designing the user interface!</p><p>After some time at the whiteboard, I believe we <em>can</em> get all the information we need into a single specification. For this, we&#39;re also using less intimidating/technical terminology and defining a single <code>blueprints.yaml</code> file with definitions of service expectation kinds:</p><p><strong>blueprints.yaml (proposal)</strong></p><pre><code data-lang="yaml">kinds:
+  - name: success_rate
+    inputs:
+      gql_operation: String
+    queries:
+      numerator:   &#39;sum.app.requests{operation:${gql_operation},status:info}.as_count()&#39;
+      denominator: &#39;sum.app.requests{operation:${gql_operation}}.as_count()&#39;
+    value: &quot;numerator / denominator&quot;
+</code></pre><p>With this, we now have a much simpler interface with only 4 fields:</p><ul style="list-style-type:disc;"><li><p><strong>name</strong> - unique identifier for referencing the kind within instantiations</p></li><li><p><strong>inputs</strong> - a key-value list of attribute names and types (<strong>note:</strong> we support an <code>Optional</code> collection type)</p></li><li><p><strong>queries</strong> - a key-value list of named sub-query strings</p></li><li><p><strong>value</strong> - the CQL top-level query definition</p></li></ul><p>Furthermore, this is completely backwards compatible with existing instantiations.</p><hr><h2 id="Conclusion">Conclusion</h2><p>At the time of writing (November 22, 2025), this post captures the journey to Caffeine and my current progress. We expect things to continue changing as we refine the design and UX.</p><p>Caffeine is truly the ultimate result of a combination of my interests, skills, and experience as I pursue the simplest, yet most effective tool to guide production service operators towards a better state of reliability via enhanced ability to reason and assert
+facts about the system.</p><p>And finally, if you made it all the way through this post...</p><p><img alt="thanks for reading" src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ2l4OThneWQ5M2E5Z2tleW45ZXBuenRlc3dlOG9kaDJjaHhyNmpteiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/gJ3gMJrWWx3WlrQpd5/giphy.gif"></p><hr></div></article></main><footer class="site-footer"><div class="footer-content"><p>Built with <a href="https://gleam.run" target="_blank">Gleam</a> and <a href="https://github.com/lustre-labs/ssg" target="_blank">Lustre SSG</a></p><p>© 2025 <a href="https://brickellresearch.org/" target="_blank">Brickell Research</a></p></div></footer><script>
+        // Convert data-lang to language-* class for Prism
+        document.querySelectorAll('code[data-lang]').forEach(function(code) {
+          var lang = code.getAttribute('data-lang').toLowerCase();
+          // Map common language names
+          if (lang === 'dockerfile') lang = 'docker';
+          if (lang === 'js') lang = 'javascript';
+          code.classList.add('language-' + lang);
+          if (code.parentElement.tagName === 'PRE') {
+            code.parentElement.classList.add('language-' + lang);
+          }
+        });
+        if (typeof Prism !== 'undefined') { Prism.highlightAll(); }
+        // Generate Table of Contents
+        document.querySelectorAll('.post-content .toc').forEach(function(tocContainer) {
+          var headers = document.querySelectorAll('.post-content h2[id], .post-content h3[id], .post-content h4[id]');
+
+          if (headers.length === 0) return;
+
+          // Function to convert number to Roman numeral
+          function toRoman(num) {
+            var romans = [
+              ['X', 10], ['IX', 9], ['V', 5], ['IV', 4], ['I', 1]
+            ];
+            var result = '';
+            for (var i = 0; i < romans.length; i++) {
+              while (num >= romans[i][1]) {
+                result += romans[i][0];
+                num -= romans[i][1];
+              }
+            }
+            return result;
+          }
+
+          // Function to convert number to letter (1=a, 2=b, etc.)
+          function toLetter(num) {
+            return String.fromCharCode(96 + num); // 97 is 'a'
+          }
+
+          var tocTitle = document.createElement('div');
+          tocTitle.className = 'toc-title';
+          tocTitle.textContent = 'Table of Contents';
+
+          var tocList = document.createElement('ul');
+          var currentH2 = null;
+          var currentH3 = null;
+          var h2Count = 0;
+          var h3Count = 0;
+
+          headers.forEach(function(header) {
+            var level = header.tagName.toLowerCase();
+            var text = header.textContent.replace('#', '').trim();
+            var link = document.createElement('a');
+            link.href = '#' + header.id;
+
+            if (level === 'h2') {
+              h2Count++;
+              h3Count = 0; // Reset h3 counter for new h2 section
+              link.textContent = toRoman(h2Count) + '. ' + text;
+            } else if (level === 'h3') {
+              h3Count++;
+              link.textContent = toLetter(h3Count) + '. ' + text;
+            } else {
+              link.textContent = text;
+            }
+
+            var li = document.createElement('li');
+            li.appendChild(link);
+
+            if (level === 'h2') {
+              tocList.appendChild(li);
+              currentH2 = li;
+              currentH3 = null;
+            } else if (level === 'h3' && currentH2) {
+              if (!currentH2.querySelector('ul')) {
+                var ul = document.createElement('ul');
+                currentH2.appendChild(ul);
+              }
+              currentH2.querySelector('ul').appendChild(li);
+              currentH3 = li;
+            } else if (level === 'h4' && currentH3) {
+              if (!currentH3.querySelector('ul')) {
+                var ul = document.createElement('ul');
+                currentH3.appendChild(ul);
+              }
+              currentH3.querySelector('ul').appendChild(li);
+            }
+          });
+
+          tocContainer.appendChild(tocTitle);
+          tocContainer.appendChild(tocList);
+        });
+
+        // Add anchor links to headers
+        document.querySelectorAll('.post-content h2[id], .post-content h3[id], .post-content h4[id]').forEach(function(header) {
+          var anchor = document.createElement('span');
+          anchor.className = 'header-anchor';
+          anchor.innerHTML = '#';
+          anchor.setAttribute('aria-label', 'Copy link to ' + header.textContent);
+          header.insertBefore(anchor, header.firstChild);
+
+          // Make entire header clickable to copy URL
+          header.style.cursor = 'pointer';
+          header.addEventListener('click', function(e) {
+            var url = window.location.origin + window.location.pathname + '#' + header.id;
+
+            // Update URL bar
+            window.history.pushState(null, '', '#' + header.id);
+
+            // Copy to clipboard
+            navigator.clipboard.writeText(url).then(function() {
+              // Show feedback
+              var originalText = anchor.innerHTML;
+              anchor.innerHTML = '✓';
+              setTimeout(function() {
+                anchor.innerHTML = originalText;
+              }, 1000);
+            }).catch(function(err) {
+              console.error('Failed to copy:', err);
+            });
+          });
+        });
+      </script></body></html>

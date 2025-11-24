@@ -1,0 +1,8 @@
+types:
+  - name: success_rate
+    query_template_type: valid_over_total
+    typed_instatiation_of_query_templates:
+      numerator: "sum.graphql.requests{$$operation->gql_operation$$, status:info}.as_count()"
+      denominator: "sum.graphql.requests{$$operation->gql_operation$$}.as_count()"
+    specification_of_query_templatized_variables:
+      - gql_operation

@@ -1,0 +1,7 @@
+basic_types:
+  - attribute_name: gql_operation
+    attribute_type: String
+  - attribute_name: numerator
+    attribute_type: String
+  - attribute_name: denominator
+    attribute_type: String

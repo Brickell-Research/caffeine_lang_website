@@ -1,0 +1,13 @@
+slos:
+  - name: "Get Cart"
+    sli_type: "success_rate"
+    typed_instatiation_of_query_templatized_variables:
+      "gql_operation": "getCart"
+    threshold: 99.99
+    window_in_days: 7
+  - name: "Purchase"
+    sli_type: "success_rate"
+    typed_instatiation_of_query_templatized_variables:
+      "gql_operation": "purchase"
+    threshold: 99.5
+    window_in_days: 7

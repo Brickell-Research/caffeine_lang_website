@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Packaging Caffeine | Caffeine</title><link href="/images/temp_caffeine_icon.png" rel="icon" type="image/png"><meta content="Packaging Caffeine | Caffeine" property="og:title"><meta content="website" property="og:type"><meta content="Caffeine" property="og:site_name"><meta content="summary" name="twitter:card"><meta content="A step-by-step guide to creating distributable binaries from Gleam code by targeting JavaScript and compiling with Deno." name="description"><meta content="A step-by-step guide to creating distributable binaries from Gleam code by targeting JavaScript and compiling with Deno." property="og:description"><meta content="https://caffeine-lang.org/blog/packaging-caffeine" property="og:url"><link href="/css/styles.css" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script><script async src="https://plausible.io/js/pa-vjl7vif68GwpiuXNTPtt7.js"></script><script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script></head><body><div class="announcement-banner"><a class="banner-link" href="https://gleamgathering.com/" target="_blank"><span class="banner-text-full">📣 I will be speaking at Gleam Gathering! Join me for &quot;10,000 Lines Later: When a Tool Became a Compiler (and I Became a Gleamlin)&quot;</span><span class="banner-text-mobile">📣 Speaking at Gleam Gathering</span><span class="banner-arrow"> →</span></a></div><header class="site-header"><nav class="nav"><a class="logo" href="/"><img alt="Caffeine" class="logo-img" src="/images/temp_caffeine_icon.png">Caffeine</a><ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/blog">Blog</a></li></ul></nav></header><main class="main-content"><article class="blog-post"><header class="post-header"><h1>Packaging Caffeine</h1><p class="post-date">2025-11-18 · by Rob Durst</p></header><div class="post-content"><div class="toc"></div><p>Ok so I actually do roast my own coffee and for a brief while sold it on the internet.</p><p class="figure"><img alt="stardust" src="/images/packaging-caffeine_stardust.jpg"></p><p>A nice Costa Rican roast with lovely notes of chocolate ☕️</p><p>My wife designed a logo, I bought some bags on Amazon, and with a plastic heat sealer, the end result was something I am pretty proud of. <em><strong>[Insert joke about how important good packaging is].</strong></em></p><p>... and on to the content you actually came here for ...</p><p><strong>I&#39;m building <a href="https://github.com/Brickell-Research/caffeine_lang">Caffeine</a>, a compiler written in Gleam that compiles service expectations to reliability artifacts. This post documents how I solved one of my 
+first challenges: creating standalone binaries for simpler distribution.</strong></p><hr><h2 id="Gimme-the-Bits">Gimme the Bits</h2><p><a href="https://gleam.run/">Gleam</a> is <em>a friendly language for building type-safe systems that scale [which leverages] [t]he power of a type system, the expressiveness of functional programming, and the reliability of the highly concurrent, fault tolerant Erlang runtime, with a familiar and modern syntax.</em></p><p>As Gleam <a href="https://gleam.run/writing-gleam/gleam-toml/">targets either Erlang or Javascript</a> configured within the gleam.toml, unlike a Rust or a Go, it doesn&#39;t compile to a binary out of the box.
+While the <code>gleam</code> command line tool itself is pretty <em>kickass</em>, coming with a lot of built in ease (i.e. installing deps on <code>gleam run</code>), the lack of compilation to a binary makes distribution of a
+compiler a bit of a challenge; I would love to just create a release on my website with versioned binaries for the release.</p><p>As I am creating a <a href="https://github.com/Brickell-Research/caffeine_lang_github_action">Github Action</a> to intergate the compiler in a CICD pipeline (that I am leveraging at my day job at <a href="https://www.springhealth.com/">Spring Health</a>),
+I found myself searching for an answer to this issue early on. </p><hr><h2 id="The-First-Naive-Solution">The First Naive Solution</h2><p>I have setup my Github Action (first time GHA developer... no clue if this is <em>the</em> approach or just where I landed) with a Dockerfile and an <code>entrypoint.sh</code> script.</p><p>A condensed version of my Dockerfile is:</p><pre><code data-lang="Dockerfile">FROM alpine:3.18
+
+# Install minimal dependencies
+...
+
+# Install rebar3 manually
+...
+
+# Install Gleam
+...
+
+# Create Gleam project and set up custom main
+WORKDIR /caffeine
+RUN gleam new . \
+    &amp;&amp; gleam add argv \
+    &amp;&amp; gleam add caffeine_lang \
+    &amp;&amp; gleam deps download
+
+# Copy custom main.gleam
+COPY main.gleam src/caffeine.gleam
+
+# Build the project
+RUN gleam build
+
+# Set the entrypoint
+ENTRYPOINT [&quot;/entrypoint.sh&quot;]
+</code></pre><p>Where the <code>entrypoint.sh</code> is a bash script to consume the required compiler input parameters and feed them to <code>caffeine</code> and <code>main.gleam</code> is a copy-pasta version of the main file from <code>caffeine</code> itself.</p><p><strong>All together:</strong></p><p>1. package <code>caffeine</code> and publish package (<a href="https://packages.gleam.run/?search=caffeine">see here</a>)</p><p>2. in Dockerfile of GHA, create a new Gleam project where <code>caffeine</code> is a dependency</p><p>3. move a copy of the command line interface (<code>main.gleam</code>) in to the Dockerfile build</p><p>4. execute <code>caffeine</code> via the Gleam project, passing in the parameters captured</p><p>This is exceptionally hacky, but it works 🤷‍♂️. </p><hr><h2 id="A-Better-Solution">A Better Solution</h2><p>Across the web, there are glimmers of hope 🙏</p><ul style="list-style-type:&#39;-&#39;;"><li><p>Yoshie&#39;s Lightning talk: <em>Building self-contained executables with Gleam - Yoshie Reusch | Code BEAM Europe 2025</em> (<a href="https://www.youtube.com/watch?v=Ojs0YREqX8k">video</a>)</p></li><li><p>An issue in Gleam&#39;s repo hinting that <em>maybe</em> with enough financial support, we&#39;d get something (<a href="https://github.com/gleam-lang/gleam/issues/2777">link</a>)</p></li><li><p><a href="https://github.com/inoas">inoas</a> on Github recommended existing solutions (<a href="https://github.com/gleam-lang/gleam/issues/2777#issuecomment-2007405330">link</a>): (1) <code>gleam export erlang-shipment</code>, (2) <a href="https://github.com/burrito-elixir/burrito">burrito</a>, (3) building a small docker image, or (4) targetting Javascript then building that with <a href="https://deno.com/">deno</a> or <a href="https://nodejs.org/en">node</a>.</p></li><li><p><a href="https://github.com/gleam-lang/mix_gleam">gleam-mix</a>: <em>an Elixir archive that teaches Mix how to work with Gleam code and dependencies!</em></p></li></ul><p>While building a small docker image is feasible, I wanted to aim for a true binary and not require folks to install Erlang, nix, or mix. So, possibly in my
+naivety and desire to checkout deno, I went with inoas&#39;s fourth option.</p><p>The first step here is to just target <code>javascript</code> in the <code>gleam.toml</code>.</p><p>Pretty easy:</p><pre><code data-lang="toml">name = &quot;caffeine_lang&quot;
+...
+
+target = &quot;javascript&quot;
+
+[dependencies]
+...
+</code></pre><p>Ok, so <code>gleam build</code>... and ... I appear to be using a yaml parser library that only has Erlang FFI bindings 🤦‍♂️</p><pre><code data-lang="text">➜  caffeine_lang git:(main) gleam build
+  Compiling caffeine_lang
+error: Unsupported target
+   ┌─ /Users/developer/projects/caffeine_lang/src/caffeine_lang/phase_1/parser/utils/general_common.gleam:22:11
+   │
+22 │     glaml.parse_file(file_path)
+   │           ^^^^^^^^^^
+
+This value is not available as it is defined using externals, and there is
+no implementation for the JavaScript target.
+
+Hint: Did you mean to build for a different target?
+</code></pre><p><a href="https://hexdocs.pm/glaml/index.html">glaml</a> is my yaml parser of choice and it is in fact just a wrapper around <a href="https://hex.pm/packages/yamerl">yamerl</a> a <em>YAML 1.2 and JSON parser in pure Erlang</em>. The error means glaml uses Erlang FFI functions that don&#39;t have JavaScript equivalents.</p><p>Luckily as far as I could tell, glaml was the only package with Erlang-only externals (no JS implementation). Other packages like simplifile use <a href="https://en.wikipedia.org/wiki/Foreign_function_interface">FFI</a> but have both Erlang and JS implementations.</p><pre><code data-lang="toml">[dependencies]
+gleam_stdlib = &quot;&gt;= 0.63.0 and &lt; 1.0.0&quot;
+simplifile = &quot;&gt;= 2.3.0 and &lt; 3.0.0&quot;
+argv = &quot;&gt;= 1.0.2 and &lt; 2.0.0&quot;
+glaml = &quot;~&gt; 3.0.0&quot;
+gleeunit = &quot;&gt;= 1.0.0&quot;
+caffeine_query_language = &quot;&gt;= 0.0.2&quot;  # my own library
+</code></pre><p>As I was (a) stubborn about compiling to Javascript and (b) too invested in glaml (<em>my glaml extensions is another planned blog post and maybe even a future upstream contribution</em>),
+the path forward was an abstraction layer that enabled both an Erlang and a Javascript FFI.</p><p>As mentioned, I&#39;d actually already set this up with my <code>glaml_extended</code> library which lives within a <code>deps</code> directory within <code>src</code> (<em>whether or not this organizational structure makes sense remains to be seen...</em>). Thus, I just needed to add an FFI file there (named <code>yaml.gleam</code>) which
+acted as a minimal parser around a <code>.mjs</code> and <code>.erl</code> yaml parser file respectively. Structurally I ended up with:</p><pre><code data-lang="text">└── deps
+    ├── README.md
+    └── glaml_extended
+        ├── README.md
+        ├── extractors.gleam
+        ├── yaml.gleam
+        ├── yaml_ffi.erl
+        └── yaml_ffi.mjs
+</code></pre><p>I will admit I used AI for this, specifically <a href="https://www.claude.com/product/claude-code">Claude Code</a>. It made short work of this and even added unit tests. Proper FFI best practices would be an interesting blog post as, in my opinion,
+one of the super powers of Gleam is it&#39;s ability to leverage battle worn Erlang &amp; Javascript libraries, immediately expanding it&#39;s tooling support out of the gate. If I continue this Deno compilation approach into the future and have to
+repeat this FFI process, I&#39;ll create a followup blog post 🙏</p><p>From there I then installed the Javascript yaml equivalent package <a href="https://github.com/nodeca/js-yaml">js-yaml</a>.</p><pre><code data-lang="json">{
+  &quot;name&quot;: &quot;caffeine_lang&quot;,
+  &quot;version&quot;: &quot;0.1.0&quot;,
+  &quot;type&quot;: &quot;module&quot;,
+  &quot;dependencies&quot;: {
+    &quot;js-yaml&quot;: &quot;^4.1.0&quot;
+  }
+}
+</code></pre><p>Then ran <code>npm install</code> to install the dependencies, and added a <code>deno.json</code> to tell Deno where to find npm packages:</p><pre><code data-lang="json">{
+  &quot;nodeModulesDir&quot;: &quot;auto&quot;
+}
+</code></pre><p>Then finally I just needed to change the import paths within yaml parsing Gleam files. While I got lucky here that I only had to handle this for a single
+library that was fairly isolated (just a single compiler phase), this really wasn&#39;t too painful (<em>again, thanks Claude</em>)!</p><p>With this, we were now ready to compile to binary with Deno. To do this we:</p><p>1. created a <code>main.mjs</code> that imports the project and runs the Gleam code</p><pre><code data-lang="js">import { main } from &quot;./build/dev/javascript/caffeine_lang/caffeine_lang.mjs&quot;;
+
+main();
+</code></pre><p>2. compiled with Deno</p><pre><code data-lang="bash">deno compile --no-check --allow-read --allow-write --output caffeine main.mjs
+</code></pre><p><strong>Key flags</strong></p><pre><code data-lang="text">--no-check - skip TypeScript type checking (required for some compiled Gleam packages)
+--allow-read / --allow-write - permissions for file I/O (your YAML parsing needs these)
+--output &lt;name&gt; - output binary name
+--target - cross-compile (e.g., x86_64-unknown-linux-gnu)
+</code></pre><p>And lo and behold:</p><pre><code data-lang="text">➜  caffeine_lang git:(main) ✗ ./caffeine 
+Caffeine SLI/SLO compiler
+
+Usage:
+  caffeine compile &lt;specification_directory&gt; &lt;instantiation_directory&gt; &lt;output_directory&gt;
+
+Arguments:
+  specification_directory   Directory containing specification files
+  instantiation_directory   Directory containing instantiation files
+  output_directory          Directory to output compiled files
+
+</code></pre><p><strong>Note</strong>: the binary size here is pretty big: 73mb and still 29mb zipped! Furthermore <a href="https://bun.com/docs">bun</a> is also a similar option worth exploring.</p><p>Just to see if this worked, I did a lazy man distribution, zipping the binary and emailing it between my personal MacBook and work MacBook.</p><p><img alt="emailing myself" src="/images/packaging-caffeine_emailing_myself_caffeine_zip.png"></p><p>Unsurprisingly, Apple was not too happy to have me run an arbitrary binary I downloaded from Google Drive.</p><p class="figure"><img alt="Apple stops me" src="/images/packaging-caffeine_apple_security.png"></p><p>&quot;Go home you&#39;re drunk (and on the verge of a security breach)&quot; -- Apple</p><p>However, once I clicked all the right buttons and said aloud &quot;I swear this is a good idea&quot;, we got our binary executing!</p><p class="figure"><img alt="it works" src="/images/packaging-caffeine_it_works.png"></p><p>First distrubuted binary of caffeine running in the &quot;wild&quot; 🏆</p><hr><h2 id="TLDR-How-to-Compile-Gleam-Application-to-a-Binary-with-Deno">TLDR How to Compile Gleam Application to a Binary with Deno</h2><p>1. target Javascript</p><p>2. create JS FFI bindings for any Erlang-only packages</p><p>3. add a Javascript entrypoint</p><p>4. compile with Deno</p><p>5. profit 🤘</p><hr><h2 id="Update:-Easier-Options-Available">Update: Easier Options Available</h2><p>Since writing this, I realized my initial research was incomplete as a couple tools exist that automate more or less exactly the process I describe above:</p><ul style="list-style-type:&#39;-&#39;;"><li><p><a href="https://github.com/Comamoca/garnet">Garnet</a> - automates the Deno compilation process for Gleam</p></li><li><p><a href="https://hex.pm/packages/gleative">Gleative</a> - another tool for Deno compilation with declarative config</p></li></ul><hr><h2 id="Update-(11/22/25):-Homebrew-Distribution-Support">Update (11/22/25): Homebrew Distribution Support</h2><p>Since we have binaries now, with just a little work we&#39;re now available via <a href="https://brew.sh/">Homebrew</a> for MacOs users!</p><p><strong>To install:</strong></p><pre><code data-lang="text">brew tap brickell-research/caffeine
+brew install caffeine_lang
+</code></pre><p><strong>To upgrade:</strong></p><pre><code data-lang="text">brew upgrade caffeine_lang
+</code></pre><p>To set this up was surprisingly straightforward. All I really had to do was create a custom tap at <code>brickell-research/homebrew-caffeine</code> with a formula that handles multi-platform installation:</p><pre><code data-lang="ruby">class CaffeineLang &lt; Formula
+  desc &quot;Caffeine programming language&quot;
+  homepage &quot;https://caffeine-lang.run&quot;
+  version &quot;0.1.6&quot;
+
+  if OS.mac? &amp;&amp; Hardware::CPU.intel?
+    url &quot;https://github.com/Brickell-Research/caffeine_lang/releases/download/v0.1.6/caffeine-0.1.6-macos-x64.tar.gz&quot;
+    sha256 &quot;0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5&quot;
+  elsif OS.mac? &amp;&amp; Hardware::CPU.arm?
+    url &quot;https://github.com/Brickell-Research/caffeine_lang/releases/download/v0.1.6/caffeine-0.1.6-macos-arm64.tar.gz&quot;
+    sha256 &quot;...&quot;
+  # ... Linux support
+  end
+
+  def install
+    bin.install &quot;caffeine-#{version}-macos-x64&quot; =&gt; &quot;caffeine&quot;
+  end
+end
+</code></pre><p>Each binary is verified with SHA256 checksums for security. Right now pushing updates is a manual change, but will certainly be automated in the near future!</p><hr></div></article></main><footer class="site-footer"><div class="footer-content"><p>Built with <a href="https://gleam.run" target="_blank">Gleam</a> and <a href="https://github.com/lustre-labs/ssg" target="_blank">Lustre SSG</a></p><p>© 2025 <a href="https://brickellresearch.org/" target="_blank">Brickell Research</a></p></div></footer><script>
+        // Convert data-lang to language-* class for Prism
+        document.querySelectorAll('code[data-lang]').forEach(function(code) {
+          var lang = code.getAttribute('data-lang').toLowerCase();
+          // Map common language names
+          if (lang === 'dockerfile') lang = 'docker';
+          if (lang === 'js') lang = 'javascript';
+          code.classList.add('language-' + lang);
+          if (code.parentElement.tagName === 'PRE') {
+            code.parentElement.classList.add('language-' + lang);
+          }
+        });
+        if (typeof Prism !== 'undefined') { Prism.highlightAll(); }
+        // Generate Table of Contents
+        document.querySelectorAll('.post-content .toc').forEach(function(tocContainer) {
+          var headers = document.querySelectorAll('.post-content h2[id], .post-content h3[id], .post-content h4[id]');
+
+          if (headers.length === 0) return;
+
+          // Function to convert number to Roman numeral
+          function toRoman(num) {
+            var romans = [
+              ['X', 10], ['IX', 9], ['V', 5], ['IV', 4], ['I', 1]
+            ];
+            var result = '';
+            for (var i = 0; i < romans.length; i++) {
+              while (num >= romans[i][1]) {
+                result += romans[i][0];
+                num -= romans[i][1];
+              }
+            }
+            return result;
+          }
+
+          // Function to convert number to letter (1=a, 2=b, etc.)
+          function toLetter(num) {
+            return String.fromCharCode(96 + num); // 97 is 'a'
+          }
+
+          var tocTitle = document.createElement('div');
+          tocTitle.className = 'toc-title';
+          tocTitle.textContent = 'Table of Contents';
+
+          var tocList = document.createElement('ul');
+          var currentH2 = null;
+          var currentH3 = null;
+          var h2Count = 0;
+          var h3Count = 0;
+
+          headers.forEach(function(header) {
+            var level = header.tagName.toLowerCase();
+            var text = header.textContent.replace('#', '').trim();
+            var link = document.createElement('a');
+            link.href = '#' + header.id;
+
+            if (level === 'h2') {
+              h2Count++;
+              h3Count = 0; // Reset h3 counter for new h2 section
+              link.textContent = toRoman(h2Count) + '. ' + text;
+            } else if (level === 'h3') {
+              h3Count++;
+              link.textContent = toLetter(h3Count) + '. ' + text;
+            } else {
+              link.textContent = text;
+            }
+
+            var li = document.createElement('li');
+            li.appendChild(link);
+
+            if (level === 'h2') {
+              tocList.appendChild(li);
+              currentH2 = li;
+              currentH3 = null;
+            } else if (level === 'h3' && currentH2) {
+              if (!currentH2.querySelector('ul')) {
+                var ul = document.createElement('ul');
+                currentH2.appendChild(ul);
+              }
+              currentH2.querySelector('ul').appendChild(li);
+              currentH3 = li;
+            } else if (level === 'h4' && currentH3) {
+              if (!currentH3.querySelector('ul')) {
+                var ul = document.createElement('ul');
+                currentH3.appendChild(ul);
+              }
+              currentH3.querySelector('ul').appendChild(li);
+            }
+          });
+
+          tocContainer.appendChild(tocTitle);
+          tocContainer.appendChild(tocList);
+        });
+
+        // Add anchor links to headers
+        document.querySelectorAll('.post-content h2[id], .post-content h3[id], .post-content h4[id]').forEach(function(header) {
+          var anchor = document.createElement('span');
+          anchor.className = 'header-anchor';
+          anchor.innerHTML = '#';
+          anchor.setAttribute('aria-label', 'Copy link to ' + header.textContent);
+          header.insertBefore(anchor, header.firstChild);
+
+          // Make entire header clickable to copy URL
+          header.style.cursor = 'pointer';
+          header.addEventListener('click', function(e) {
+            var url = window.location.origin + window.location.pathname + '#' + header.id;
+
+            // Update URL bar
+            window.history.pushState(null, '', '#' + header.id);
+
+            // Copy to clipboard
+            navigator.clipboard.writeText(url).then(function() {
+              // Show feedback
+              var originalText = anchor.innerHTML;
+              anchor.innerHTML = '✓';
+              setTimeout(function() {
+                anchor.innerHTML = originalText;
+              }, 1000);
+            }).catch(function(err) {
+              console.error('Failed to copy:', err);
+            });
+          });
+        });
+      </script></body></html>
