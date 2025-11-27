@@ -416,29 +416,60 @@ While this all worked and is implemented in Caffeine version [v0.1.6](https://gi
 
 _"so simple it makes "no code" blush"_ - ok, that's certainly an exaggeration... but it is an inspirational mindset to assume when designing the user interface!
 
-After some time at the whiteboard, I believe we _can_ get all the information we need into a single specification. For this, we're also using less intimidating/technical terminology and defining a single `blueprints.yaml` file with definitions of service expectation kinds:
+After some time at the whiteboard, I landed on a three-tier architecture with clear separation of concerns:
 
-*blueprints.yaml (proposal)*
+1. *Artifacts*: defined by standard library or plugin developers per distinct reliability artifact.
+
+2. *Blueprints*: defined by observability experts per artifact abstraction referencing artifacts.
+
+3. *Expectations*: defined by the operating team per service referencing blueprints.
+
+This design cleanly separates responsibilities across an organization - the standard library defines the artifact interface, observability experts create reusable blueprints, and service teams simply declare their expectations.
+
+Here's a simplified example of what this looks like in practice:
+
+*artifacts.yaml (defined in stdlib)*
 
 ```yaml
-kinds:
-  - name: success_rate
-    inputs:
-      gql_operation: String
-    queries:
-      numerator:   'sum.app.requests{operation:${gql_operation},status:info}.as_count()'
-      denominator: 'sum.app.requests{operation:${gql_operation}}.as_count()'
-    value: "numerator / denominator"
+artifacts:
+  - name: SLO
+    passed_down_params:
+      - threshold: Decimal
+      - window_in_days: Optional(Integer) -> 30
+    params:
+      - queries: Dict(String, String)
+      - value: String
 ```
 
-With this, we now have a much simpler interface with only 4 fields:
+*blueprints.yaml (defined by observability experts)*
 
-* *name* - unique identifier for referencing the kind within instantiations
-* *inputs* - a key-value list of attribute names and types (*note:* we support an `Optional` collection type)
-* *queries* - a key-value list of named sub-query strings
-* *value* - the CQL top-level query definition
+```yaml
+blueprints:
+  - name: LCP_Latency
+    artifact: SLO
+    params:
+      - view: String
+      - p95_latency_in_seconds: Integer
+    inputs:
+      - queries:
+        - numerator:   ___________________
+        - denominator: ___________________
+      - value: "numerator / denominator"
+```
 
-Furthermore, this is completely backwards compatible with existing instantiations.
+*expectations.yaml (defined by service owners)*
+
+```yaml
+expectations:
+  - name: "Admin Portal Home Page LCP Latency"
+    blueprint: LCP_Latency
+    inputs:
+      view: /admin/home
+      p95_latency_in_seconds: 5
+      threshold: 99.5
+```
+
+With this design, service owners only need to understand their specific inputs - they don't need to know about queries, formulas, or the underlying artifact implementation. The complexity is progressively layered, with each tier adding detail for those who need it.
 
 ***
 

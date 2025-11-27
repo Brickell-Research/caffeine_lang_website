@@ -26,7 +26,11 @@ pub fn load() -> Result(StdlibRef, Nil) {
   Ok(StdlibRef(title: title, summary: summary, content: rendered))
 }
 
-fn get_string(meta: Dict(String, tom.Toml), key: String, default: String) -> String {
+fn get_string(
+  meta: Dict(String, tom.Toml),
+  key: String,
+  default: String,
+) -> String {
   case dict.get(meta, key) {
     Ok(tom.String(s)) -> s
     _ -> default

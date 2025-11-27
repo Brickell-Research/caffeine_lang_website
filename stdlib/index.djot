@@ -3,4 +3,28 @@ title = "Standard Library Reference"
 summary = "Reference documentation for the Caffeine standard library artifacts and types."
 ---
 
-_Coming soon!_
+This page contains the artifacts supported by the current version of the standard library.
+
+***
+
+## SLO - Service Level Objective
+
+### Description
+
+[SLOs](https://en.wikipedia.org/wiki/Service-level_objective) are a very common reliability artifact and the first to gain support in Caffeine. This artifact enables users to leverage Caffeine
+to guide SLO creation, maintenance, and tuning at their engineering organization.
+
+### Definition
+
+```
+artifacts:
+  - name: SLO
+    passed_down_params:
+      - threshold: Decimal
+      - window_in_days: Optional(Integer) -> 30
+    params:
+      - queries: Dict(String, String)
+      - value: String
+```
+
+***

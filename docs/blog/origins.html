@@ -146,15 +146,33 @@ Fundamentally we&#39;re writing a compiler here and we need to better structure 
 </code></pre><p>This basically just says we define the query as a ratio. <code>query</code> here is actually interpreted by a tiny DSL called Caffeine Query Language or CQL (<a href="https://github.com/Brickell-Research/caffeine_lang/blob/main/rfcs/002_Caffeine_Query_Language.md">defined here</a>).</p><p>And finally, we also provide type annotations to the compiler via the <code>basic_types.yaml</code> specification file:</p><pre><code data-lang="yaml">basic_types:
   - attribute_name: gql_operation
     attribute_type: String
-</code></pre><p>While this all worked and is implemented in Caffeine version <a href="https://github.com/Brickell-Research/caffeine_lang/releases/tag/v0.1.6">v0.1.6</a>, this was one of the simplest possible examples...</p><h3 id="Tomorrow:-so-simple-it-makes-&quot;no-code&quot;-blush">Tomorrow: so simple it makes &quot;no code&quot; blush</h3><p><em>&quot;so simple it makes &quot;no code&quot; blush&quot;</em> - ok, that&#39;s certainly an exaggeration... but it is an inspirational mindset to assume when designing the user interface!</p><p>After some time at the whiteboard, I believe we <em>can</em> get all the information we need into a single specification. For this, we&#39;re also using less intimidating/technical terminology and defining a single <code>blueprints.yaml</code> file with definitions of service expectation kinds:</p><p><strong>blueprints.yaml (proposal)</strong></p><pre><code data-lang="yaml">kinds:
-  - name: success_rate
+</code></pre><p>While this all worked and is implemented in Caffeine version <a href="https://github.com/Brickell-Research/caffeine_lang/releases/tag/v0.1.6">v0.1.6</a>, this was one of the simplest possible examples...</p><h3 id="Tomorrow:-so-simple-it-makes-&quot;no-code&quot;-blush">Tomorrow: so simple it makes &quot;no code&quot; blush</h3><p><em>&quot;so simple it makes &quot;no code&quot; blush&quot;</em> - ok, that&#39;s certainly an exaggeration... but it is an inspirational mindset to assume when designing the user interface!</p><p>After some time at the whiteboard, I landed on a three-tier architecture with clear separation of concerns:</p><p>1. <strong>Artifacts</strong>: defined by standard library or plugin developers per distinct reliability artifact.</p><p>2. <strong>Blueprints</strong>: defined by observability experts per artifact abstraction referencing artifacts.</p><p>3. <strong>Expectations</strong>: defined by the operating team per service referencing blueprints.</p><p>This design cleanly separates responsibilities across an organization - the standard library defines the artifact interface, observability experts create reusable blueprints, and service teams simply declare their expectations.</p><p>Here&#39;s a simplified example of what this looks like in practice:</p><p><strong>artifacts.yaml (defined in stdlib)</strong></p><pre><code data-lang="yaml">artifacts:
+  - name: SLO
+    passed_down_params:
+      - threshold: Decimal
+      - window_in_days: Optional(Integer) -&gt; 30
+    params:
+      - queries: Dict(String, String)
+      - value: String
+</code></pre><p><strong>blueprints.yaml (defined by observability experts)</strong></p><pre><code data-lang="yaml">blueprints:
+  - name: LCP_Latency
+    artifact: SLO
+    params:
+      - view: String
+      - p95_latency_in_seconds: Integer
     inputs:
-      gql_operation: String
-    queries:
-      numerator:   &#39;sum.app.requests{operation:${gql_operation},status:info}.as_count()&#39;
-      denominator: &#39;sum.app.requests{operation:${gql_operation}}.as_count()&#39;
-    value: &quot;numerator / denominator&quot;
-</code></pre><p>With this, we now have a much simpler interface with only 4 fields:</p><ul style="list-style-type:disc;"><li><p><strong>name</strong> - unique identifier for referencing the kind within instantiations</p></li><li><p><strong>inputs</strong> - a key-value list of attribute names and types (<strong>note:</strong> we support an <code>Optional</code> collection type)</p></li><li><p><strong>queries</strong> - a key-value list of named sub-query strings</p></li><li><p><strong>value</strong> - the CQL top-level query definition</p></li></ul><p>Furthermore, this is completely backwards compatible with existing instantiations.</p><hr><h2 id="Conclusion">Conclusion</h2><p>At the time of writing (November 22, 2025), this post captures the journey to Caffeine and my current progress. We expect things to continue changing as we refine the design and UX.</p><p>Caffeine is truly the ultimate result of a combination of my interests, skills, and experience as I pursue the simplest, yet most effective tool to guide production service operators towards a better state of reliability via enhanced ability to reason and assert
+      - queries:
+        - numerator:   ___________________
+        - denominator: ___________________
+      - value: &quot;numerator / denominator&quot;
+</code></pre><p><strong>expectations.yaml (defined by service owners)</strong></p><pre><code data-lang="yaml">expectations:
+  - name: &quot;Admin Portal Home Page LCP Latency&quot;
+    blueprint: LCP_Latency
+    inputs:
+      view: /admin/home
+      p95_latency_in_seconds: 5
+      threshold: 99.5
+</code></pre><p>With this design, service owners only need to understand their specific inputs - they don&#39;t need to know about queries, formulas, or the underlying artifact implementation. The complexity is progressively layered, with each tier adding detail for those who need it.</p><hr><h2 id="Conclusion">Conclusion</h2><p>At the time of writing (November 22, 2025), this post captures the journey to Caffeine and my current progress. We expect things to continue changing as we refine the design and UX.</p><p>Caffeine is truly the ultimate result of a combination of my interests, skills, and experience as I pursue the simplest, yet most effective tool to guide production service operators towards a better state of reliability via enhanced ability to reason and assert
 facts about the system.</p><p>And finally, if you made it all the way through this post...</p><p><img alt="thanks for reading" src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ2l4OThneWQ5M2E5Z2tleW45ZXBuenRlc3dlOG9kaDJjaHhyNmpteiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/gJ3gMJrWWx3WlrQpd5/giphy.gif"></p><hr></div></article></main><footer class="site-footer"><div class="footer-content"><p>Built with <a href="https://gleam.run" target="_blank">Gleam</a> and <a href="https://github.com/lustre-labs/ssg" target="_blank">Lustre SSG</a></p><p>© 2025 <a href="https://brickellresearch.org/" target="_blank">Brickell Research</a></p></div></footer><script>
         // Convert data-lang to language-* class for Prism
         document.querySelectorAll('code[data-lang]').forEach(function(code) {

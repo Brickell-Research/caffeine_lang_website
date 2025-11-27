@@ -3,13 +3,13 @@ title = "Documentation"
 summary = "Learn how to use Caffeine to define service expectations and generate reliability artifacts."
 ---
 
-There exist three levels of configurations, each distinct and isolated, referenced by lower levels via unique naming scheme and typically owned by different _roles_ within an organization:
+There exist three levels of configurations, each distinct and isolated, referenced by lower levels via an unique naming scheme and typically owned by different _roles_ within an organization:
 
-(1) *Artifacts*: defined by standard library or plugin developers per distinct reliability artifact.
+1. *Artifacts*: defined by standard library or plugin developers per distinct reliability artifact.
 
-(2) *Blueprints*: defined by observability experts per artifact abstraction referencing artifacts.
+2. *Blueprints*: defined by observability experts per artifact abstraction referencing artifacts.
 
-(3) *Expectations*: defined by the operating team per service referencing blueprints.
+3. *Expectations*: defined by the operating team per service referencing blueprints.
 
 {.figure}
 ![stardust](/images/documentation_structure_of_configs.png)
@@ -21,7 +21,7 @@ Thus, for the *SLO* artifact, we might see something like this:
 {.figure}
 ![stardust](/images/documentation_structure_of_configs_filled_in.png)
 
-The same diagram from above with made of examples for the SLO reliability artifact
+The same diagram from above made up of examples for the SLO reliability artifact
 
 The documentation is split by _persona_ with sufficient details for each to operate within their domain.
 
@@ -31,7 +31,7 @@ The documentation is split by _persona_ with sufficient details for each to oper
 
 ### Artifacts Explanation
 
-An artifact surfaces the standard library or a plugin's interface - it defines the expected values from which the logic operates on. An SLO artifact would require thresholds and queries
+An artifact surfaces the standard library or a plugin's interface - it defines the expected values on which the logic operates. An SLO artifact would require thresholds and queries
 while a systems modelling artifact might require dependency relationships.
 
 
@@ -55,7 +55,7 @@ An artifact is a `.yaml` file with the following required fields.
     <tr>
       <td>passed_down_params</td>
       <td>Dict(String, AcceptedTypes)</td>
-      <td>A collection of `blueprint` inherited input names mapped to input types. Uniquely here, we define defaults for optionals using the `->` operator.</td>
+      <td>A collection of <code>blueprint</code> inherited input names mapped to input types. Uniquely here, we define defaults for optionals using the <code>-></code> operator.</td>
     </tr>
     <tr>
       <td>params</td>
@@ -72,7 +72,7 @@ So, an example would look like:
 artifacts:
   - name: SLO
     passed_down_params:
-      - threshold: String
+      - threshold: Decimal
       - window_in_days: Optional(Integer) -> 30
     params:
       - queries: Dict(String, String)
@@ -86,7 +86,7 @@ Artifacts are distributed with the core Caffeine binary. Documentation is availa
 
 ***
 
-## Observability experts
+## Observability Experts
 
 ### Blueprints Explained
 
@@ -152,9 +152,9 @@ blueprints:
 
 ### Service Expectation Explained
 
-*Definition:* a service expectation is single blueprint invocation for a single service within the domain of an owning team. 
+*Definition:* a service expectation is a single blueprint invocation for a single service within the domain of an owning team. 
 
-The organization name, team name, and service name are baked in to the filepath path: 
+The organization name, team name, and service name are baked into the filepath: 
 
 `ORGANIZATION_NAME/TEAM_NAME/SERVICE_NAME.yaml`
 
@@ -203,7 +203,7 @@ expectations:
 
 ### Documentation and Distribution
 
-Caffeine has no opinion on where these files live, just the file path as mentioned above. Documentation might be generated as part of compilation depending on the artifact.
+Caffeine has no opinion on where these files live, just that the filepath follows the pattern mentioned above. Documentation might be generated as part of compilation depending on the artifact.
 
 ***
 

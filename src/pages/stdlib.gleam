@@ -8,7 +8,7 @@ import stdlib/stdlib.{type StdlibRef}
 pub fn view(ref: StdlibRef) -> Element(Nil) {
   let meta =
     PageMeta(
-      title: ref.title <> " - Caffeine",
+      title: ref.title,
       description: Some(ref.summary),
       url: Some("https://caffeine-lang.org/stdlib"),
     )
