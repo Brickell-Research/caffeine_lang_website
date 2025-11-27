@@ -31,29 +31,11 @@ The documentation is split by _persona_ with sufficient details for each to oper
 
 ### Artifacts Explanation
 
-### Documentation and Distribution
+An artifact surfaces the standard library or a plugin's interface - it defines the expected values from which the logic operates on. An SLO artifact would require thresholds and queries
+while a systems modelling artifact might require dependency relationships.
 
-***
 
-## Observability experts
-
-### Blueprints Explained
-
-### Documentation and Distribution
-
-***
-
-## Service Owners
-
-### Service Expectation Explained
-
-*Definition:* a service expectation is single blueprint invocation for a single service within the domain of an owning team. 
-
-The organization name, team name, and service name are baked in to the filepath path: 
-
-`ORGANIZATION_NAME/TEAM_NAME/SERIVE_NAME.yaml`
-
-As all other configurations, an expectation is a `.yaml` file with the following required fields.
+An artifact is a `.yaml` file with the following required fields.
 
 ``` =html
 <table>
@@ -71,6 +53,129 @@ As all other configurations, an expectation is a `.yaml` file with the following
       <td>Unique within a single <code>artifacts.yaml</code> file.</td>
     </tr>
     <tr>
+      <td>passed_down_params</td>
+      <td>Dict(String, AcceptedTypes)</td>
+      <td>A collection of `blueprint` inherited input names mapped to input types. Uniquely here, we define defaults for optionals using the `->` operator.</td>
+    </tr>
+    <tr>
+      <td>params</td>
+      <td>Dict(String, AcceptedTypes)</td>
+      <td>A collection of input names mapped to input types of attributes required to be defined by blueprints that inherit it.</td>
+    </tr>
+  </tbody>
+</table>
+```
+
+So, an example would look like:
+
+```
+artifacts:
+  - name: SLO
+    passed_down_params:
+      - threshold: String
+      - window_in_days: Optional(Integer) -> 30
+    params:
+      - queries: Dict(String, String)
+      - value: String
+```
+
+
+### Documentation and Distribution
+
+Artifacts are distributed with the core Caffeine binary. Documentation is available on the [Standard Library Reference](/stdlib) page.
+
+***
+
+## Observability experts
+
+### Blueprints Explained
+
+Blueprints represent common abstractions over reliability artifacts typically used to codify (either completely or partially, i.e. templatized) well known, common patterns. These
+take the form of:
+
+```=html
+<table>
+  <thead>
+    <tr>
+      <th>Attribute</th>
+      <th>Expected Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>name</td>
+      <td>String</td>
+      <td>Unique within a single <code>blueprints.yaml</code> file.</td>
+    </tr>
+    <tr>
+      <td>artifact</td>
+      <td>String</td>
+      <td>An identifier referencing an artifact.</td>
+    </tr>
+    <tr>
+      <td>params</td>
+      <td>Dict(String, AcceptedTypes)</td>
+      <td>A collection of input names mapped to input types of attributes required to be defined by service expectations that invoke it.</td>
+    </tr>
+    <tr>
+      <td>inputs</td>
+      <td>Dict(String, Any)</td>
+      <td>A collection of input names mapped to input values to be consumed by the artifact it references.</td>
+    </tr>
+  </tbody>
+</table>
+```
+
+So, an example would look like:
+
+```
+blueprints:
+  - name: LCP_Latency
+    artifact: SLO
+    params:
+      - view: String
+      - p95_latency_in_seconds: Integer
+    inputs:
+      - queries:
+        - numerator:   ___________________
+        - denominator: ___________________
+      - value: "numerator / denominator"
+```
+
+
+### Documentation and Distribution
+
+***
+
+## Service Owners
+
+### Service Expectation Explained
+
+*Definition:* a service expectation is single blueprint invocation for a single service within the domain of an owning team. 
+
+The organization name, team name, and service name are baked in to the filepath path: 
+
+`ORGANIZATION_NAME/TEAM_NAME/SERVICE_NAME.yaml`
+
+As all other configurations, an expectation is a `.yaml` file with the following required fields.
+
+``` =html
+<table>
+  <thead>
+    <tr>
+      <th>Attribute</th>
+      <th>Expected Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>name</td>
+      <td>String</td>
+      <td>Unique within a single <code>SERVICE_NAME.yaml</code> file.</td>
+    </tr>
+    <tr>
       <td>blueprint</td>
       <td>String</td>
       <td>An identifier referencing a blueprint.</td>
@@ -86,14 +191,14 @@ As all other configurations, an expectation is a `.yaml` file with the following
 
 So, an example would look like:
 
-```
+```yaml
 expectations:
   - name: "Admin Portal Home Page LCP Latency"
     blueprint: LCP_Latency
     inputs:
-      - view: /admin/home
-        p95_latency_in_seconds: 5
-        threshold: 99.5%
+      view: /admin/home
+      p95_latency_in_seconds: 5
+      threshold: 99.5
 ```
 
 ### Documentation and Distribution
@@ -101,3 +206,66 @@ expectations:
 Caffeine has no opinion on where these files live, just the file path as mentioned above. Documentation might be generated as part of compilation depending on the artifact.
 
 ***
+
+## Appendix
+
+### Accepted Types
+
+Accepted Types are type names leveraged throughout Caffeine configuration files as type annotations for the compiler to enforce. Today we support the following:
+
+``` =html
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Boolean</td>
+      <td>A true or false value.</td>
+    </tr>
+    <tr>
+      <td>Decimal</td>
+      <td>A floating-point number (e.g., 99.5).</td>
+    </tr>
+    <tr>
+      <td>Integer</td>
+      <td>A whole number (e.g., 30).</td>
+    </tr>
+    <tr>
+      <td>String</td>
+      <td>A text value (e.g., "my-service").</td>
+    </tr>
+    <tr>
+      <td>NonEmptyList(T)</td>
+      <td>A list containing at least one element of type T. Supported inner types: String, Integer, Boolean, Decimal.</td>
+    </tr>
+    <tr>
+      <td>Optional(T)</td>
+      <td>A value that may or may not be present. Supported inner types: String, Integer, Boolean, Decimal, NonEmptyList(String), NonEmptyList(Integer), NonEmptyList(Boolean), NonEmptyList(Decimal).</td>
+    </tr>
+  </tbody>
+</table>
+```
+
+#### Technical Details
+
+While the _type_ definition technically allows infinite recursion as it is defined as so:
+
+```gleam
+pub type AcceptedTypes {
+  Boolean
+  Decimal
+  Integer
+  String
+  NonEmptyList(AcceptedTypes)
+  Optional(AcceptedTypes)
+}
+```
+
+We do limit it intentionally at this time.
+
+***
+

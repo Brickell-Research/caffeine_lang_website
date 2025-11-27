@@ -5,7 +5,9 @@ import lustre/ssg
 import pages/blog
 import pages/docs as docs_page
 import pages/home
+import pages/stdlib as stdlib_page
 import posts/posts
+import stdlib/stdlib
 
 pub fn main() {
   let all_posts = posts.all()
@@ -14,6 +16,11 @@ pub fn main() {
   let docs_view = case docs.load() {
     Ok(doc) -> docs_page.view(doc)
     Error(_) -> docs_page.fallback_view()
+  }
+
+  let stdlib_view = case stdlib.load() {
+    Ok(ref) -> stdlib_page.view(ref)
+    Error(_) -> stdlib_page.fallback_view()
   }
 
   let build =
@@ -25,6 +32,7 @@ pub fn main() {
       blog.post_view(post)
     })
     |> ssg.add_static_route("/docs", docs_view)
+    |> ssg.add_static_route("/stdlib", stdlib_view)
     |> ssg.build
 
   case build {

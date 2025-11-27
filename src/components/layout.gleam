@@ -293,7 +293,7 @@ pub fn view_with_meta(meta: PageMeta, content: Element(Nil)) -> Element(Nil) {
         // Generate Documentation Sidebar TOC
         var docsToc = document.getElementById('docs-toc');
         if (docsToc) {
-          var headers = document.querySelectorAll('.doc-content h2[id], .doc-content h3[id]');
+          var headers = document.querySelectorAll('.doc-content h2[id], .doc-content h3[id], .doc-content h4[id]');
 
           if (headers.length > 0) {
             // Function to convert number to Roman numeral
@@ -318,6 +318,110 @@ pub fn view_with_meta(meta: PageMeta, content: Element(Nil)) -> Element(Nil) {
 
             var tocList = document.createElement('ul');
             var currentH2Li = null;
+            var currentH3Li = null;
+            var h2Count = 0;
+            var h3Count = 0;
+            var h4Count = 0;
+
+            headers.forEach(function(header) {
+              var level = header.tagName.toLowerCase();
+              var text = header.textContent.replace('#', '').trim();
+              var link = document.createElement('a');
+              link.href = '#' + header.id;
+
+              if (level === 'h2') {
+                h2Count++;
+                h3Count = 0;
+                h4Count = 0;
+                link.textContent = toRomanDoc(h2Count) + '. ' + text;
+              } else if (level === 'h3') {
+                h3Count++;
+                h4Count = 0;
+                link.textContent = toLetterDoc(h3Count) + '. ' + text;
+              } else if (level === 'h4') {
+                h4Count++;
+                link.textContent = h4Count + '. ' + text;
+              }
+
+              var li = document.createElement('li');
+              li.appendChild(link);
+
+              if (level === 'h2') {
+                tocList.appendChild(li);
+                currentH2Li = li;
+                currentH3Li = null;
+              } else if (level === 'h3' && currentH2Li) {
+                if (!currentH2Li.querySelector('ul')) {
+                  var subList = document.createElement('ul');
+                  currentH2Li.appendChild(subList);
+                }
+                currentH2Li.querySelector('ul').appendChild(li);
+                currentH3Li = li;
+              } else if (level === 'h4' && currentH3Li) {
+                if (!currentH3Li.querySelector('ul')) {
+                  var subList = document.createElement('ul');
+                  currentH3Li.appendChild(subList);
+                }
+                currentH3Li.querySelector('ul').appendChild(li);
+              }
+            });
+
+            docsToc.appendChild(tocList);
+          }
+
+          // Add anchor links to doc headers
+          document.querySelectorAll('.doc-content h2[id], .doc-content h3[id], .doc-content h4[id]').forEach(function(header) {
+            var anchor = document.createElement('span');
+            anchor.className = 'header-anchor';
+            anchor.innerHTML = '#';
+            anchor.setAttribute('aria-label', 'Copy link to ' + header.textContent);
+            header.insertBefore(anchor, header.firstChild);
+
+            header.style.cursor = 'pointer';
+            header.addEventListener('click', function(e) {
+              var url = window.location.origin + window.location.pathname + '#' + header.id;
+              window.history.pushState(null, '', '#' + header.id);
+              navigator.clipboard.writeText(url).then(function() {
+                var originalText = anchor.innerHTML;
+                anchor.innerHTML = '✓';
+                setTimeout(function() {
+                  anchor.innerHTML = originalText;
+                }, 1000);
+              }).catch(function(err) {
+                console.error('Failed to copy:', err);
+              });
+            });
+          });
+        }
+
+        // Generate Standard Library Sidebar TOC
+        var stdlibToc = document.getElementById('stdlib-toc');
+        if (stdlibToc) {
+          var headers = document.querySelectorAll('.stdlib-content h2[id], .stdlib-content h3[id]');
+
+          if (headers.length > 0) {
+            // Function to convert number to Roman numeral
+            function toRomanStdlib(num) {
+              var romans = [
+                ['X', 10], ['IX', 9], ['V', 5], ['IV', 4], ['I', 1]
+              ];
+              var result = '';
+              for (var i = 0; i < romans.length; i++) {
+                while (num >= romans[i][1]) {
+                  result += romans[i][0];
+                  num -= romans[i][1];
+                }
+              }
+              return result;
+            }
+
+            // Function to convert number to letter (1=a, 2=b, etc.)
+            function toLetterStdlib(num) {
+              return String.fromCharCode(96 + num); // 97 is 'a'
+            }
+
+            var tocList = document.createElement('ul');
+            var currentH2Li = null;
             var h2Count = 0;
             var h3Count = 0;
 
@@ -329,11 +433,11 @@ pub fn view_with_meta(meta: PageMeta, content: Element(Nil)) -> Element(Nil) {
 
               if (level === 'h2') {
                 h2Count++;
-                h3Count = 0; // Reset h3 counter for new h2 section
-                link.textContent = toRomanDoc(h2Count) + '. ' + text;
+                h3Count = 0;
+                link.textContent = toRomanStdlib(h2Count) + '. ' + text;
               } else if (level === 'h3') {
                 h3Count++;
-                link.textContent = toLetterDoc(h3Count) + '. ' + text;
+                link.textContent = toLetterStdlib(h3Count) + '. ' + text;
               }
 
               var li = document.createElement('li');
@@ -351,11 +455,11 @@ pub fn view_with_meta(meta: PageMeta, content: Element(Nil)) -> Element(Nil) {
               }
             });
 
-            docsToc.appendChild(tocList);
+            stdlibToc.appendChild(tocList);
           }
 
-          // Add anchor links to doc headers
-          document.querySelectorAll('.doc-content h2[id], .doc-content h3[id], .doc-content h4[id]').forEach(function(header) {
+          // Add anchor links to stdlib headers
+          document.querySelectorAll('.stdlib-content h2[id], .stdlib-content h3[id], .stdlib-content h4[id]').forEach(function(header) {
             var anchor = document.createElement('span');
             anchor.className = 'header-anchor';
             anchor.innerHTML = '#';

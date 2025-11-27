@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Home | Caffeine</title><link href="/images/temp_caffeine_icon.png" rel="icon" type="image/png"><meta content="Home | Caffeine" property="og:title"><meta content="website" property="og:type"><meta content="Caffeine" property="og:site_name"><meta content="summary" name="twitter:card"><link href="/css/styles.css" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script><script async src="https://plausible.io/js/pa-vjl7vif68GwpiuXNTPtt7.js"></script><script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script></head><body><div class="announcement-banner"><a class="banner-link" href="https://gleamgathering.com/" target="_blank"><span class="banner-text-full">📣 I will be speaking at Gleam Gathering! Join me for &quot;10,000 Lines Later: When a Tool Became a Compiler (and I Became a Gleamlin)&quot;</span><span class="banner-text-mobile">📣 Speaking at Gleam Gathering</span><span class="banner-arrow"> →</span></a></div><header class="site-header"><nav class="nav"><a class="logo" href="/"><img alt="Caffeine" class="logo-img" src="/images/temp_caffeine_icon.png">Caffeine</a><ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/docs">Docs</a></li><li><a href="/blog">Blog</a></li></ul></nav></header><main class="main-content"><div class="home"><section class="hero"><h1>Caffeine</h1><p class="tagline">A compiler for generating reliability artifacts from service expectation definitions.</p><div class="cta-buttons"><a class="btn btn-primary" href="https://github.com/Brickell-Research/caffeine_lang">Get Started</a><a class="btn btn-secondary" href="/blog">Read the Blog</a></div></section><section class="install-section"><h2>Installation</h2><p>With Homebrew:</p><div class="install-box"><pre class="code-block"><code class="language-bash">brew tap Brickell-Research/caffeine_lang &amp;&amp; brew install caffeine</code></pre></div></section><section class="code-examples"><div class="code-grid"><div class="code-panel"><div class="panel-header">Specification</div><div class="tab-bar"><button class="tab active" data-panel="spec" data-tab="basic_types">basic_types.yaml</button><button class="tab" data-panel="spec" data-tab="query_templates">query_templates.yaml</button><button class="tab" data-panel="spec" data-tab="sli_types">sli_types.yaml</button><button class="tab" data-panel="spec" data-tab="services">services.yaml</button></div><div class="tab-content"><pre class="code-block active" data-content="basic_types" data-panel="spec"><code class="language-yaml">basic_types:
+<html lang="en"><head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Home | Caffeine</title><link href="/images/temp_caffeine_icon.png" rel="icon" type="image/png"><meta content="Home | Caffeine" property="og:title"><meta content="website" property="og:type"><meta content="Caffeine" property="og:site_name"><meta content="summary" name="twitter:card"><link href="/css/styles.css" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script><script async src="https://plausible.io/js/pa-vjl7vif68GwpiuXNTPtt7.js"></script><script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script></head><body><div class="announcement-banner"><a class="banner-link" href="https://gleamgathering.com/" target="_blank"><span class="banner-text-full">📣 I will be speaking at Gleam Gathering! Join me for &quot;10,000 Lines Later: When a Tool Became a Compiler (and I Became a Gleamlin)&quot;</span><span class="banner-text-mobile">📣 Speaking at Gleam Gathering</span><span class="banner-arrow"> →</span></a></div><header class="site-header"><nav class="nav"><a class="logo" href="/"><img alt="Caffeine" class="logo-img" src="/images/temp_caffeine_icon.png">Caffeine</a><ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/docs">Docs</a></li><li><a href="/stdlib">Stdlib</a></li><li><a href="/blog">Blog</a></li></ul></nav></header><main class="main-content"><div class="home"><section class="hero"><h1>Caffeine</h1><p class="tagline">A compiler for generating reliability artifacts from service expectation definitions.</p><div class="cta-buttons"><a class="btn btn-primary" href="https://github.com/Brickell-Research/caffeine_lang">Get Started</a><a class="btn btn-secondary" href="/blog">Read the Blog</a></div></section><section class="install-section"><h2>Installation</h2><p>With Homebrew:</p><div class="install-box"><pre class="code-block"><code class="language-bash">brew tap Brickell-Research/caffeine_lang &amp;&amp; brew install caffeine</code></pre></div></section><section class="code-examples"><div class="code-grid"><div class="code-panel"><div class="panel-header">Specification</div><div class="tab-bar"><button class="tab active" data-panel="spec" data-tab="basic_types">basic_types.yaml</button><button class="tab" data-panel="spec" data-tab="query_templates">query_templates.yaml</button><button class="tab" data-panel="spec" data-tab="sli_types">sli_types.yaml</button><button class="tab" data-panel="spec" data-tab="services">services.yaml</button></div><div class="tab-content"><pre class="code-block active" data-content="basic_types" data-panel="spec"><code class="language-yaml">basic_types:
   - attribute_name: gql_operation
     attribute_type: String
   - attribute_name: numerator
@@ -181,7 +181,7 @@ if (typeof Prism !== 'undefined') {
         // Generate Documentation Sidebar TOC
         var docsToc = document.getElementById('docs-toc');
         if (docsToc) {
-          var headers = document.querySelectorAll('.doc-content h2[id], .doc-content h3[id]');
+          var headers = document.querySelectorAll('.doc-content h2[id], .doc-content h3[id], .doc-content h4[id]');
 
           if (headers.length > 0) {
             // Function to convert number to Roman numeral
@@ -206,6 +206,110 @@ if (typeof Prism !== 'undefined') {
 
             var tocList = document.createElement('ul');
             var currentH2Li = null;
+            var currentH3Li = null;
+            var h2Count = 0;
+            var h3Count = 0;
+            var h4Count = 0;
+
+            headers.forEach(function(header) {
+              var level = header.tagName.toLowerCase();
+              var text = header.textContent.replace('#', '').trim();
+              var link = document.createElement('a');
+              link.href = '#' + header.id;
+
+              if (level === 'h2') {
+                h2Count++;
+                h3Count = 0;
+                h4Count = 0;
+                link.textContent = toRomanDoc(h2Count) + '. ' + text;
+              } else if (level === 'h3') {
+                h3Count++;
+                h4Count = 0;
+                link.textContent = toLetterDoc(h3Count) + '. ' + text;
+              } else if (level === 'h4') {
+                h4Count++;
+                link.textContent = h4Count + '. ' + text;
+              }
+
+              var li = document.createElement('li');
+              li.appendChild(link);
+
+              if (level === 'h2') {
+                tocList.appendChild(li);
+                currentH2Li = li;
+                currentH3Li = null;
+              } else if (level === 'h3' && currentH2Li) {
+                if (!currentH2Li.querySelector('ul')) {
+                  var subList = document.createElement('ul');
+                  currentH2Li.appendChild(subList);
+                }
+                currentH2Li.querySelector('ul').appendChild(li);
+                currentH3Li = li;
+              } else if (level === 'h4' && currentH3Li) {
+                if (!currentH3Li.querySelector('ul')) {
+                  var subList = document.createElement('ul');
+                  currentH3Li.appendChild(subList);
+                }
+                currentH3Li.querySelector('ul').appendChild(li);
+              }
+            });
+
+            docsToc.appendChild(tocList);
+          }
+
+          // Add anchor links to doc headers
+          document.querySelectorAll('.doc-content h2[id], .doc-content h3[id], .doc-content h4[id]').forEach(function(header) {
+            var anchor = document.createElement('span');
+            anchor.className = 'header-anchor';
+            anchor.innerHTML = '#';
+            anchor.setAttribute('aria-label', 'Copy link to ' + header.textContent);
+            header.insertBefore(anchor, header.firstChild);
+
+            header.style.cursor = 'pointer';
+            header.addEventListener('click', function(e) {
+              var url = window.location.origin + window.location.pathname + '#' + header.id;
+              window.history.pushState(null, '', '#' + header.id);
+              navigator.clipboard.writeText(url).then(function() {
+                var originalText = anchor.innerHTML;
+                anchor.innerHTML = '✓';
+                setTimeout(function() {
+                  anchor.innerHTML = originalText;
+                }, 1000);
+              }).catch(function(err) {
+                console.error('Failed to copy:', err);
+              });
+            });
+          });
+        }
+
+        // Generate Standard Library Sidebar TOC
+        var stdlibToc = document.getElementById('stdlib-toc');
+        if (stdlibToc) {
+          var headers = document.querySelectorAll('.stdlib-content h2[id], .stdlib-content h3[id]');
+
+          if (headers.length > 0) {
+            // Function to convert number to Roman numeral
+            function toRomanStdlib(num) {
+              var romans = [
+                ['X', 10], ['IX', 9], ['V', 5], ['IV', 4], ['I', 1]
+              ];
+              var result = '';
+              for (var i = 0; i < romans.length; i++) {
+                while (num >= romans[i][1]) {
+                  result += romans[i][0];
+                  num -= romans[i][1];
+                }
+              }
+              return result;
+            }
+
+            // Function to convert number to letter (1=a, 2=b, etc.)
+            function toLetterStdlib(num) {
+              return String.fromCharCode(96 + num); // 97 is 'a'
+            }
+
+            var tocList = document.createElement('ul');
+            var currentH2Li = null;
             var h2Count = 0;
             var h3Count = 0;
 
@@ -217,11 +321,11 @@ if (typeof Prism !== 'undefined') {
 
               if (level === 'h2') {
                 h2Count++;
-                h3Count = 0; // Reset h3 counter for new h2 section
-                link.textContent = toRomanDoc(h2Count) + '. ' + text;
+                h3Count = 0;
+                link.textContent = toRomanStdlib(h2Count) + '. ' + text;
               } else if (level === 'h3') {
                 h3Count++;
-                link.textContent = toLetterDoc(h3Count) + '. ' + text;
+                link.textContent = toLetterStdlib(h3Count) + '. ' + text;
               }
 
               var li = document.createElement('li');
@@ -239,11 +343,11 @@ if (typeof Prism !== 'undefined') {
               }
             });
 
-            docsToc.appendChild(tocList);
+            stdlibToc.appendChild(tocList);
           }
 
-          // Add anchor links to doc headers
-          document.querySelectorAll('.doc-content h2[id], .doc-content h3[id], .doc-content h4[id]').forEach(function(header) {
+          // Add anchor links to stdlib headers
+          document.querySelectorAll('.stdlib-content h2[id], .stdlib-content h3[id], .stdlib-content h4[id]').forEach(function(header) {
             var anchor = document.createElement('span');
             anchor.className = 'header-anchor';
             anchor.innerHTML = '#';

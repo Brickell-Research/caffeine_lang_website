@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Documentation - Caffeine | Caffeine</title><link href="/images/temp_caffeine_icon.png" rel="icon" type="image/png"><meta content="Documentation - Caffeine | Caffeine" property="og:title"><meta content="website" property="og:type"><meta content="Caffeine" property="og:site_name"><meta content="summary" name="twitter:card"><meta content="Learn how to use Caffeine to define service expectations and generate reliability artifacts." name="description"><meta content="Learn how to use Caffeine to define service expectations and generate reliability artifacts." property="og:description"><meta content="https://caffeine-lang.org/docs" property="og:url"><link href="/css/styles.css" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script><script async src="https://plausible.io/js/pa-vjl7vif68GwpiuXNTPtt7.js"></script><script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script></head><body><div class="announcement-banner"><a class="banner-link" href="https://gleamgathering.com/" target="_blank"><span class="banner-text-full">📣 I will be speaking at Gleam Gathering! Join me for &quot;10,000 Lines Later: When a Tool Became a Compiler (and I Became a Gleamlin)&quot;</span><span class="banner-text-mobile">📣 Speaking at Gleam Gathering</span><span class="banner-arrow"> →</span></a></div><header class="site-header"><nav class="nav"><a class="logo" href="/"><img alt="Caffeine" class="logo-img" src="/images/temp_caffeine_icon.png">Caffeine</a><ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/docs">Docs</a></li><li><a href="/blog">Blog</a></li></ul></nav></header><main class="main-content"><div class="docs-container"><article class="docs-main"><header class="doc-header"><h1>Documentation</h1></header><div class="doc-content"><p>There exist three levels of configurations, each distinct and isolated, referenced by lower levels via unique naming scheme and typically owned by different <em>roles</em> within an organization:</p><p>(1) <strong>Artifacts</strong>: defined by standard library or plugin developers per distinct reliability artifact.</p><p>(2) <strong>Blueprints</strong>: defined by observability experts per artifact abstraction referencing artifacts.</p><p>(3) <strong>Expectations</strong>: defined by the operating team per service referencing blueprints.</p><p class="figure"><img alt="stardust" src="/images/documentation_structure_of_configs.png"></p><p>An example of how the file types interact across a typical engineering organization</p><p>Thus, for the <strong>SLO</strong> artifact, we might see something like this:</p><p class="figure"><img alt="stardust" src="/images/documentation_structure_of_configs_filled_in.png"></p><p>The same diagram from above with made of examples for the SLO reliability artifact</p><p>The documentation is split by <em>persona</em> with sufficient details for each to operate within their domain.</p><hr><h2 id="Caffeine-Standard-Library">Caffeine Standard Library</h2><h3 id="Artifacts-Explanation">Artifacts Explanation</h3><h3 id="Documentation-and-Distribution">Documentation and Distribution</h3><hr><h2 id="Observability-experts">Observability experts</h2><h3 id="Blueprints-Explained">Blueprints Explained</h3><h3>Documentation and Distribution</h3><hr><h2 id="Service-Owners">Service Owners</h2><h3 id="Service-Expectation-Explained">Service Expectation Explained</h3><p><strong>Definition:</strong> a service expectation is single blueprint invocation for a single service within the domain of an owning team. </p><p>The organization name, team name, and service name are baked in to the filepath path: </p><p><code>ORGANIZATION_NAME/TEAM_NAME/SERIVE_NAME.yaml</code></p><p>As all other configurations, an expectation is a <code>.yaml</code> file with the following required fields.</p><div><table>
+<html lang="en"><head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Documentation - Caffeine | Caffeine</title><link href="/images/temp_caffeine_icon.png" rel="icon" type="image/png"><meta content="Documentation - Caffeine | Caffeine" property="og:title"><meta content="website" property="og:type"><meta content="Caffeine" property="og:site_name"><meta content="summary" name="twitter:card"><meta content="Learn how to use Caffeine to define service expectations and generate reliability artifacts." name="description"><meta content="Learn how to use Caffeine to define service expectations and generate reliability artifacts." property="og:description"><meta content="https://caffeine-lang.org/docs" property="og:url"><link href="/css/styles.css" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script><script async src="https://plausible.io/js/pa-vjl7vif68GwpiuXNTPtt7.js"></script><script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script></head><body><div class="announcement-banner"><a class="banner-link" href="https://gleamgathering.com/" target="_blank"><span class="banner-text-full">📣 I will be speaking at Gleam Gathering! Join me for &quot;10,000 Lines Later: When a Tool Became a Compiler (and I Became a Gleamlin)&quot;</span><span class="banner-text-mobile">📣 Speaking at Gleam Gathering</span><span class="banner-arrow"> →</span></a></div><header class="site-header"><nav class="nav"><a class="logo" href="/"><img alt="Caffeine" class="logo-img" src="/images/temp_caffeine_icon.png">Caffeine</a><ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/docs">Docs</a></li><li><a href="/stdlib">Stdlib</a></li><li><a href="/blog">Blog</a></li></ul></nav></header><main class="main-content"><div class="docs-container"><article class="docs-main"><header class="doc-header"><h1>Documentation</h1></header><div class="doc-content"><p>There exist three levels of configurations, each distinct and isolated, referenced by lower levels via unique naming scheme and typically owned by different <em>roles</em> within an organization:</p><p>(1) <strong>Artifacts</strong>: defined by standard library or plugin developers per distinct reliability artifact.</p><p>(2) <strong>Blueprints</strong>: defined by observability experts per artifact abstraction referencing artifacts.</p><p>(3) <strong>Expectations</strong>: defined by the operating team per service referencing blueprints.</p><p class="figure"><img alt="stardust" src="/images/documentation_structure_of_configs.png"></p><p>An example of how the file types interact across a typical engineering organization</p><p>Thus, for the <strong>SLO</strong> artifact, we might see something like this:</p><p class="figure"><img alt="stardust" src="/images/documentation_structure_of_configs_filled_in.png"></p><p>The same diagram from above with made of examples for the SLO reliability artifact</p><p>The documentation is split by <em>persona</em> with sufficient details for each to operate within their domain.</p><hr><h2 id="Caffeine-Standard-Library">Caffeine Standard Library</h2><h3 id="Artifacts-Explanation">Artifacts Explanation</h3><p>An artifact surfaces the standard library or a plugin&#39;s interface - it defines the expected values from which the logic operates on. An SLO artifact would require thresholds and queries
+while a systems modelling artifact might require dependency relationships.</p><p>An artifact is a <code>.yaml</code> file with the following required fields.</p><div><table>
   <thead>
     <tr>
       <th>Attribute</th>
@@ -14,6 +15,81 @@
       <td>Unique within a single <code>artifacts.yaml</code> file.</td>
     </tr>
     <tr>
+      <td>passed_down_params</td>
+      <td>Dict(String, AcceptedTypes)</td>
+      <td>A collection of `blueprint` inherited input names mapped to input types. Uniquely here, we define defaults for optionals using the `->` operator.</td>
+    </tr>
+    <tr>
+      <td>params</td>
+      <td>Dict(String, AcceptedTypes)</td>
+      <td>A collection of input names mapped to input types of attributes required to be defined by blueprints that inherit it.</td>
+    </tr>
+  </tbody>
+</table></div><p>So, an example would look like:</p><pre><code data-lang="text">artifacts:
+  - name: SLO
+    passed_down_params:
+      - threshold: String
+      - window_in_days: Optional(Integer) -&gt; 30
+    params:
+      - queries: Dict(String, String)
+      - value: String
+</code></pre><h3 id="Documentation-and-Distribution">Documentation and Distribution</h3><p>Artifacts are distributed with the core Caffeine binary. Documentation is available on the <a href="/stdlib">Standard Library Reference</a> page.</p><hr><h2 id="Observability-experts">Observability experts</h2><h3 id="Blueprints-Explained">Blueprints Explained</h3><p>Blueprints represent common abstractions over reliability artifacts typically used to codify (either completely or partially, i.e. templatized) well known, common patterns. These
+take the form of:</p><div><table>
+  <thead>
+    <tr>
+      <th>Attribute</th>
+      <th>Expected Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>name</td>
+      <td>String</td>
+      <td>Unique within a single <code>blueprints.yaml</code> file.</td>
+    </tr>
+    <tr>
+      <td>artifact</td>
+      <td>String</td>
+      <td>An identifier referencing an artifact.</td>
+    </tr>
+    <tr>
+      <td>params</td>
+      <td>Dict(String, AcceptedTypes)</td>
+      <td>A collection of input names mapped to input types of attributes required to be defined by service expectations that invoke it.</td>
+    </tr>
+    <tr>
+      <td>inputs</td>
+      <td>Dict(String, Any)</td>
+      <td>A collection of input names mapped to input values to be consumed by the artifact it references.</td>
+    </tr>
+  </tbody>
+</table></div><p>So, an example would look like:</p><pre><code data-lang="text">blueprints:
+  - name: LCP_Latency
+    artifact: SLO
+    params:
+      - view: String
+      - p95_latency_in_seconds: Integer
+    inputs:
+      - queries:
+        - numerator:   ___________________
+        - denominator: ___________________
+      - value: &quot;numerator / denominator&quot;
+</code></pre><h3>Documentation and Distribution</h3><hr><h2 id="Service-Owners">Service Owners</h2><h3 id="Service-Expectation-Explained">Service Expectation Explained</h3><p><strong>Definition:</strong> a service expectation is single blueprint invocation for a single service within the domain of an owning team. </p><p>The organization name, team name, and service name are baked in to the filepath path: </p><p><code>ORGANIZATION_NAME/TEAM_NAME/SERVICE_NAME.yaml</code></p><p>As all other configurations, an expectation is a <code>.yaml</code> file with the following required fields.</p><div><table>
+  <thead>
+    <tr>
+      <th>Attribute</th>
+      <th>Expected Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>name</td>
+      <td>String</td>
+      <td>Unique within a single <code>SERVICE_NAME.yaml</code> file.</td>
+    </tr>
+    <tr>
       <td>blueprint</td>
       <td>String</td>
       <td>An identifier referencing a blueprint.</td>
@@ -24,14 +100,55 @@
       <td>Collection of input names mapped to input values.</td>
     </tr>
   </tbody>
-</table></div><p>So, an example would look like:</p><pre><code data-lang="text">expectations:
+</table></div><p>So, an example would look like:</p><pre><code data-lang="yaml">expectations:
   - name: &quot;Admin Portal Home Page LCP Latency&quot;
     blueprint: LCP_Latency
     inputs:
-      - view: /admin/home
-        p95_latency_in_seconds: 5
-        threshold: 99.5%
-</code></pre><h3>Documentation and Distribution</h3><p>Caffeine has no opinion on where these files live, just the file path as mentioned above. Documentation might be generated as part of compilation depending on the artifact.</p><hr></div></article><aside class="docs-sidebar"><h3>On This Page</h3><nav class="docs-nav" id="docs-toc"></nav></aside></div></main><footer class="site-footer"><div class="footer-content"><div class="subscribe-section"><p class="subscribe-title">Subscribe for updates</p><form action="https://dev.us14.list-manage.com/subscribe/post?u=96948c5e8fc6f534d39ebdb3f&amp;id=6080af26e0&amp;f_id=009f89e1f0" class="subscribe-form" method="post" target="_blank"><input class="subscribe-input" name="EMAIL" placeholder="your@email.com" required type="email"><button class="subscribe-btn" type="submit">Subscribe</button></form></div><p>Built with <a href="https://gleam.run" target="_blank">Gleam</a> and <a href="https://github.com/lustre-labs/ssg" target="_blank">Lustre SSG</a></p><p>© 2025 <a href="https://www.brickellresearch.org/" target="_blank">Brickell Research</a></p></div></footer><script>
+      view: /admin/home
+      p95_latency_in_seconds: 5
+      threshold: 99.5
+</code></pre><h3>Documentation and Distribution</h3><p>Caffeine has no opinion on where these files live, just the file path as mentioned above. Documentation might be generated as part of compilation depending on the artifact.</p><hr><h2 id="Appendix">Appendix</h2><h3 id="Accepted-Types">Accepted Types</h3><p>Accepted Types are type names leveraged throughout Caffeine configuration files as type annotations for the compiler to enforce. Today we support the following:</p><div><table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Boolean</td>
+      <td>A true or false value.</td>
+    </tr>
+    <tr>
+      <td>Decimal</td>
+      <td>A floating-point number (e.g., 99.5).</td>
+    </tr>
+    <tr>
+      <td>Integer</td>
+      <td>A whole number (e.g., 30).</td>
+    </tr>
+    <tr>
+      <td>String</td>
+      <td>A text value (e.g., "my-service").</td>
+    </tr>
+    <tr>
+      <td>NonEmptyList(T)</td>
+      <td>A list containing at least one element of type T. Supported inner types: String, Integer, Boolean, Decimal.</td>
+    </tr>
+    <tr>
+      <td>Optional(T)</td>
+      <td>A value that may or may not be present. Supported inner types: String, Integer, Boolean, Decimal, NonEmptyList(String), NonEmptyList(Integer), NonEmptyList(Boolean), NonEmptyList(Decimal).</td>
+    </tr>
+  </tbody>
+</table></div><h4 id="Technical-Details">Technical Details</h4><p>While the <em>type</em> definition technically allows infinite recursion as it is defined as so:</p><pre><code data-lang="gleam">pub type AcceptedTypes {
+  Boolean
+  Decimal
+  Integer
+  String
+  NonEmptyList(AcceptedTypes)
+  Optional(AcceptedTypes)
+}
+</code></pre><p>We do limit it intentionally at this time.</p><hr></div></article><aside class="docs-sidebar"><h3>On This Page</h3><nav class="docs-nav" id="docs-toc"></nav></aside></div></main><footer class="site-footer"><div class="footer-content"><p>Built with <a href="https://gleam.run" target="_blank">Gleam</a> and <a href="https://github.com/lustre-labs/ssg" target="_blank">Lustre SSG</a></p><p>© 2025 <a href="https://brickellresearch.org/" target="_blank">Brickell Research</a></p></div></footer><script>
         // Convert data-lang to language-* class for Prism
         document.querySelectorAll('code[data-lang]').forEach(function(code) {
           var lang = code.getAttribute('data-lang').toLowerCase();
@@ -157,7 +274,7 @@
         // Generate Documentation Sidebar TOC
         var docsToc = document.getElementById('docs-toc');
         if (docsToc) {
-          var headers = document.querySelectorAll('.doc-content h2[id], .doc-content h3[id]');
+          var headers = document.querySelectorAll('.doc-content h2[id], .doc-content h3[id], .doc-content h4[id]');
 
           if (headers.length > 0) {
             // Function to convert number to Roman numeral
@@ -182,6 +299,110 @@
 
             var tocList = document.createElement('ul');
             var currentH2Li = null;
+            var currentH3Li = null;
+            var h2Count = 0;
+            var h3Count = 0;
+            var h4Count = 0;
+
+            headers.forEach(function(header) {
+              var level = header.tagName.toLowerCase();
+              var text = header.textContent.replace('#', '').trim();
+              var link = document.createElement('a');
+              link.href = '#' + header.id;
+
+              if (level === 'h2') {
+                h2Count++;
+                h3Count = 0;
+                h4Count = 0;
+                link.textContent = toRomanDoc(h2Count) + '. ' + text;
+              } else if (level === 'h3') {
+                h3Count++;
+                h4Count = 0;
+                link.textContent = toLetterDoc(h3Count) + '. ' + text;
+              } else if (level === 'h4') {
+                h4Count++;
+                link.textContent = h4Count + '. ' + text;
+              }
+
+              var li = document.createElement('li');
+              li.appendChild(link);
+
+              if (level === 'h2') {
+                tocList.appendChild(li);
+                currentH2Li = li;
+                currentH3Li = null;
+              } else if (level === 'h3' && currentH2Li) {
+                if (!currentH2Li.querySelector('ul')) {
+                  var subList = document.createElement('ul');
+                  currentH2Li.appendChild(subList);
+                }
+                currentH2Li.querySelector('ul').appendChild(li);
+                currentH3Li = li;
+              } else if (level === 'h4' && currentH3Li) {
+                if (!currentH3Li.querySelector('ul')) {
+                  var subList = document.createElement('ul');
+                  currentH3Li.appendChild(subList);
+                }
+                currentH3Li.querySelector('ul').appendChild(li);
+              }
+            });
+
+            docsToc.appendChild(tocList);
+          }
+
+          // Add anchor links to doc headers
+          document.querySelectorAll('.doc-content h2[id], .doc-content h3[id], .doc-content h4[id]').forEach(function(header) {
+            var anchor = document.createElement('span');
+            anchor.className = 'header-anchor';
+            anchor.innerHTML = '#';
+            anchor.setAttribute('aria-label', 'Copy link to ' + header.textContent);
+            header.insertBefore(anchor, header.firstChild);
+
+            header.style.cursor = 'pointer';
+            header.addEventListener('click', function(e) {
+              var url = window.location.origin + window.location.pathname + '#' + header.id;
+              window.history.pushState(null, '', '#' + header.id);
+              navigator.clipboard.writeText(url).then(function() {
+                var originalText = anchor.innerHTML;
+                anchor.innerHTML = '✓';
+                setTimeout(function() {
+                  anchor.innerHTML = originalText;
+                }, 1000);
+              }).catch(function(err) {
+                console.error('Failed to copy:', err);
+              });
+            });
+          });
+        }
+
+        // Generate Standard Library Sidebar TOC
+        var stdlibToc = document.getElementById('stdlib-toc');
+        if (stdlibToc) {
+          var headers = document.querySelectorAll('.stdlib-content h2[id], .stdlib-content h3[id]');
+
+          if (headers.length > 0) {
+            // Function to convert number to Roman numeral
+            function toRomanStdlib(num) {
+              var romans = [
+                ['X', 10], ['IX', 9], ['V', 5], ['IV', 4], ['I', 1]
+              ];
+              var result = '';
+              for (var i = 0; i < romans.length; i++) {
+                while (num >= romans[i][1]) {
+                  result += romans[i][0];
+                  num -= romans[i][1];
+                }
+              }
+              return result;
+            }
+
+            // Function to convert number to letter (1=a, 2=b, etc.)
+            function toLetterStdlib(num) {
+              return String.fromCharCode(96 + num); // 97 is 'a'
+            }
+
+            var tocList = document.createElement('ul');
+            var currentH2Li = null;
             var h2Count = 0;
             var h3Count = 0;
 
@@ -193,11 +414,11 @@
 
               if (level === 'h2') {
                 h2Count++;
-                h3Count = 0; // Reset h3 counter for new h2 section
-                link.textContent = toRomanDoc(h2Count) + '. ' + text;
+                h3Count = 0;
+                link.textContent = toRomanStdlib(h2Count) + '. ' + text;
               } else if (level === 'h3') {
                 h3Count++;
-                link.textContent = toLetterDoc(h3Count) + '. ' + text;
+                link.textContent = toLetterStdlib(h3Count) + '. ' + text;
               }
 
               var li = document.createElement('li');
@@ -215,11 +436,11 @@
               }
             });
 
-            docsToc.appendChild(tocList);
+            stdlibToc.appendChild(tocList);
           }
 
-          // Add anchor links to doc headers
-          document.querySelectorAll('.doc-content h2[id], .doc-content h3[id], .doc-content h4[id]').forEach(function(header) {
+          // Add anchor links to stdlib headers
+          document.querySelectorAll('.stdlib-content h2[id], .stdlib-content h3[id], .stdlib-content h4[id]').forEach(function(header) {
             var anchor = document.createElement('span');
             anchor.className = 'header-anchor';
             anchor.innerHTML = '#';

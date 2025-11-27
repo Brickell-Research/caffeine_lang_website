@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Origin Story | Caffeine</title><link href="/images/temp_caffeine_icon.png" rel="icon" type="image/png"><meta content="Origin Story | Caffeine" property="og:title"><meta content="website" property="og:type"><meta content="Caffeine" property="og:site_name"><meta content="summary" name="twitter:card"><meta content="How Caffeine Came to Be" name="description"><meta content="How Caffeine Came to Be" property="og:description"><meta content="https://caffeine-lang.org/blog/origins" property="og:url"><link href="/css/styles.css" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script><script async src="https://plausible.io/js/pa-vjl7vif68GwpiuXNTPtt7.js"></script><script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script></head><body><div class="announcement-banner"><a class="banner-link" href="https://gleamgathering.com/" target="_blank"><span class="banner-text-full">📣 I will be speaking at Gleam Gathering! Join me for &quot;10,000 Lines Later: When a Tool Became a Compiler (and I Became a Gleamlin)&quot;</span><span class="banner-text-mobile">📣 Speaking at Gleam Gathering</span><span class="banner-arrow"> →</span></a></div><header class="site-header"><nav class="nav"><a class="logo" href="/"><img alt="Caffeine" class="logo-img" src="/images/temp_caffeine_icon.png">Caffeine</a><ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/docs">Docs</a></li><li><a href="/blog">Blog</a></li></ul></nav></header><main class="main-content"><article class="blog-post"><header class="post-header"><h1>Origin Story</h1><p class="post-date">2025-11-22 · by Rob Durst</p></header><div class="post-content"><div class="toc"></div><p><strong>I&#39;m building <a href="https://github.com/Brickell-Research/caffeine_lang">Caffeine</a>, a compiler written in Gleam that compiles service expectations to reliability artifacts.
+<html lang="en"><head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Origin Story | Caffeine</title><link href="/images/temp_caffeine_icon.png" rel="icon" type="image/png"><meta content="Origin Story | Caffeine" property="og:title"><meta content="website" property="og:type"><meta content="Caffeine" property="og:site_name"><meta content="summary" name="twitter:card"><meta content="How Caffeine Came to Be" name="description"><meta content="How Caffeine Came to Be" property="og:description"><meta content="https://caffeine-lang.org/blog/origins" property="og:url"><link href="/css/styles.css" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script><script async src="https://plausible.io/js/pa-vjl7vif68GwpiuXNTPtt7.js"></script><script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script></head><body><div class="announcement-banner"><a class="banner-link" href="https://gleamgathering.com/" target="_blank"><span class="banner-text-full">📣 I will be speaking at Gleam Gathering! Join me for &quot;10,000 Lines Later: When a Tool Became a Compiler (and I Became a Gleamlin)&quot;</span><span class="banner-text-mobile">📣 Speaking at Gleam Gathering</span><span class="banner-arrow"> →</span></a></div><header class="site-header"><nav class="nav"><a class="logo" href="/"><img alt="Caffeine" class="logo-img" src="/images/temp_caffeine_icon.png">Caffeine</a><ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/docs">Docs</a></li><li><a href="/stdlib">Stdlib</a></li><li><a href="/blog">Blog</a></li></ul></nav></header><main class="main-content"><article class="blog-post"><header class="post-header"><h1>Origin Story</h1><p class="post-date">2025-11-22 · by Rob Durst</p></header><div class="post-content"><div class="toc"></div><p><strong>I&#39;m building <a href="https://github.com/Brickell-Research/caffeine_lang">Caffeine</a>, a compiler written in Gleam that compiles service expectations to reliability artifacts.
 This post documents the motivation and inspiration behind Caffeine, tracing a path from Terraform automation to typed functional compilation.</strong></p><hr><h2 id="Frontloading-the-Buzzwords">Frontloading the Buzzwords</h2><h3 id="SRE---Site-Reliability-Engineering">SRE - Site Reliability Engineering</h3><p>As initially designed, Caffeine is a tool that&#39;s most interesting to folks within the Site Reliability Engineering (<a href="https://en.wikipedia.org/wiki/Site_reliability_engineering">or SRE</a>) community. While I do currently don the title of SRE, I&#39;ve only done so
 <strong>officially</strong> since May 2024 (<a href="https://www.linkedin.com/in/robertdurst/details/experience/">see my LinkedIn</a>). Yet, I&#39;ve been unofficially filling this role for years.</p><p>Some proof from the web:</p><ul style="list-style-type:disc;"><li><p>2018 @ Stellar Development Foundation - A summer fuzz-testing internship (no blog post 😢)</p></li><li><p>2021 @ DocuSign - <a href="https://robdurst.com/why-defensive-coding-matters">My experience: Why defensive coding matters</a></p></li><li><p>2022 @ Spring Health - <a href="https://medium.com/spring-health-engineering/the-birth-of-the-performance-lab-at-spring-health-76b768c9c967">The Birth of the Performance Lab at Spring Health</a></p></li></ul><p>My official transition is documented in my 2025 EMEA SRECon talk: <a href="https://www.youtube.com/watch?v=f3lKbV32dyg">Run, Walk, Crawl, or How We Failed Our Way to SLO Readiness</a>.</p><h3 id="IAC---Infrastructure-as-Code">IAC - Infrastructure as Code</h3><p>As I mention in that talk, immediately upon moving to the SRE team, I was thrown into a large cloud infrastructure migration project. A significant part of this work was developing <a href="https://www.hashicorp.com/en/products/terraform">Terraform</a> modules for our new infrastructure. Over my first six months working with Terraform, I began to drink the <a href="https://en.wikipedia.org/wiki/Infrastructure_as_code">infrastructure-as-code</a> (IAC) Koolaid.</p><h3 id="ODD---Observability-Driven-Development">ODD - Observability Driven Development</h3><p>Another concept I&#39;d been introduced to at DocuSign was <a href="https://stackoverflow.blog/2022/10/12/how-observability-driven-development-creates-elite-performers/">observability driven development</a> (ODD): an emphasis on introducing sufficient telemetry instrumentation to understand how code actually performs.</p><p>This really clicked for me at DocuSign when, as a junior engineer, I was tasked with introducing changes to DocuSign&#39;s core service discovery service (aptly named <code>Discovery</code>). A mentor challenged me: <em>&quot;what is the minimum change you can push to production to understand the actual behavior of your proposed modifications?&quot;</em> Following this advice, my first few PRs focused strictly on instrumentation. After running it in production for a few days, I gained immense confidence about (a) what the changes would look like and (b) <strong>most importantly</strong> how to know if something went wrong.</p><p>It&#39;s no exaggeration to say this was a serious &quot;AHA!&quot; 🧠 moment in my engineering career.</p><h2 id="Datadog-+-Terraform-=-🔥-but-also-😅">Datadog + Terraform = 🔥 but also 😅</h2><p>At Spring, we use <a href="https://www.datadoghq.com/">Datadog</a> for observability. It&#39;s great. Upon diving into my ODD mentality, I quickly became not only a Datadog power user but unofficially garnered the nickname &quot;Datadog Rob&quot; for my telemetry obsession and willingness to help others <em>&quot;see the light&quot;</em>.</p><p>Yet while Datadog is an instrumental part of our observability stack, it&#39;s got its own quirks, complexities, and downsides. In my opinion, one con is its intimidating interface: it gives you a lot of ways to view your system&#39;s telemetry which is powerful, but also hinders adoption for casual users.</p><p>Focusing just on monitoring, I discovered teammates had begun exploring Datadog&#39;s <a href="https://registry.terraform.io/providers/DataDog/datadog/latest/docs">Terraform provider</a> to IAC their monitors 👀. This was by no means easy... requiring multiple verbose files to define even a single monitor:</p><p><strong>Note:</strong> Examples below use generic placeholders; any names resembling internal systems are illustrative only.</p><p><strong>providers.tf</strong></p><pre><code data-lang="tf">terraform {
   required_providers {
@@ -281,7 +281,7 @@ facts about the system.</p><p>And finally, if you made it all the way through th
         // Generate Documentation Sidebar TOC
         var docsToc = document.getElementById('docs-toc');
         if (docsToc) {
-          var headers = document.querySelectorAll('.doc-content h2[id], .doc-content h3[id]');
+          var headers = document.querySelectorAll('.doc-content h2[id], .doc-content h3[id], .doc-content h4[id]');
 
           if (headers.length > 0) {
             // Function to convert number to Roman numeral
@@ -306,6 +306,110 @@ facts about the system.</p><p>And finally, if you made it all the way through th
 
             var tocList = document.createElement('ul');
             var currentH2Li = null;
+            var currentH3Li = null;
+            var h2Count = 0;
+            var h3Count = 0;
+            var h4Count = 0;
+
+            headers.forEach(function(header) {
+              var level = header.tagName.toLowerCase();
+              var text = header.textContent.replace('#', '').trim();
+              var link = document.createElement('a');
+              link.href = '#' + header.id;
+
+              if (level === 'h2') {
+                h2Count++;
+                h3Count = 0;
+                h4Count = 0;
+                link.textContent = toRomanDoc(h2Count) + '. ' + text;
+              } else if (level === 'h3') {
+                h3Count++;
+                h4Count = 0;
+                link.textContent = toLetterDoc(h3Count) + '. ' + text;
+              } else if (level === 'h4') {
+                h4Count++;
+                link.textContent = h4Count + '. ' + text;
+              }
+
+              var li = document.createElement('li');
+              li.appendChild(link);
+
+              if (level === 'h2') {
+                tocList.appendChild(li);
+                currentH2Li = li;
+                currentH3Li = null;
+              } else if (level === 'h3' && currentH2Li) {
+                if (!currentH2Li.querySelector('ul')) {
+                  var subList = document.createElement('ul');
+                  currentH2Li.appendChild(subList);
+                }
+                currentH2Li.querySelector('ul').appendChild(li);
+                currentH3Li = li;
+              } else if (level === 'h4' && currentH3Li) {
+                if (!currentH3Li.querySelector('ul')) {
+                  var subList = document.createElement('ul');
+                  currentH3Li.appendChild(subList);
+                }
+                currentH3Li.querySelector('ul').appendChild(li);
+              }
+            });
+
+            docsToc.appendChild(tocList);
+          }
+
+          // Add anchor links to doc headers
+          document.querySelectorAll('.doc-content h2[id], .doc-content h3[id], .doc-content h4[id]').forEach(function(header) {
+            var anchor = document.createElement('span');
+            anchor.className = 'header-anchor';
+            anchor.innerHTML = '#';
+            anchor.setAttribute('aria-label', 'Copy link to ' + header.textContent);
+            header.insertBefore(anchor, header.firstChild);
+
+            header.style.cursor = 'pointer';
+            header.addEventListener('click', function(e) {
+              var url = window.location.origin + window.location.pathname + '#' + header.id;
+              window.history.pushState(null, '', '#' + header.id);
+              navigator.clipboard.writeText(url).then(function() {
+                var originalText = anchor.innerHTML;
+                anchor.innerHTML = '✓';
+                setTimeout(function() {
+                  anchor.innerHTML = originalText;
+                }, 1000);
+              }).catch(function(err) {
+                console.error('Failed to copy:', err);
+              });
+            });
+          });
+        }
+
+        // Generate Standard Library Sidebar TOC
+        var stdlibToc = document.getElementById('stdlib-toc');
+        if (stdlibToc) {
+          var headers = document.querySelectorAll('.stdlib-content h2[id], .stdlib-content h3[id]');
+
+          if (headers.length > 0) {
+            // Function to convert number to Roman numeral
+            function toRomanStdlib(num) {
+              var romans = [
+                ['X', 10], ['IX', 9], ['V', 5], ['IV', 4], ['I', 1]
+              ];
+              var result = '';
+              for (var i = 0; i < romans.length; i++) {
+                while (num >= romans[i][1]) {
+                  result += romans[i][0];
+                  num -= romans[i][1];
+                }
+              }
+              return result;
+            }
+
+            // Function to convert number to letter (1=a, 2=b, etc.)
+            function toLetterStdlib(num) {
+              return String.fromCharCode(96 + num); // 97 is 'a'
+            }
+
+            var tocList = document.createElement('ul');
+            var currentH2Li = null;
             var h2Count = 0;
             var h3Count = 0;
 
@@ -317,11 +421,11 @@ facts about the system.</p><p>And finally, if you made it all the way through th
 
               if (level === 'h2') {
                 h2Count++;
-                h3Count = 0; // Reset h3 counter for new h2 section
-                link.textContent = toRomanDoc(h2Count) + '. ' + text;
+                h3Count = 0;
+                link.textContent = toRomanStdlib(h2Count) + '. ' + text;
               } else if (level === 'h3') {
                 h3Count++;
-                link.textContent = toLetterDoc(h3Count) + '. ' + text;
+                link.textContent = toLetterStdlib(h3Count) + '. ' + text;
               }
 
               var li = document.createElement('li');
@@ -339,11 +443,11 @@ facts about the system.</p><p>And finally, if you made it all the way through th
               }
             });
 
-            docsToc.appendChild(tocList);
+            stdlibToc.appendChild(tocList);
           }
 
-          // Add anchor links to doc headers
-          document.querySelectorAll('.doc-content h2[id], .doc-content h3[id], .doc-content h4[id]').forEach(function(header) {
+          // Add anchor links to stdlib headers
+          document.querySelectorAll('.stdlib-content h2[id], .stdlib-content h3[id], .stdlib-content h4[id]').forEach(function(header) {
             var anchor = document.createElement('span');
             anchor.className = 'header-anchor';
             anchor.innerHTML = '#';

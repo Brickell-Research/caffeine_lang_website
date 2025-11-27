@@ -1040,6 +1040,17 @@ a:hover {
   margin: 0.5rem 0;
 }
 
+.docs-nav ul ul ul {
+  padding-left: 1rem;
+  margin-top: 0.25rem;
+  border-left: 1px solid var(--color-primary);
+}
+
+.docs-nav ul ul ul li {
+  font-size: 0.8rem;
+  margin: 0.35rem 0;
+}
+
 .docs-list {
   list-style: none;
   padding: 0;
@@ -1337,15 +1348,246 @@ a:hover {
   font-size: 0.85rem;
 }
 
+/* Standard Library Reference - reuses doc styles */
+.stdlib-container {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 3rem;
+  align-items: start;
+}
+
+.stdlib-main {
+  min-width: 0;
+  max-width: 800px;
+}
+
+.stdlib-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 3px solid var(--color-primary);
+}
+
+.stdlib-header h1 {
+  font-size: 2rem;
+  color: var(--color-primary);
+  margin-bottom: 0;
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  line-height: 1.6;
+}
+
+.stdlib-sidebar {
+  position: sticky;
+  top: 2rem;
+  border: 3px solid var(--color-primary);
+  background: var(--color-surface);
+  padding: 1.5rem;
+  box-shadow: 6px 6px 0 0 var(--color-border);
+}
+
+.stdlib-sidebar h3 {
+  color: var(--color-primary);
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--color-primary);
+}
+
+.stdlib-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.stdlib-nav li {
+  margin: 0.75rem 0;
+}
+
+.stdlib-nav a {
+  color: var(--color-text);
+  font-size: 0.9rem;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  border-bottom: none;
+}
+
+.stdlib-nav a:hover {
+  color: var(--color-primary);
+  border-bottom: 2px solid var(--color-primary);
+}
+
+.stdlib-nav ul ul {
+  padding-left: 1.25rem;
+  margin-top: 0.5rem;
+  border-left: 2px solid var(--color-primary);
+}
+
+.stdlib-nav ul ul li {
+  font-size: 0.85rem;
+  margin: 0.5rem 0;
+}
+
+/* stdlib-content reuses doc-content styles */
+.stdlib-content {
+  color: var(--color-text);
+}
+
+.stdlib-content p {
+  margin-bottom: 1.5rem;
+  line-height: 1.8;
+}
+
+.stdlib-content strong {
+  color: var(--color-text-bright);
+  font-weight: bold;
+}
+
+.stdlib-content h2 {
+  color: var(--color-secondary);
+  margin: 2.5rem 0 1.5rem;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  font-size: 1.3rem;
+  border-left: 4px solid var(--color-secondary);
+  padding-left: 1rem;
+}
+
+.stdlib-content h3 {
+  color: var(--color-tertiary);
+  margin: 2rem 0 1rem;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  font-size: 1.1rem;
+}
+
+.stdlib-content h4 {
+  color: var(--color-mocha);
+  margin: 1.5rem 0 0.75rem;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  font-size: 1rem;
+}
+
+.stdlib-content ul,
+.stdlib-content ol {
+  margin-left: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.stdlib-content li {
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
+}
+
+.stdlib-content pre {
+  background-color: var(--color-background);
+  border: 3px solid var(--color-primary);
+  padding: 1.5rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  box-shadow: 4px 4px 0 0 var(--color-border);
+}
+
+.stdlib-content pre code {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--color-text-bright);
+}
+
+.stdlib-content code {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  background-color: rgba(255, 142, 212, 0.15);
+  padding: 0.15rem 0.35rem;
+  border-radius: 3px;
+  color: var(--color-primary);
+}
+
+.stdlib-content pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  color: var(--color-text-bright);
+}
+
+.stdlib-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+  border: 3px solid var(--color-primary);
+  box-shadow: 4px 4px 0 0 var(--color-border);
+}
+
+.stdlib-content th,
+.stdlib-content td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border: 1px solid var(--color-border);
+}
+
+.stdlib-content th {
+  background-color: var(--color-primary);
+  color: var(--color-background);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.stdlib-content tr:nth-child(even) {
+  background-color: var(--color-surface);
+}
+
+.stdlib-content tr:nth-child(odd) {
+  background-color: var(--color-background);
+}
+
+/* stdlib header anchors */
+.stdlib-content h2,
+.stdlib-content h3,
+.stdlib-content h4 {
+  position: relative;
+}
+
+.stdlib-content h2:hover,
+.stdlib-content h3:hover,
+.stdlib-content h4:hover {
+  color: var(--color-primary);
+}
+
+.stdlib-content .header-anchor {
+  position: absolute;
+  left: -1.5rem;
+  padding-right: 0.5rem;
+  color: var(--color-primary);
+  text-decoration: none;
+  opacity: 0;
+  font-weight: normal;
+  cursor: pointer;
+  border: none;
+}
+
+.stdlib-content h2:hover .header-anchor,
+.stdlib-content h3:hover .header-anchor,
+.stdlib-content h4:hover .header-anchor {
+  opacity: 1;
+}
+
 /* Responsive */
 @media (max-width: 968px) {
   .blog-container,
-  .docs-container {
+  .docs-container,
+  .stdlib-container {
     grid-template-columns: 1fr;
   }
 
   .blog-sidebar,
-  .docs-sidebar {
+  .docs-sidebar,
+  .stdlib-sidebar {
     order: -1;
     position: static;
     margin-bottom: 2rem;
