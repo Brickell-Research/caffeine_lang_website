@@ -3,7 +3,7 @@ title = "Documentation"
 summary = "Learn how to use Caffeine to define service expectations and generate reliability artifacts."
 ---
 
-There exist three levels of configurations, each distinct and isolated, referenced by lower levels via an unique naming scheme and typically owned by different _roles_ within an organization:
+There exist three levels of configurations, each distinct and isolated, referenced by lower levels via a unique naming scheme and typically owned by different _roles_ within an organization:
 
 1. *Artifacts*: defined by standard library or plugin developers per distinct reliability artifact.
 
@@ -68,15 +68,15 @@ An artifact is a `.yaml` file with the following required fields.
 
 So, an example would look like:
 
-```
+```yaml
 artifacts:
   - name: SLO
     passed_down_params:
-      - threshold: Decimal
-      - window_in_days: Optional(Integer) -> 30
+      threshold: Decimal
+      window_in_days: Optional(Integer) -> 30
     params:
-      - queries: Dict(String, String)
-      - value: String
+      queries: Dict(String, String)
+      value: String
 ```
 
 
@@ -121,7 +121,7 @@ take the form of:
     <tr>
       <td>inputs</td>
       <td>Dict(String, Any)</td>
-      <td>A collection of input names mapped to input values to be consumed by the artifact it references.</td>
+      <td>A collection of input names mapped to input values satisfying the <code>params</code> required by the referenced artifact.</td>
     </tr>
   </tbody>
 </table>
@@ -129,22 +129,20 @@ take the form of:
 
 So, an example would look like:
 
-```
+```yaml
 blueprints:
   - name: LCP_Latency
     artifact: SLO
     params:
-      - view: String
-      - p95_latency_in_seconds: Integer
+      view: String
+      p95_latency_in_seconds: Integer
     inputs:
-      - queries:
-        - numerator:   ___________________
-        - denominator: ___________________
-      - value: "numerator / denominator"
+      queries:
+        numerator:   ___________________
+        denominator: ___________________
+      value: "numerator / denominator"
 ```
 
-
-### Documentation and Distribution
 
 ***
 
@@ -183,7 +181,7 @@ As all other configurations, an expectation is a `.yaml` file with the following
     <tr>
       <td>inputs</td>
       <td>Dict(String, Any)</td>
-      <td>Collection of input names mapped to input values.</td>
+      <td>A collection of input names mapped to input values satisfying the <code>params</code> and <code>passed_down_params</code> required by the referenced blueprint.</td>
     </tr>
   </tbody>
 </table>
@@ -245,6 +243,10 @@ Accepted Types are type names leveraged throughout Caffeine configuration files 
     <tr>
       <td>Optional(T)</td>
       <td>A value that may or may not be present. Supported inner types: String, Integer, Boolean, Decimal, NonEmptyList(String), NonEmptyList(Integer), NonEmptyList(Boolean), NonEmptyList(Decimal).</td>
+    </tr>
+    <tr>
+      <td>Dict(K, V)</td>
+      <td>A key-value mapping where K is the key type and V is the value type (e.g., Dict(String, String)).</td>
     </tr>
   </tbody>
 </table>
