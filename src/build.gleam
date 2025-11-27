@@ -1,13 +1,20 @@
+import docs/docs
 import gleam/io
 import gleam/string
 import lustre/ssg
 import pages/blog
+import pages/docs as docs_page
 import pages/home
 import posts/posts
 
 pub fn main() {
   let all_posts = posts.all()
   let posts_dict = posts.as_dict()
+
+  let docs_view = case docs.load() {
+    Ok(doc) -> docs_page.view(doc)
+    Error(_) -> docs_page.fallback_view()
+  }
 
   let build =
     ssg.new("./docs")
@@ -17,6 +24,7 @@ pub fn main() {
     |> ssg.add_dynamic_route("/blog", posts_dict, fn(post) {
       blog.post_view(post)
     })
+    |> ssg.add_static_route("/docs", docs_view)
     |> ssg.build
 
   case build {

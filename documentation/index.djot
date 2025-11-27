@@ -1,0 +1,103 @@
+---
+title = "Documentation"
+summary = "Learn how to use Caffeine to define service expectations and generate reliability artifacts."
+---
+
+There exist three levels of configurations, each distinct and isolated, referenced by lower levels via unique naming scheme and typically owned by different _roles_ within an organization:
+
+(1) *Artifacts*: defined by standard library or plugin developers per distinct reliability artifact.
+
+(2) *Blueprints*: defined by observability experts per artifact abstraction referencing artifacts.
+
+(3) *Expectations*: defined by the operating team per service referencing blueprints.
+
+{.figure}
+![stardust](/images/documentation_structure_of_configs.png)
+
+An example of how the file types interact across a typical engineering organization
+
+Thus, for the *SLO* artifact, we might see something like this:
+
+{.figure}
+![stardust](/images/documentation_structure_of_configs_filled_in.png)
+
+The same diagram from above with made of examples for the SLO reliability artifact
+
+The documentation is split by _persona_ with sufficient details for each to operate within their domain.
+
+***
+
+## Caffeine Standard Library
+
+### Artifacts Explanation
+
+### Documentation and Distribution
+
+***
+
+## Observability experts
+
+### Blueprints Explained
+
+### Documentation and Distribution
+
+***
+
+## Service Owners
+
+### Service Expectation Explained
+
+*Definition:* a service expectation is single blueprint invocation for a single service within the domain of an owning team. 
+
+The organization name, team name, and service name are baked in to the filepath path: 
+
+`ORGANIZATION_NAME/TEAM_NAME/SERIVE_NAME.yaml`
+
+As all other configurations, an expectation is a `.yaml` file with the following required fields.
+
+``` =html
+<table>
+  <thead>
+    <tr>
+      <th>Attribute</th>
+      <th>Expected Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>name</td>
+      <td>String</td>
+      <td>Unique within a single <code>artifacts.yaml</code> file.</td>
+    </tr>
+    <tr>
+      <td>blueprint</td>
+      <td>String</td>
+      <td>An identifier referencing a blueprint.</td>
+    </tr>
+    <tr>
+      <td>inputs</td>
+      <td>Dict(String, Any)</td>
+      <td>Collection of input names mapped to input values.</td>
+    </tr>
+  </tbody>
+</table>
+```
+
+So, an example would look like:
+
+```
+expectations:
+  - name: "Admin Portal Home Page LCP Latency"
+    blueprint: LCP_Latency
+    inputs:
+      - view: /admin/home
+        p95_latency_in_seconds: 5
+        threshold: 99.5%
+```
+
+### Documentation and Distribution
+
+Caffeine has no opinion on where these files live, just the file path as mentioned above. Documentation might be generated as part of compilation depending on the artifact.
+
+***

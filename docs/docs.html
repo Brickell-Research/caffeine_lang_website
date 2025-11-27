@@ -1,61 +1,37 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Home | Caffeine</title><link href="/images/temp_caffeine_icon.png" rel="icon" type="image/png"><meta content="Home | Caffeine" property="og:title"><meta content="website" property="og:type"><meta content="Caffeine" property="og:site_name"><meta content="summary" name="twitter:card"><link href="/css/styles.css" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script><script async src="https://plausible.io/js/pa-vjl7vif68GwpiuXNTPtt7.js"></script><script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script></head><body><div class="announcement-banner"><a class="banner-link" href="https://gleamgathering.com/" target="_blank"><span class="banner-text-full">📣 I will be speaking at Gleam Gathering! Join me for &quot;10,000 Lines Later: When a Tool Became a Compiler (and I Became a Gleamlin)&quot;</span><span class="banner-text-mobile">📣 Speaking at Gleam Gathering</span><span class="banner-arrow"> →</span></a></div><header class="site-header"><nav class="nav"><a class="logo" href="/"><img alt="Caffeine" class="logo-img" src="/images/temp_caffeine_icon.png">Caffeine</a><ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/docs">Docs</a></li><li><a href="/blog">Blog</a></li></ul></nav></header><main class="main-content"><div class="home"><section class="hero"><h1>Caffeine</h1><p class="tagline">A compiler for generating reliability artifacts from service expectation definitions.</p><div class="cta-buttons"><a class="btn btn-primary" href="https://github.com/Brickell-Research/caffeine_lang">Get Started</a><a class="btn btn-secondary" href="/blog">Read the Blog</a></div></section><section class="install-section"><h2>Installation</h2><p>With Homebrew:</p><div class="install-box"><pre class="code-block"><code class="language-bash">brew tap Brickell-Research/caffeine_lang &amp;&amp; brew install caffeine</code></pre></div></section><section class="code-examples"><div class="code-grid"><div class="code-panel"><div class="panel-header">Specification</div><div class="tab-bar"><button class="tab active" data-panel="spec" data-tab="basic_types">basic_types.yaml</button><button class="tab" data-panel="spec" data-tab="query_templates">query_templates.yaml</button><button class="tab" data-panel="spec" data-tab="sli_types">sli_types.yaml</button><button class="tab" data-panel="spec" data-tab="services">services.yaml</button></div><div class="tab-content"><pre class="code-block active" data-content="basic_types" data-panel="spec"><code class="language-yaml">basic_types:
-  - attribute_name: gql_operation
-    attribute_type: String
-  - attribute_name: numerator
-    attribute_type: String
-  - attribute_name: denominator
-    attribute_type: String
-</code></pre><pre class="code-block" data-content="query_templates" data-panel="spec"><code class="language-yaml">query_template_types:
-  - name: &quot;valid_over_total&quot;
-    specification_of_query_templates: [&quot;numerator&quot;, &quot;denominator&quot;]
-    query: &quot;numerator / denominator&quot;</code></pre><pre class="code-block" data-content="sli_types" data-panel="spec"><code class="language-yaml">types:
-  - name: success_rate
-    query_template_type: valid_over_total
-    typed_instatiation_of_query_templates:
-      numerator: &quot;sum.graphql.requests{$$operation-&gt;gql_operation$$, status:info}.as_count()&quot;
-      denominator: &quot;sum.graphql.requests{$$operation-&gt;gql_operation$$}.as_count()&quot;
-    specification_of_query_templatized_variables:
-      - gql_operation</code></pre><pre class="code-block" data-content="services" data-panel="spec"><code class="language-yaml">services:
-  - name: reliable_service
-    sli_types:
-      - success_rate</code></pre></div></div><div class="code-panel"><div class="panel-header">Instantiation</div><div class="tab-bar"><button class="tab active" data-panel="inst" data-tab="service_a">service_a.yaml</button><button class="tab" data-panel="inst" data-tab="service_b">service_b.yaml</button></div><div class="tab-content"><pre class="code-block active" data-content="service_a" data-panel="inst"><code class="language-yaml">slos:
-  - name: &quot;Fetch User&quot;
-    sli_type: &quot;success_rate&quot;
-    typed_instatiation_of_query_templatized_variables:
-      &quot;gql_operation&quot;: &quot;fetchUser&quot;
-    threshold: 99.0
-    window_in_days: 7</code></pre><pre class="code-block" data-content="service_b" data-panel="inst"><code class="language-yaml">slos:
-  - name: &quot;Get Cart&quot;
-    sli_type: &quot;success_rate&quot;
-    typed_instatiation_of_query_templatized_variables:
-      &quot;gql_operation&quot;: &quot;getCart&quot;
-    threshold: 99.99
-    window_in_days: 7
-  - name: &quot;Purchase&quot;
-    sli_type: &quot;success_rate&quot;
-    typed_instatiation_of_query_templatized_variables:
-      &quot;gql_operation&quot;: &quot;purchase&quot;
-    threshold: 99.5
-    window_in_days: 7</code></pre></div></div></div></section><script>document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    const panel = tab.dataset.panel;
-    const target = tab.dataset.tab;
-
-    // Update tabs
-    document.querySelectorAll(`.tab[data-panel="${panel}"]`).forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-
-    // Update content
-    document.querySelectorAll(`.code-block[data-panel="${panel}"]`).forEach(c => c.classList.remove('active'));
-    document.querySelector(`.code-block[data-panel="${panel}"][data-content="${target}"]`).classList.add('active');
-  });
-});
-
-// Initialize syntax highlighting
-if (typeof Prism !== 'undefined') {
-  Prism.highlightAll();
-}</script></div></main><footer class="site-footer"><div class="footer-content"><p>Built with <a href="https://gleam.run" target="_blank">Gleam</a> and <a href="https://github.com/lustre-labs/ssg" target="_blank">Lustre SSG</a></p><p>© 2025 <a href="https://brickellresearch.org/" target="_blank">Brickell Research</a></p></div></footer><script>
+<html lang="en"><head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Documentation - Caffeine | Caffeine</title><link href="/images/temp_caffeine_icon.png" rel="icon" type="image/png"><meta content="Documentation - Caffeine | Caffeine" property="og:title"><meta content="website" property="og:type"><meta content="Caffeine" property="og:site_name"><meta content="summary" name="twitter:card"><meta content="Learn how to use Caffeine to define service expectations and generate reliability artifacts." name="description"><meta content="Learn how to use Caffeine to define service expectations and generate reliability artifacts." property="og:description"><meta content="https://caffeine-lang.org/docs" property="og:url"><link href="/css/styles.css" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script><script async src="https://plausible.io/js/pa-vjl7vif68GwpiuXNTPtt7.js"></script><script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script></head><body><div class="announcement-banner"><a class="banner-link" href="https://gleamgathering.com/" target="_blank"><span class="banner-text-full">📣 I will be speaking at Gleam Gathering! Join me for &quot;10,000 Lines Later: When a Tool Became a Compiler (and I Became a Gleamlin)&quot;</span><span class="banner-text-mobile">📣 Speaking at Gleam Gathering</span><span class="banner-arrow"> →</span></a></div><header class="site-header"><nav class="nav"><a class="logo" href="/"><img alt="Caffeine" class="logo-img" src="/images/temp_caffeine_icon.png">Caffeine</a><ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/docs">Docs</a></li><li><a href="/blog">Blog</a></li></ul></nav></header><main class="main-content"><div class="docs-container"><article class="docs-main"><header class="doc-header"><h1>Documentation</h1></header><div class="doc-content"><p>There exist three levels of configurations, each distinct and isolated, referenced by lower levels via unique naming scheme and typically owned by different <em>roles</em> within an organization:</p><p>(1) <strong>Artifacts</strong>: defined by standard library or plugin developers per distinct reliability artifact.</p><p>(2) <strong>Blueprints</strong>: defined by observability experts per artifact abstraction referencing artifacts.</p><p>(3) <strong>Expectations</strong>: defined by the operating team per service referencing blueprints.</p><p class="figure"><img alt="stardust" src="/images/documentation_structure_of_configs.png"></p><p>An example of how the file types interact across a typical engineering organization</p><p>Thus, for the <strong>SLO</strong> artifact, we might see something like this:</p><p class="figure"><img alt="stardust" src="/images/documentation_structure_of_configs_filled_in.png"></p><p>The same diagram from above with made of examples for the SLO reliability artifact</p><p>The documentation is split by <em>persona</em> with sufficient details for each to operate within their domain.</p><hr><h2 id="Caffeine-Standard-Library">Caffeine Standard Library</h2><h3 id="Artifacts-Explanation">Artifacts Explanation</h3><h3 id="Documentation-and-Distribution">Documentation and Distribution</h3><hr><h2 id="Observability-experts">Observability experts</h2><h3 id="Blueprints-Explained">Blueprints Explained</h3><h3>Documentation and Distribution</h3><hr><h2 id="Service-Owners">Service Owners</h2><h3 id="Service-Expectation-Explained">Service Expectation Explained</h3><p><strong>Definition:</strong> a service expectation is single blueprint invocation for a single service within the domain of an owning team. </p><p>The organization name, team name, and service name are baked in to the filepath path: </p><p><code>ORGANIZATION_NAME/TEAM_NAME/SERIVE_NAME.yaml</code></p><p>As all other configurations, an expectation is a <code>.yaml</code> file with the following required fields.</p><div><table>
+  <thead>
+    <tr>
+      <th>Attribute</th>
+      <th>Expected Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>name</td>
+      <td>String</td>
+      <td>Unique within a single <code>artifacts.yaml</code> file.</td>
+    </tr>
+    <tr>
+      <td>blueprint</td>
+      <td>String</td>
+      <td>An identifier referencing a blueprint.</td>
+    </tr>
+    <tr>
+      <td>inputs</td>
+      <td>Dict(String, Any)</td>
+      <td>Collection of input names mapped to input values.</td>
+    </tr>
+  </tbody>
+</table></div><p>So, an example would look like:</p><pre><code data-lang="text">expectations:
+  - name: &quot;Admin Portal Home Page LCP Latency&quot;
+    blueprint: LCP_Latency
+    inputs:
+      - view: /admin/home
+        p95_latency_in_seconds: 5
+        threshold: 99.5%
+</code></pre><h3>Documentation and Distribution</h3><p>Caffeine has no opinion on where these files live, just the file path as mentioned above. Documentation might be generated as part of compilation depending on the artifact.</p><hr></div></article><aside class="docs-sidebar"><h3>On This Page</h3><nav class="docs-nav" id="docs-toc"></nav></aside></div></main><footer class="site-footer"><div class="footer-content"><div class="subscribe-section"><p class="subscribe-title">Subscribe for updates</p><form action="https://dev.us14.list-manage.com/subscribe/post?u=96948c5e8fc6f534d39ebdb3f&amp;id=6080af26e0&amp;f_id=009f89e1f0" class="subscribe-form" method="post" target="_blank"><input class="subscribe-input" name="EMAIL" placeholder="your@email.com" required type="email"><button class="subscribe-btn" type="submit">Subscribe</button></form></div><p>Built with <a href="https://gleam.run" target="_blank">Gleam</a> and <a href="https://github.com/lustre-labs/ssg" target="_blank">Lustre SSG</a></p><p>© 2025 <a href="https://www.brickellresearch.org/" target="_blank">Brickell Research</a></p></div></footer><script>
         // Convert data-lang to language-* class for Prism
         document.querySelectorAll('code[data-lang]').forEach(function(code) {
           var lang = code.getAttribute('data-lang').toLowerCase();

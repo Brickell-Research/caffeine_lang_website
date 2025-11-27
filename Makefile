@@ -11,7 +11,7 @@ serve: build
 # Watch for changes and rebuild (requires: brew install fswatch)
 build-watch:
 	@echo "Watching for changes... (Ctrl+C to stop)"
-	@fswatch -o src/ static/ content/ posts/ | xargs -n1 -I{} make build
+	@fswatch -o src/ static/ content/ posts/ documentation/ | xargs -n1 -I{} make build
 
 # Clean build artifacts
 clean:
