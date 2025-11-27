@@ -140,6 +140,11 @@ pub fn view_with_meta(meta: PageMeta, content: Element(Nil)) -> Element(Nil) {
       ],
       "",
     ),
+    // Gleam syntax highlighting (community package)
+    html.script(
+      [attribute.src("https://unpkg.com/prismjs-gleam@1/gleam.js")],
+      "",
+    ),
     // Privacy-friendly analytics by Plausible
     html.script(
       [
