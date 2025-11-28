@@ -5,6 +5,8 @@ summary = "Reference documentation for the Caffeine standard library artifacts a
 
 This page contains the artifacts supported by the current version of the standard library. For an explanation of artifact structure, see the [Documentation](/docs) page.
 
+As of the current version, SLO is the only supported artifact in Caffeine's standard library.
+
 ***
 
 ## SLO - Service Level Objective

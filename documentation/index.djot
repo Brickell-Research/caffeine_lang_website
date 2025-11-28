@@ -7,9 +7,9 @@ There exist three levels of configurations, each distinct and isolated, referenc
 
 1. *Artifacts*: defined by standard library or plugin developers per distinct reliability artifact.
 
-2. *Blueprints*: defined by observability experts per artifact abstraction referencing artifacts.
+2. *Blueprints*: reusable templates defined by observability experts that build upon artifacts to codify common reliability patterns.
 
-3. *Expectations*: defined by the operating team per service referencing blueprints.
+3. *Expectations*: defined by service owners per service referencing blueprints.
 
 {.figure}
 ![stardust](/images/documentation_structure_of_configs.png)
@@ -23,11 +23,13 @@ Thus, for the *SLO* artifact, we might see something like this:
 
 The same diagram from above made up of examples for the SLO reliability artifact
 
+Artifacts are released as part of the standard library. Within an organization, observability experts create common abstractions (blueprints), working alongside service owners to establish expectations for their services.
+
 The documentation is split by _persona_ with sufficient details for each to operate within their domain.
 
 ***
 
-## Caffeine Standard Library
+## Standard Library Developers
 
 ### Artifacts Explanation
 
@@ -55,12 +57,12 @@ An artifact is a `.yaml` file with the following required fields.
     <tr>
       <td>passed_down_params</td>
       <td>Dict(String, AcceptedTypes)</td>
-      <td>A collection of <code>blueprint</code> inherited input names mapped to input types. Uniquely here, we define defaults for optionals using the <code>-></code> operator.</td>
+      <td>Parameters that flow through blueprints to service owners. Blueprints may leave these for service owners to specify, or provide defaults using the <code>-></code> operator.</td>
     </tr>
     <tr>
       <td>params</td>
       <td>Dict(String, AcceptedTypes)</td>
-      <td>A collection of input names mapped to input types of attributes required to be defined by blueprints that inherit it.</td>
+      <td>Parameters that must be provided by blueprints using this artifact. These cannot be deferred to service owners.</td>
     </tr>
   </tbody>
 </table>
@@ -82,7 +84,7 @@ artifacts:
 
 ### Documentation and Distribution
 
-Artifacts are distributed with the core Caffeine binary. Documentation is available on the [Standard Library Reference](/stdlib) page.
+Artifacts are distributed with the core Caffeine binary. Documentation is available on the [Standard Library Reference](/stdlib) page. Organizations can extend Caffeine with custom artifacts via plugins.
 
 ***
 
@@ -143,6 +145,19 @@ blueprints:
       value: "numerator / denominator"
 ```
 
+In the example above, `numerator` and `denominator` are left as placeholders (indicated by underscores). The actual query strings will be provided in each service's expectation. A complete blueprint might look like:
+
+```yaml
+...
+      queries:
+        numerator: "SELECT COUNT(*) FROM events WHERE lcp < {p95_latency_in_seconds} AND view = '{view}'"
+        denominator: "SELECT COUNT(*) FROM events WHERE view = '{view}'"
+...
+```
+
+### File Organization
+
+Blueprints are typically defined in one or more `blueprints.yaml` files owned by the observability team and referenced by service teams in their expectation files.
 
 ***
 
@@ -199,9 +214,11 @@ expectations:
       threshold: 99.5
 ```
 
-### Documentation and Distribution
+Note that `window_in_days` is not specified above. Since the SLO artifact defines a default of 30 for this passed-down parameter, the compiler will use that value automatically.
 
-Caffeine has no opinion on where these files live, just that the filepath follows the pattern mentioned above. Documentation might be generated as part of compilation depending on the artifact.
+### File Organization
+
+Caffeine has no opinion on where expectation files live, just that the filepath follows the pattern mentioned above.
 
 ***
 
