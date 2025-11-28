@@ -9,7 +9,7 @@ There exist three levels of configurations, each distinct and isolated, referenc
 
 2. *Blueprints*: reusable templates defined by observability experts that build upon artifacts to codify common reliability patterns.
 
-3. *Expectations*: defined by service owners per service referencing blueprints.
+3. *Expectations*: defined by service owners per service, referencing blueprints.
 
 {.figure}
 ![stardust](/images/documentation_structure_of_configs.png)
@@ -37,7 +37,7 @@ An artifact surfaces the standard library or a plugin's interface - it defines t
 while a systems modelling artifact might require dependency relationships.
 
 
-An artifact is a `.yaml` file with the following required fields.
+An artifact is a `.yaml` file with the following required fields per artifact.
 
 ``` =html
 <table>
@@ -51,17 +51,22 @@ An artifact is a `.yaml` file with the following required fields.
   <tbody>
     <tr>
       <td>name</td>
-      <td>String</td>
+      <td><code>String</code></td>
       <td>Unique within a single <code>artifacts.yaml</code> file.</td>
     </tr>
     <tr>
-      <td>passed_down_params</td>
-      <td>Dict(String, AcceptedTypes)</td>
+      <td>version</td>
+      <td><code>String</code></td>
+      <td>Semantic version of the artifact (e.g., "0.0.1").</td>
+    </tr>
+    <tr>
+      <td>base_params</td>
+      <td><code>Dict(String, AcceptedTypes)</code></td>
       <td>Parameters that flow through blueprints to service owners. Blueprints may leave these for service owners to specify, or provide defaults using the <code>-></code> operator.</td>
     </tr>
     <tr>
       <td>params</td>
-      <td>Dict(String, AcceptedTypes)</td>
+      <td><code>Dict(String, AcceptedTypes)</code></td>
       <td>Parameters that must be provided by blueprints using this artifact. These cannot be deferred to service owners.</td>
     </tr>
   </tbody>
@@ -73,8 +78,9 @@ So, an example would look like:
 ```yaml
 artifacts:
   - name: SLO
-    passed_down_params:
-      threshold: Decimal
+    version: 0.0.1
+    base_params:
+      threshold: Float
       window_in_days: Optional(Integer) -> 30
     params:
       queries: Dict(String, String)
@@ -92,7 +98,7 @@ Artifacts are distributed with the core Caffeine binary. Documentation is availa
 
 ### Blueprints Explained
 
-Blueprints represent common abstractions over reliability artifacts typically used to codify (either completely or partially, i.e. templatized) well known, common patterns. These
+Blueprints represent common abstractions over reliability artifacts typically used to codify (either completely or partially, i.e. templatized) well known, common patterns. Per blueprint
 take the form of:
 
 ```=html
@@ -107,22 +113,22 @@ take the form of:
   <tbody>
     <tr>
       <td>name</td>
-      <td>String</td>
+      <td><code>String</code></td>
       <td>Unique within a single <code>blueprints.yaml</code> file.</td>
     </tr>
     <tr>
       <td>artifact</td>
-      <td>String</td>
+      <td><code>String</code></td>
       <td>An identifier referencing an artifact.</td>
     </tr>
     <tr>
       <td>params</td>
-      <td>Dict(String, AcceptedTypes)</td>
+      <td><code>Dict(String, AcceptedTypes)</code></td>
       <td>A collection of input names mapped to input types of attributes required to be defined by service expectations that invoke it.</td>
     </tr>
     <tr>
       <td>inputs</td>
-      <td>Dict(String, Any)</td>
+      <td><code>Dict(String, Any)</code></td>
       <td>A collection of input names mapped to input values satisfying the <code>params</code> required by the referenced artifact.</td>
     </tr>
   </tbody>
@@ -157,7 +163,7 @@ In the example above, `numerator` and `denominator` are left as placeholders (in
 
 ### File Organization
 
-Blueprints are typically defined in one or more `blueprints.yaml` files owned by the observability team and referenced by service teams in their expectation files.
+Blueprints are typically defined in one or more `blueprints.yaml` files owned by the observability team and referenced by service teams in their expectation files. At this time we don't expect to dstribute any common blueprints due to the content typically being organization specific.
 
 ***
 
@@ -185,18 +191,18 @@ As all other configurations, an expectation is a `.yaml` file with the following
   <tbody>
     <tr>
       <td>name</td>
-      <td>String</td>
+      <td><code>String</code></td>
       <td>Unique within a single <code>SERVICE_NAME.yaml</code> file.</td>
     </tr>
     <tr>
       <td>blueprint</td>
-      <td>String</td>
+      <td><code>String</code></td>
       <td>An identifier referencing a blueprint.</td>
     </tr>
     <tr>
       <td>inputs</td>
-      <td>Dict(String, Any)</td>
-      <td>A collection of input names mapped to input values satisfying the <code>params</code> and <code>passed_down_params</code> required by the referenced blueprint.</td>
+      <td><code>Dict(String, Any)</code></td>
+      <td>A collection of input names mapped to input values satisfying the <code>params</code> and <code>base_params</code> required by the referenced blueprint.</td>
     </tr>
   </tbody>
 </table>
@@ -214,7 +220,7 @@ expectations:
       threshold: 99.5
 ```
 
-Note that `window_in_days` is not specified above. Since the SLO artifact defines a default of 30 for this passed-down parameter, the compiler will use that value automatically.
+Note that `window_in_days` is not specified above. Since the SLO artifact defines a default of 30 for this base parameter, the compiler will use that value automatically.
 
 ### File Organization
 
@@ -242,7 +248,7 @@ Accepted Types are type names leveraged throughout Caffeine configuration files 
       <td>A true or false value.</td>
     </tr>
     <tr>
-      <td>Decimal</td>
+      <td>Float</td>
       <td>A floating-point number (e.g., 99.5).</td>
     </tr>
     <tr>
@@ -255,15 +261,15 @@ Accepted Types are type names leveraged throughout Caffeine configuration files 
     </tr>
     <tr>
       <td>NonEmptyList(T)</td>
-      <td>A list containing at least one element of type T. Supported inner types: String, Integer, Boolean, Decimal.</td>
+      <td>A list containing at least one element of type T. Supported inner types: <code>String</code>, <code>Integer</code>, <code>Boolean</code>, <code>Float</code>.</td>
     </tr>
     <tr>
       <td>Optional(T)</td>
-      <td>A value that may or may not be present. Supported inner types: String, Integer, Boolean, Decimal, NonEmptyList(String), NonEmptyList(Integer), NonEmptyList(Boolean), NonEmptyList(Decimal).</td>
+      <td>A value that may or may not be present. Supported inner types: <code>String</code>, <code>Integer</code>, <code>Boolean</code>, <code>Float</code>, <code>NonEmptyList(String)</code>, <code>NonEmptyList(Integer)</code>, <code>NonEmptyList(Boolean)</code>, <code>NonEmptyList(Float)</code>.</td>
     </tr>
     <tr>
-      <td>Dict(K, V)</td>
-      <td>A key-value mapping where K is the key type and V is the value type (e.g., Dict(String, String)).</td>
+      <td>Dict(String, T)</td>
+      <td>A key-value mapping where <code>String</code> is the key type and T is the value type (e.g., <code>Dict(String, Integer)</code>). Supported inner types: <code>String</code>, <code>Integer</code>, <code>Boolean</code>, <code>Float</code>, <code>NonEmptyList(String)</code>, <code>NonEmptyList(Integer)</code>, <code>NonEmptyList(Boolean)</code>, <code>NonEmptyList(Float)</code>.</td>
     </tr>
   </tbody>
 </table>
@@ -271,12 +277,12 @@ Accepted Types are type names leveraged throughout Caffeine configuration files 
 
 #### Technical Details
 
-While the _type_ definition technically allows infinite recursion as it is defined as so:
+While the _type_ definition technically allows infinite recursion as it is currendtly defined:
 
 ```gleam
 pub type AcceptedTypes {
   Boolean
-  Decimal
+  Float
   Integer
   String
   NonEmptyList(AcceptedTypes)
@@ -284,7 +290,12 @@ pub type AcceptedTypes {
 }
 ```
 
-We do limit it intentionally at this time.
+We do limit it intentionally within the Caffeine compiler at this time with the restrictions on collection types noted in the table above.
+
+### Multi-Inheritance
+
+There is no support for [multi-inheritance](https://en.wikipedia.org/wiki/Multiple_inheritance) within the existing design of Caffeine: we do not support a single service expectation referencing multiple blueprints or a single blueprint referencing multiple artifacts. This 1:1 relationship seems sensible and we do not want
+to think hard about the diamond problem...
 
 ***
 

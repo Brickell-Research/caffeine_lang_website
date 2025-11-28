@@ -1,6 +1,6 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Documentation - Caffeine | Caffeine</title><link href="/images/temp_caffeine_icon.png" rel="icon" type="image/png"><meta content="Documentation - Caffeine | Caffeine" property="og:title"><meta content="website" property="og:type"><meta content="Caffeine" property="og:site_name"><meta content="summary" name="twitter:card"><meta content="Learn how to use Caffeine to define service expectations and generate reliability artifacts." name="description"><meta content="Learn how to use Caffeine to define service expectations and generate reliability artifacts." property="og:description"><meta content="https://caffeine-lang.org/docs" property="og:url"><link href="/css/styles.css" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script><script src="https://unpkg.com/prismjs-gleam@1/gleam.js"></script><script async src="https://plausible.io/js/pa-vjl7vif68GwpiuXNTPtt7.js"></script><script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script></head><body><div class="announcement-banner"><a class="banner-link" href="https://gleamgathering.com/" target="_blank"><span class="banner-text-full">📣 I will be speaking at Gleam Gathering! Join me for &quot;10,000 Lines Later: When a Tool Became a Compiler (and I Became a Gleamlin)&quot;</span><span class="banner-text-mobile">📣 Speaking at Gleam Gathering</span><span class="banner-arrow"> →</span></a></div><header class="site-header"><nav class="nav"><a class="logo" href="/"><img alt="Caffeine" class="logo-img" src="/images/temp_caffeine_icon.png">Caffeine</a><ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/docs">Docs</a></li><li><a href="/stdlib">Stdlib</a></li><li><a href="/blog">Blog</a></li></ul></nav></header><main class="main-content"><div class="docs-container"><article class="docs-main"><header class="doc-header"><h1>Documentation</h1></header><div class="doc-content"><p>There exist three levels of configurations, each distinct and isolated, referenced by lower levels via a unique naming scheme and typically owned by different <em>roles</em> within an organization:</p><p>1. <strong>Artifacts</strong>: defined by standard library or plugin developers per distinct reliability artifact.</p><p>2. <strong>Blueprints</strong>: reusable templates defined by observability experts that build upon artifacts to codify common reliability patterns.</p><p>3. <strong>Expectations</strong>: defined by service owners per service referencing blueprints.</p><p class="figure"><img alt="stardust" src="/images/documentation_structure_of_configs.png"></p><p>An example of how the file types interact across a typical engineering organization</p><p>Thus, for the <strong>SLO</strong> artifact, we might see something like this:</p><p class="figure"><img alt="stardust" src="/images/documentation_structure_of_configs_filled_in.png"></p><p>The same diagram from above made up of examples for the SLO reliability artifact</p><p>Artifacts are released as part of the standard library. Within an organization, observability experts create common abstractions (blueprints), working alongside service owners to establish expectations for their services.</p><p>The documentation is split by <em>persona</em> with sufficient details for each to operate within their domain.</p><hr><h2 id="Standard-Library-Developers">Standard Library Developers</h2><h3 id="Artifacts-Explanation">Artifacts Explanation</h3><p>An artifact surfaces the standard library or a plugin&#39;s interface - it defines the expected values on which the logic operates. An SLO artifact would require thresholds and queries
-while a systems modelling artifact might require dependency relationships.</p><p>An artifact is a <code>.yaml</code> file with the following required fields.</p><div><table>
+<html lang="en"><head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Documentation - Caffeine | Caffeine</title><link href="/images/temp_caffeine_icon.png" rel="icon" type="image/png"><meta content="Documentation - Caffeine | Caffeine" property="og:title"><meta content="website" property="og:type"><meta content="Caffeine" property="og:site_name"><meta content="summary" name="twitter:card"><meta content="Learn how to use Caffeine to define service expectations and generate reliability artifacts." name="description"><meta content="Learn how to use Caffeine to define service expectations and generate reliability artifacts." property="og:description"><meta content="https://caffeine-lang.org/docs" property="og:url"><link href="/css/styles.css" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script><script src="https://unpkg.com/prismjs-gleam@1/gleam.js"></script><script async src="https://plausible.io/js/pa-vjl7vif68GwpiuXNTPtt7.js"></script><script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script></head><body><div class="announcement-banner"><a class="banner-link" href="https://gleamgathering.com/" target="_blank"><span class="banner-text-full">📣 I will be speaking at Gleam Gathering! Join me for &quot;10,000 Lines Later: When a Tool Became a Compiler (and I Became a Gleamlin)&quot;</span><span class="banner-text-mobile">📣 Speaking at Gleam Gathering</span><span class="banner-arrow"> →</span></a></div><header class="site-header"><nav class="nav"><a class="logo" href="/"><img alt="Caffeine" class="logo-img" src="/images/temp_caffeine_icon.png">Caffeine</a><ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/docs">Docs</a></li><li><a href="/stdlib">Stdlib</a></li><li><a href="/blog">Blog</a></li></ul></nav></header><main class="main-content"><div class="docs-container"><article class="docs-main"><header class="doc-header"><h1>Documentation</h1></header><div class="doc-content"><p>There exist three levels of configurations, each distinct and isolated, referenced by lower levels via a unique naming scheme and typically owned by different <em>roles</em> within an organization:</p><p>1. <strong>Artifacts</strong>: defined by standard library or plugin developers per distinct reliability artifact.</p><p>2. <strong>Blueprints</strong>: reusable templates defined by observability experts that build upon artifacts to codify common reliability patterns.</p><p>3. <strong>Expectations</strong>: defined by service owners per service, referencing blueprints.</p><p class="figure"><img alt="stardust" src="/images/documentation_structure_of_configs.png"></p><p>An example of how the file types interact across a typical engineering organization</p><p>Thus, for the <strong>SLO</strong> artifact, we might see something like this:</p><p class="figure"><img alt="stardust" src="/images/documentation_structure_of_configs_filled_in.png"></p><p>The same diagram from above made up of examples for the SLO reliability artifact</p><p>Artifacts are released as part of the standard library. Within an organization, observability experts create common abstractions (blueprints), working alongside service owners to establish expectations for their services.</p><p>The documentation is split by <em>persona</em> with sufficient details for each to operate within their domain.</p><hr><h2 id="Standard-Library-Developers">Standard Library Developers</h2><h3 id="Artifacts-Explanation">Artifacts Explanation</h3><p>An artifact surfaces the standard library or a plugin&#39;s interface - it defines the expected values on which the logic operates. An SLO artifact would require thresholds and queries
+while a systems modelling artifact might require dependency relationships.</p><p>An artifact is a <code>.yaml</code> file with the following required fields per artifact.</p><div><table>
   <thead>
     <tr>
       <th>Attribute</th>
@@ -11,29 +11,35 @@ while a systems modelling artifact might require dependency relationships.</p><p
   <tbody>
     <tr>
       <td>name</td>
-      <td>String</td>
+      <td><code>String</code></td>
       <td>Unique within a single <code>artifacts.yaml</code> file.</td>
     </tr>
     <tr>
-      <td>passed_down_params</td>
-      <td>Dict(String, AcceptedTypes)</td>
+      <td>version</td>
+      <td><code>String</code></td>
+      <td>Semantic version of the artifact (e.g., "0.0.1").</td>
+    </tr>
+    <tr>
+      <td>base_params</td>
+      <td><code>Dict(String, AcceptedTypes)</code></td>
       <td>Parameters that flow through blueprints to service owners. Blueprints may leave these for service owners to specify, or provide defaults using the <code>-></code> operator.</td>
     </tr>
     <tr>
       <td>params</td>
-      <td>Dict(String, AcceptedTypes)</td>
+      <td><code>Dict(String, AcceptedTypes)</code></td>
       <td>Parameters that must be provided by blueprints using this artifact. These cannot be deferred to service owners.</td>
     </tr>
   </tbody>
 </table></div><p>So, an example would look like:</p><pre><code data-lang="yaml">artifacts:
   - name: SLO
-    passed_down_params:
-      threshold: Decimal
+    version: 0.0.1
+    base_params:
+      threshold: Float
       window_in_days: Optional(Integer) -&gt; 30
     params:
       queries: Dict(String, String)
       value: String
-</code></pre><h3 id="Documentation-and-Distribution">Documentation and Distribution</h3><p>Artifacts are distributed with the core Caffeine binary. Documentation is available on the <a href="/stdlib">Standard Library Reference</a> page. Organizations can extend Caffeine with custom artifacts via plugins.</p><hr><h2 id="Observability-Experts">Observability Experts</h2><h3 id="Blueprints-Explained">Blueprints Explained</h3><p>Blueprints represent common abstractions over reliability artifacts typically used to codify (either completely or partially, i.e. templatized) well known, common patterns. These
+</code></pre><h3 id="Documentation-and-Distribution">Documentation and Distribution</h3><p>Artifacts are distributed with the core Caffeine binary. Documentation is available on the <a href="/stdlib">Standard Library Reference</a> page. Organizations can extend Caffeine with custom artifacts via plugins.</p><hr><h2 id="Observability-Experts">Observability Experts</h2><h3 id="Blueprints-Explained">Blueprints Explained</h3><p>Blueprints represent common abstractions over reliability artifacts typically used to codify (either completely or partially, i.e. templatized) well known, common patterns. Per blueprint
 take the form of:</p><div><table>
   <thead>
     <tr>
@@ -45,22 +51,22 @@ take the form of:</p><div><table>
   <tbody>
     <tr>
       <td>name</td>
-      <td>String</td>
+      <td><code>String</code></td>
       <td>Unique within a single <code>blueprints.yaml</code> file.</td>
     </tr>
     <tr>
       <td>artifact</td>
-      <td>String</td>
+      <td><code>String</code></td>
       <td>An identifier referencing an artifact.</td>
     </tr>
     <tr>
       <td>params</td>
-      <td>Dict(String, AcceptedTypes)</td>
+      <td><code>Dict(String, AcceptedTypes)</code></td>
       <td>A collection of input names mapped to input types of attributes required to be defined by service expectations that invoke it.</td>
     </tr>
     <tr>
       <td>inputs</td>
-      <td>Dict(String, Any)</td>
+      <td><code>Dict(String, Any)</code></td>
       <td>A collection of input names mapped to input values satisfying the <code>params</code> required by the referenced artifact.</td>
     </tr>
   </tbody>
@@ -80,7 +86,7 @@ take the form of:</p><div><table>
         numerator: &quot;SELECT COUNT(*) FROM events WHERE lcp &lt; {p95_latency_in_seconds} AND view = &#39;{view}&#39;&quot;
         denominator: &quot;SELECT COUNT(*) FROM events WHERE view = &#39;{view}&#39;&quot;
 ...
-</code></pre><h3 id="File-Organization">File Organization</h3><p>Blueprints are typically defined in one or more <code>blueprints.yaml</code> files owned by the observability team and referenced by service teams in their expectation files.</p><hr><h2 id="Service-Owners">Service Owners</h2><h3 id="Service-Expectation-Explained">Service Expectation Explained</h3><p><strong>Definition:</strong> a service expectation is a single blueprint invocation for a single service within the domain of an owning team. </p><p>The organization name, team name, and service name are baked into the filepath: </p><p><code>ORGANIZATION_NAME/TEAM_NAME/SERVICE_NAME.yaml</code></p><p>As all other configurations, an expectation is a <code>.yaml</code> file with the following required fields.</p><div><table>
+</code></pre><h3 id="File-Organization">File Organization</h3><p>Blueprints are typically defined in one or more <code>blueprints.yaml</code> files owned by the observability team and referenced by service teams in their expectation files. At this time we don&#39;t expect to dstribute any common blueprints due to the content typically being organization specific.</p><hr><h2 id="Service-Owners">Service Owners</h2><h3 id="Service-Expectation-Explained">Service Expectation Explained</h3><p><strong>Definition:</strong> a service expectation is a single blueprint invocation for a single service within the domain of an owning team. </p><p>The organization name, team name, and service name are baked into the filepath: </p><p><code>ORGANIZATION_NAME/TEAM_NAME/SERVICE_NAME.yaml</code></p><p>As all other configurations, an expectation is a <code>.yaml</code> file with the following required fields.</p><div><table>
   <thead>
     <tr>
       <th>Attribute</th>
@@ -91,18 +97,18 @@ take the form of:</p><div><table>
   <tbody>
     <tr>
       <td>name</td>
-      <td>String</td>
+      <td><code>String</code></td>
       <td>Unique within a single <code>SERVICE_NAME.yaml</code> file.</td>
     </tr>
     <tr>
       <td>blueprint</td>
-      <td>String</td>
+      <td><code>String</code></td>
       <td>An identifier referencing a blueprint.</td>
     </tr>
     <tr>
       <td>inputs</td>
-      <td>Dict(String, Any)</td>
-      <td>A collection of input names mapped to input values satisfying the <code>params</code> and <code>passed_down_params</code> required by the referenced blueprint.</td>
+      <td><code>Dict(String, Any)</code></td>
+      <td>A collection of input names mapped to input values satisfying the <code>params</code> and <code>base_params</code> required by the referenced blueprint.</td>
     </tr>
   </tbody>
 </table></div><p>So, an example would look like:</p><pre><code data-lang="yaml">expectations:
@@ -112,7 +118,7 @@ take the form of:</p><div><table>
       view: /admin/home
       p95_latency_in_seconds: 5
       threshold: 99.5
-</code></pre><p>Note that <code>window_in_days</code> is not specified above. Since the SLO artifact defines a default of 30 for this passed-down parameter, the compiler will use that value automatically.</p><h3>File Organization</h3><p>Caffeine has no opinion on where expectation files live, just that the filepath follows the pattern mentioned above.</p><hr><h2 id="Appendix">Appendix</h2><h3 id="Accepted-Types">Accepted Types</h3><p>Accepted Types are type names leveraged throughout Caffeine configuration files as type annotations for the compiler to enforce. Today we support the following:</p><div><table>
+</code></pre><p>Note that <code>window_in_days</code> is not specified above. Since the SLO artifact defines a default of 30 for this base parameter, the compiler will use that value automatically.</p><h3>File Organization</h3><p>Caffeine has no opinion on where expectation files live, just that the filepath follows the pattern mentioned above.</p><hr><h2 id="Appendix">Appendix</h2><h3 id="Accepted-Types">Accepted Types</h3><p>Accepted Types are type names leveraged throughout Caffeine configuration files as type annotations for the compiler to enforce. Today we support the following:</p><div><table>
   <thead>
     <tr>
       <th>Type</th>
@@ -125,7 +131,7 @@ take the form of:</p><div><table>
       <td>A true or false value.</td>
     </tr>
     <tr>
-      <td>Decimal</td>
+      <td>Float</td>
       <td>A floating-point number (e.g., 99.5).</td>
     </tr>
     <tr>
@@ -138,26 +144,27 @@ take the form of:</p><div><table>
     </tr>
     <tr>
       <td>NonEmptyList(T)</td>
-      <td>A list containing at least one element of type T. Supported inner types: String, Integer, Boolean, Decimal.</td>
+      <td>A list containing at least one element of type T. Supported inner types: <code>String</code>, <code>Integer</code>, <code>Boolean</code>, <code>Float</code>.</td>
     </tr>
     <tr>
       <td>Optional(T)</td>
-      <td>A value that may or may not be present. Supported inner types: String, Integer, Boolean, Decimal, NonEmptyList(String), NonEmptyList(Integer), NonEmptyList(Boolean), NonEmptyList(Decimal).</td>
+      <td>A value that may or may not be present. Supported inner types: <code>String</code>, <code>Integer</code>, <code>Boolean</code>, <code>Float</code>, <code>NonEmptyList(String)</code>, <code>NonEmptyList(Integer)</code>, <code>NonEmptyList(Boolean)</code>, <code>NonEmptyList(Float)</code>.</td>
     </tr>
     <tr>
-      <td>Dict(K, V)</td>
-      <td>A key-value mapping where K is the key type and V is the value type (e.g., Dict(String, String)).</td>
+      <td>Dict(String, T)</td>
+      <td>A key-value mapping where <code>String</code> is the key type and T is the value type (e.g., <code>Dict(String, Integer)</code>). Supported inner types: <code>String</code>, <code>Integer</code>, <code>Boolean</code>, <code>Float</code>, <code>NonEmptyList(String)</code>, <code>NonEmptyList(Integer)</code>, <code>NonEmptyList(Boolean)</code>, <code>NonEmptyList(Float)</code>.</td>
     </tr>
   </tbody>
-</table></div><h4 id="Technical-Details">Technical Details</h4><p>While the <em>type</em> definition technically allows infinite recursion as it is defined as so:</p><pre><code data-lang="gleam">pub type AcceptedTypes {
+</table></div><h4 id="Technical-Details">Technical Details</h4><p>While the <em>type</em> definition technically allows infinite recursion as it is currendtly defined:</p><pre><code data-lang="gleam">pub type AcceptedTypes {
   Boolean
-  Decimal
+  Float
   Integer
   String
   NonEmptyList(AcceptedTypes)
   Optional(AcceptedTypes)
 }
-</code></pre><p>We do limit it intentionally at this time.</p><hr></div></article><aside class="docs-sidebar"><h3>On This Page</h3><nav class="docs-nav" id="docs-toc"></nav></aside></div></main><footer class="site-footer"><div class="footer-content"><p>Built with <a href="https://gleam.run" target="_blank">Gleam</a> and <a href="https://github.com/lustre-labs/ssg" target="_blank">Lustre SSG</a></p><p>© 2025 <a href="https://brickellresearch.org/" target="_blank">Brickell Research</a></p></div></footer><script>
+</code></pre><p>We do limit it intentionally within the Caffeine compiler at this time with the restrictions on collection types noted in the table above.</p><h3 id="Multi-Inheritance">Multi-Inheritance</h3><p>There is no support for <a href="https://en.wikipedia.org/wiki/Multiple_inheritance">multi-inheritance</a> within the existing design of Caffeine: we do not support a single service expectation referencing multiple blueprints or a single blueprint referencing multiple artifacts. This 1:1 relationship seems sensible and we do not want
+to think hard about the diamond problem...</p><hr></div></article><aside class="docs-sidebar"><h3>On This Page</h3><nav class="docs-nav" id="docs-toc"></nav></aside></div></main><footer class="site-footer"><div class="footer-content"><p>Built with <a href="https://gleam.run" target="_blank">Gleam</a> and <a href="https://github.com/lustre-labs/ssg" target="_blank">Lustre SSG</a></p><p>© 2025 <a href="https://brickellresearch.org/" target="_blank">Brickell Research</a></p></div></footer><script>
         // Convert data-lang to language-* class for Prism
         document.querySelectorAll('code[data-lang]').forEach(function(code) {
           var lang = code.getAttribute('data-lang').toLowerCase();
