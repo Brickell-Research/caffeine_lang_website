@@ -1,7 +1,7 @@
 ---
 title = "Sunday Scaries ep. 1: Verbosity, Complexity, OOP, Oh My!"
 date = "2025-11-30"
-summary = "A story of when I really came to understand the pipe operator"
+summary = "A story of refactors and learnings cleaning up some verbose, complex, OOP like code from the night before"
 author = "Rob Durst"
 tags = ["Gleam"]
 ---
