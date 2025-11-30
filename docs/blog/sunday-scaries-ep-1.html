@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Sunday Scaries ep. 1: Verbosity, Complexity, OOP, Oh My! | Caffeine</title><link href="/images/temp_caffeine_icon.png" rel="icon" type="image/png"><meta content="Sunday Scaries ep. 1: Verbosity, Complexity, OOP, Oh My! | Caffeine" property="og:title"><meta content="website" property="og:type"><meta content="Caffeine" property="og:site_name"><meta content="summary" name="twitter:card"><meta content="A story of when I really came to understand the pipe operator" name="description"><meta content="A story of when I really came to understand the pipe operator" property="og:description"><meta content="https://caffeine-lang.org/blog/sunday-scaries-ep-1" property="og:url"><link href="/css/styles.css" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script><script src="https://unpkg.com/prismjs-gleam@1/gleam.js"></script><script async src="https://plausible.io/js/pa-vjl7vif68GwpiuXNTPtt7.js"></script><script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script></head><body><div class="announcement-banner"><a class="banner-link" href="https://gleamgathering.com/" target="_blank"><span class="banner-text-full">📣 I will be speaking at Gleam Gathering! Join me for &quot;10,000 Lines Later: When a Tool Became a Compiler (and I Became a Gleamlin)&quot;</span><span class="banner-text-mobile">📣 Speaking at Gleam Gathering</span><span class="banner-arrow"> →</span></a></div><header class="site-header"><nav class="nav"><a class="logo" href="/"><img alt="Caffeine" class="logo-img" src="/images/temp_caffeine_icon.png">Caffeine</a><ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/docs">Docs</a></li><li><a href="/stdlib">Stdlib</a></li><li><a href="/blog">Blog</a></li></ul></nav></header><main class="main-content"><article class="blog-post"><header class="post-header"><h1>Sunday Scaries ep. 1: Verbosity, Complexity, OOP, Oh My!</h1><p class="post-date">2025-11-30 · by Rob Durst</p></header><div class="post-content"><div class="toc"></div><p><strong>I&#39;m building <a href="https://github.com/Brickell-Research/caffeine_lang">Caffeine</a>, a compiler written in Gleam that compiles service expectations to reliability artifacts.
+This post documents the learnings from a Sunday morning refactor following a late Saturday night coding session.</strong></p><hr><h2 id="Setting-the-Scene">Setting the Scene</h2><p>With a <a href="https://www.youtube.com/watch?v=V-La6hkgnCU&amp;list=RDV-La6hkgnCU&amp;start_radio=1">Chris Luno mix</a> on, I am taking a slow walk on my under-desk treadmill writing this post.</p><p class="figure"><img alt="view from my desk" src="/images/sunday-scaries-ep-1_pov_desk.jpg"></p><p>Low quality picture of my current setup - MacBook pro, 2 external screens, my wife&#39;s ring light, and ofc my Lucy mug</p><p>Last night I was working on the <code>Artifact</code> type (<a href="https://caffeine-lang.run/docs#Standard-Library-Developers">as per docs</a>): <em>&quot;an artifact surfaces the standard library or a plugin&#39;s interface - it defines the expected values on which the logic operates. An SLO artifact would require thresholds and queries while a systems modelling artifact might require dependency relationships.&quot;</em></p><p>In yaml, an example <code>artifacts.yaml</code> looks like:</p><pre><code data-lang="yaml">artifacts:
+  - name: SLO
+    version: 0.0.1
+    base_params:
+      threshold: Decimal
+      window_in_days: Optional(Integer)
+    params:
+      queries: Dict(String, String)
+      value: String
+</code></pre><p>As you can see, part of this is a version field which must be a legal <a href="https://semver.org/">semver</a> value.</p><p><img alt="brace yourself" src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExcW0wemVsM3M3MmlrOHRuZGpmdW52b2VoOTBkejQ2Y2M1anJ5dGR5ciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/11JeH5lk2G494A/giphy.gif"></p><p>In order to achieve this, it felt like a smart constructor would be the right solution, so I decided to leverage (for the first time) <a href="https://tour.gleam.run/everything/#advanced-features-opaque-types">Gleam&#39;s opaque</a> types. Here is a simplified version of my original definition:</p><pre><code data-lang="gleam">pub opaque type Artifact {
+  Artifact(
+    name: String,
+    version: String,
+  )
+}
+
+pub fn make_artifact(
+  name name: String,
+  version version: String,
+) -&gt; Result(Artifact, String) {
+  // Fail early if the version isn&#39;t valid semver
+  use _ &lt;- result.try(try_parse_semver_string(version))
+
+  Ok(Artifact(name:, version:))
+}
+
+fn try_parse_semver_string(version: String) -&gt; Result(Bool, String) {
+  case string.split(version, &quot;.&quot;) {
+    [major, minor, patch] -&gt; {
+      let parts = [major, minor, patch]
+
+      case list.all(parts, is_int) {
+        True -&gt; Ok(True)
+        False -&gt; Error(&quot;bad semver&quot;)
+      }
+    }
+    _ -&gt; Error(&quot;bad semver&quot;)
+  }
+}
+
+pub fn is_int(integer_string: String) -&gt; Bool {
+  string.split(integer_string, &quot;&quot;)
+  |&gt; list.map(fn(digit) {
+    case digit {
+      &quot;0&quot; | &quot;1&quot; | &quot;2&quot; | &quot;3&quot; | &quot;4&quot; | &quot;5&quot; | &quot;6&quot; | &quot;7&quot; | &quot;8&quot; | &quot;9&quot; -&gt; True
+      _ -&gt; False
+    }
+  })
+  |&gt; list.all(fn(a) { a == True })
+}
+</code></pre><p><a href="https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9DPlHEgwB0kFarUYt2HKBBgBXJviEia9Zm05M43IUMqyARnQSVWAR1kQ6+AJ6VLAQVpwAZqxz1gQunUf4Xb/AAKL286JHYIVDoAZR4+BkwQ70hYRCQo2N5+RKRvAEohAF8dJD1DZ1zyVgBrCAB9VidXd2DcsIj28kiYuOyQlPhkOgG0jN6EoTy6AFoAPjoAJRl5IN9/d0werIYpzzaODjoAMVY4Jjo2KCZrOhcrAAtLEaGtJAByejBWTQATOhgIOQUiFZAC6HU6AAeaZ0aRyBQAOh41kCyLqJlg9QBQOgdW420CzyQeQKSBCAHlqoE1s0guEuqhNkTUCSiiUKlYoNZ0Y0AXjASk8eNCdBBuktvEpnNFssFIEAEIIBBMTaZSV0PbeFj0aBQGh1cgwBh0AC8SToAhAADVRWk6ORQfRnMqmAgAO7/QGsYhwHDDW3IeJ0QIADQRAE0EQAtPIImIQbr3fD4SgwVAHbEpBE0BgcONLHAQOCQP5vS3myHzIkV+aWt4I8tkto4Vhg/HxBEwSiaIJEzaWhsgXbmgDaVQAVjRNuQ+FO6CZ8Dh7gBdGbzTWhLUQegY/AwU10MesSdQaez0/z1iLlclTfeFtgzTcBHfJiBXcwTZaOp8fDDtp3nQAAqUAWGudCUoEIEWKSgHeCcTBgtKACiUB6lAgS6vqho7Oa3jFABdAEZuEIoWhNCYeRUAGkasFEWyTZlHQHLfr+gS/hADC4u2/BjNsUrzIqyoaiEPEMJ23ZwEEHFcdRYn9iAlp0QAPvMT74AiVSUIEFSBD8cAMFJ/6bg+lj6YZHh4RaIAAAyWnQynWeg9mOZaABMLnWQAzJ5loACy+SAACsgUAGyBQA7IFAAcgUAJz2dK0EQFZpHzAhALmsRREqWpWgaa+OlIIErC7HQrCmiawGgZYhSkgRugGMxlSnMVxkXEuCD2jU9SNH4tLBCALAMN8ACEloKegCI2Qi6AeUOIQQJ13W1A0TQBINZzDd8dCALwbgC0exNTnTbNbmsEpDEgIUQA">See code in playground here</a>.</p><p>This snippet has a few parts: the first is the opaque type itself, followed by a smart constructor that will fail if the semver is illegal and then two supporting functions to parse the semver.</p><p>We can do significantly better here! With a fresh cup of joe in my Lucy mug, I started up the under-desk treadmill and got to work.</p><hr><h2 id="Towards-a-Better-Solution">Towards a Better Solution</h2><h3 id="Thou-Shalt-Use-the-Standard-Library-🙏">Thou Shalt Use the Standard Library 🙏</h3><p>The first rather obvious refactor here is to leverage the standard library. A quick perusal of the <a href="https://hexdocs.pm/gleam_stdlib/gleam/int.html">gleam/int module docs</a> and I come across <a href="https://hexdocs.pm/gleam_stdlib/gleam/int.html#parse">parse</a>.</p><p>This gets us the first refactor:</p><pre><code data-lang="gleam">pub opaque type Artifact {
+  Artifact(
+    name: String,
+    version: String,
+  )
+}
+
+pub fn make_artifact(
+  name name: String,
+  version version: String,
+) -&gt; Result(Artifact, String) {
+  // Fail early if the version isn&#39;t valid semver
+  use _ &lt;- result.try(try_parse_semver_string(version))
+
+  Ok(Artifact(name:, version:))
+}
+
+fn try_parse_semver_string(version: String) -&gt; Result(Bool, String) {
+  case string.split(version, &quot;.&quot;) {
+    [major, minor, patch] -&gt; {
+      case int.parse(major), int.parse(minor), int.parse(patch) {
+        Ok(_), Ok(_), Ok(_) -&gt; Ok(True)
+        _, _, _ -&gt; Error(&quot;bad semver&quot;)
+      }
+    }
+    _ -&gt; Error(&quot;bad semver&quot;)
+  }
+}
+</code></pre><p><a href="https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9HMQDpIXVajFuw5QIMAK5N8fATXrM2nGPijcGfPpUkAjOgkqsAjpIh18AT0rmAgrTgAzVjnrA+dOvfxOX+ABRI7BCodADKahqYdJCwiEihEepIDACUfAC+Wkg6+o5IdOSsANYQAPqsDs6u/h50QeTmDSHhkSmYdbHwyDHQ3QmtyQwdSKl0ALQAfHQAShLSAd6+rtFJGmPuBXQcHHQAYqxwTHRsUEyWdE4WABbmXfGXMEgA5PRgrExwACZ0MBDksTqkj+dDKdAAPOM6OIpDIAHRqSz+RFlIywcp/AHQMqqIb+e7IVLpJB1ADyxX8S2qAWaqGiBISRMy2XyFigllRlT+OP+sRxbQY+L68USArGU1m8xk/gAQggEExVmK6JtPCx6NAoDQyuQYAw6ABeOqeHggABqwp65GB9EcCqYCAA7r9/qxiHAcL04sgNHR/AANOEATThAC1UnDwhAWtd8PhKDBUDtMbE4TQGBxI3McBA4JAfs9TcaIdMGcXwdNTc84UWSVscKwQbiNHCYJRPgEGdFTTWQBtiwBtIoAKxo0XI3DHdCM+Bw1wAuhNpqrPKuGyDuPg4Wi/v4RzRUtFN9uuRA95OoIfLsQT+j/DO5/2tqvV+T/GUr2+P9Ev+Lpm+ABUoDMYkXxfMpogg0ElzoABRKAtSgfxNW1XU0mLTwsmfOgsPAmD4MQ5CENQvVQJw5k61yOhWSKbh/CfTwIDnBBChKcpKh8alahAFgGA+ABCU1uxAdA4QABjhdAACZTTIpjrhYopSgqKo/G4o5eI+OhAF4NwBaPaEuhTVEiTpNYWTMhADIgA">See code in playground here</a></p><p>Ok, we&#39;re now in a moderately better state, down from 4 functions to 3.</p><h3 id="Love-Thy-Pipe-Operator-🪈">Love Thy Pipe Operator 🪈</h3><p>The <code>try_parse_semver_string</code> function does however leave a lot to be desired: the parsing within the split feels clunky. Furthermore, even the <code>string.split(version, &quot;.&quot;)</code> feels less &quot;gleam-y&quot;.</p><p>Turns out, we can actually leverage pipe operators to clean this up a ton going from:</p><pre><code data-lang="gleam">case string.split(version, &quot;.&quot;) {
+    [major, minor, patch] -&gt; {
+      case int.parse(major), int.parse(minor), int.parse(patch) {
+        Ok(_), Ok(_), Ok(_) -&gt; Ok(True)
+        _, _, _ -&gt; Error(&quot;bad semver&quot;)
+      }
+    }
+    _ -&gt; Error(&quot;bad semver&quot;)
+  }
+</code></pre><p>to:</p><pre><code data-lang="gleam">  case version |&gt; string.split(&quot;.&quot;) |&gt; list.try_map(int.parse) {
+    Ok([_, _, _]) -&gt; Ok(True)
+    _ -&gt; Error(&quot;bad semver&quot;)
+  }
+</code></pre><p><a href="https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9HMQDpIXVajFuw5QIMAK5N8fATXrM2nGPijcGcqguHKOTOKr59KkgEZ0ElVgEdJEOvgCelBwEFacAGasc9YHx0dB743r74ABRI7BCodADKahqYdJCwiEhxiepIDACUfAC+xkimFl5IdOSsANYQAPqsnj5+EYF00eQOnbEJSbmY7WnwyKnQI5l9OQyDSHl0ALQAfHQAShLSkSFhfinZGvMBlXQcHHQAYqxwTHRsUExOdN6OABYOwxlPMEgA5PRgrAMABM6DAIOQ0u1JGC6PU6AAeBZ0cRSGQAOjUTgimPq1lgDTBEOg9VU0wiH2QeQKSHaAHkahFti1Ij1UCkKZkqUUShVHFAnLimmCSeC0iT+gxyeMMlkJfNlmsNjIIgAhBAIJh7OV0I5BFj0aBQGj1cgwBh0AC87SCPBAADVpaNyND6F4NUwEAB3UHg1jEOA4MbpZAaOgRAAaaIAmmiAFp5NEJCC9F74fCUGCoU6EtJomgMDiJ9Y4CBwSAgn6260IlYc6vwla2n5oqs0yo4Vgwjl0AA+K1JGjRMEoBkitpbIHmfboBlUaOqlAi3HwaLxYMO1YA2vSIvU8ikd3uDwy9wBdRYrHcAFSg9mpQSCcIVAFEoEaoBFDcbTfl2sUkP+JjmHQvLVNwEQbscEA4C8CBVLUDRNKEzJtCALAMICACEtopLa6BogADGi6AAEy2vetwwXB1R1I0zThKh1zoYCdCALwbgC0ezhdB4YRxEkaw5FFCAhRAA===">See code in playground here</a>.</p><p>Here we move <code>version</code> to the left of <code>string.split</code> to make the expression more &quot;sentence-like&quot;. We use <code>list.try_map</code>, which applies <code>int.parse</code> to each dot-delimited string and ensures they all succeed—returning <code>Ok(List(Int))</code> only if every parse passes, or <code>Error</code> if any fails. Then, as before, we leverage pattern-based matching within the case statement to assert the <code>major.minor.patch</code> structure.</p><h3 id="What-Color-is-Your-Type-🎨">What Color is Your Type 🎨</h3><p>A famous article from 2015 <a href="https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/">titled <em>What Color is Your Function</em> by Robert Nystrom</a> details
+the challenge of explicit asynchronous function labelling. In a similar vein, arguing against boilerplate and code complexity, I&#39;d argue that if you allow for <em>opaqueness creep</em> of your types,
+you end up in a similarly sad state of needing to know which types are opaque and which are &quot;normal&quot;. Now, opaque types aren&#39;t <em>infectious</em> like async (you can freely mix them), but the mental overhead and boilerplate tax is real.</p><p>Again, consider my type and smart constructor:</p><pre><code data-lang="gleam">pub opaque type Artifact {
+  Artifact(
+    name: String,
+    version: String,
+  )
+}
+
+pub fn make_artifact(
+  name name: String,
+  version version: String,
+) -&gt; Result(Artifact, String) {
+  // Fail early if the version isn&#39;t valid semver
+  use _ &lt;- result.try(try_parse_semver_string(version))
+
+  Ok(Artifact(name:, version:))
+}
+</code></pre><p>Well, to access the innards requires getter and setter functions like this:</p><pre><code data-lang="gleam">pub fn set_name(artifact: Artifact, name: String) -&gt; Artifact {
+  Artifact(..artifact, name:)
+}
+
+pub fn get_name(artifact: Artifact) -&gt; String {
+  artifact.name
+}
+
+pub fn set_version(artifact: Artifact, version: String) -&gt; Result(Artifact, String) {
+  use _ &lt;- result.try(try_parse_semver_string(version))
+  Ok(Artifact(..artifact, version:))
+}
+
+pub fn get_version(artifact: Artifact) -&gt; String {
+  artifact.version
+}
+</code></pre><p>Before long, I am starting to feel like a Java or Ruby developer back in <a href="https://en.wikipedia.org/wiki/Object-oriented_programming">object-oriented programming</a> land. No shade to those folks, but I came to Gleam for the functional bliss.</p><p>Instead of making the entire type opaque, we can limit to just the subset which <em>really needs it</em>. Thanks to <a href="https://github.com/GearsDatapacks">Gears</a> on Discord for setting me straight!</p><p>So we&#39;d end up with something like this:</p><pre><code data-lang="gleam">pub type Artifact {
+  Artifact(
+    name: String,
+    version: Semver,
+  )
+}
+
+pub opaque type Semver {
+  Semver(version: String)
+}
+
+pub fn make_semver(
+  version version: String,
+) -&gt; Result(Semver, String) {
+  // Fail early if the version isn&#39;t valid semver
+  use _ &lt;- result.try(try_parse_semver_string(version))
+
+  Ok(Semver(version:))
+}
+</code></pre><p>And furthermore, we really don&#39;t even need the opaque type. <a href="https://github.com/gavinmorrow"><code>qua_qua_qua</code></a> challenged me on Discord to just use a more sane type definition:</p><pre><code data-lang="gleam">pub type Semver {
+  Semver(major: Int, minor: Int, patch: Int)
+}
+</code></pre><p>The beauty of this is that when Caffeine parses the semver, it can use the &quot;smart constructor&quot; but otherwise, we can stay opaque free, avoiding <em>opaqueness creep</em> and any OOP nonsense.</p><p>Our final version:</p><pre><code data-lang="gleam">pub type Artifact {
+  Artifact(name: String, version: Semver)
+}
+
+pub type Semver {
+  Semver(major: Int, minor: Int, patch: Int)
+}
+
+pub fn make_semver(version version: String) -&gt; Result(Semver, String) {
+  case version |&gt; string.split(&quot;.&quot;) |&gt; list.try_map(int.parse) {
+    Ok([major, minor, patch]) -&gt; Ok(Semver(major:, minor:, patch:))
+    _ -&gt; Error(&quot;bad semver&quot;)
+  }
+}
+</code></pre><p><a href="https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9HMQDpIXVajFuw5M4MfHwE16zNp0lRuDPn0oBXAEZ18AT0oQ6AQVpwAZqxz1gfOibOXrACiTsIqOgGV8ypA0w6SFhEJE8vCHJggEo+AF81JE0dfUNvSOC6WyR7CKjoZ3JWACsaTwBJYkDybjK6SvxAylZ8HAALCuJYpASkdW06cxyigGsIAH0YDILg+GQg6Dmw718VaLoAWgA+OgAlCBgNJnxnPODAnz8Gdez7FnpoKBpx8hgGOgBeO3s6HhAANUWoTo5A0kkGCCYTAQAHc6FMisQ4DgFiFkCo6M4ABoAOgAmjiAFrRHHpDx0Nr4fCUGCoDgcBHBHE0BgcUn7HAQOCQAAmdAA5H9vvYADw7WahYV0MW/ED8nFCvo5Og4VhTVFLOgAHx2ShUOJglHEJz+CpA6x1dHEkhxvj0L1YlGc3HwOOasAgNylAHkRs4ANpFUpQaq1EN0ZqtNoAXXW2zovtO0yghRKZVDSHTEZa7VQ0W6Pzo402OwAolAninHs9Xtdvr1ev0dEMQaxuM4vcr7nQ1VMhInGdB1h9W2NJsnnBLkJ4/ugcQAGHHoABMfwLdAg7QQDnwFisJpALAYrCYAEI/oFB1But9N21t6MJlfJ0Dp7K54uV6w1/E+CA4kAA=">See code in playground here</a></p><p><strong>Minor Notes:</strong></p><ul style="list-style-type:disc;"><li><p>Instead of <code>Result(Semver, String)</code> we&#39;d very likely introduce an error type, such as <code>SemverError</code> with a variant called <code>InvalidFormat</code>.</p></li><li><p>The above still isn&#39;t completely correct since <code>int.parse</code> accepts negative numbers, meaning <code>&quot;1.-2.3&quot;</code> would be valid...</p></li></ul><p>However, this is really a thing of beauty compared to where we started (and this doesn&#39;t even show the bonus downstream cleanup since we don&#39;t need any more getters or setters...).</p><p><img alt="chef&#39;s kiss" src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExMmJ1bTJyY2JkcDJ1czV5Mm9zYWM1ejFqa2hsbHN0aHRvNDBrYTZzOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7aCWJavAgtBzLWrS/giphy.gif"></p></div></article></main><footer class="site-footer"><div class="footer-content"><p>Built with <a href="https://gleam.run" target="_blank">Gleam</a> and <a href="https://github.com/lustre-labs/ssg" target="_blank">Lustre SSG</a></p><p>© 2025 <a href="https://brickellresearch.org/" target="_blank">Brickell Research</a></p></div></footer><script>
+        // Convert data-lang to language-* class for Prism
+        document.querySelectorAll('code[data-lang]').forEach(function(code) {
+          var lang = code.getAttribute('data-lang').toLowerCase();
+          // Map common language names
+          if (lang === 'dockerfile') lang = 'docker';
+          if (lang === 'js') lang = 'javascript';
+          code.classList.add('language-' + lang);
+          if (code.parentElement.tagName === 'PRE') {
+            code.parentElement.classList.add('language-' + lang);
+          }
+        });
+        if (typeof Prism !== 'undefined') { Prism.highlightAll(); }
+        // Generate Table of Contents
+        document.querySelectorAll('.post-content .toc').forEach(function(tocContainer) {
+          var headers = document.querySelectorAll('.post-content h2[id], .post-content h3[id], .post-content h4[id]');
+
+          if (headers.length === 0) return;
+
+          // Function to convert number to Roman numeral
+          function toRoman(num) {
+            var romans = [
+              ['X', 10], ['IX', 9], ['V', 5], ['IV', 4], ['I', 1]
+            ];
+            var result = '';
+            for (var i = 0; i < romans.length; i++) {
+              while (num >= romans[i][1]) {
+                result += romans[i][0];
+                num -= romans[i][1];
+              }
+            }
+            return result;
+          }
+
+          // Function to convert number to letter (1=a, 2=b, etc.)
+          function toLetter(num) {
+            return String.fromCharCode(96 + num); // 97 is 'a'
+          }
+
+          var tocTitle = document.createElement('div');
+          tocTitle.className = 'toc-title';
+          tocTitle.textContent = 'Table of Contents';
+
+          var tocList = document.createElement('ul');
+          var currentH2 = null;
+          var currentH3 = null;
+          var h2Count = 0;
+          var h3Count = 0;
+
+          headers.forEach(function(header) {
+            var level = header.tagName.toLowerCase();
+            var text = header.textContent.replace('#', '').trim();
+            var link = document.createElement('a');
+            link.href = '#' + header.id;
+
+            if (level === 'h2') {
+              h2Count++;
+              h3Count = 0; // Reset h3 counter for new h2 section
+              link.textContent = toRoman(h2Count) + '. ' + text;
+            } else if (level === 'h3') {
+              h3Count++;
+              link.textContent = toLetter(h3Count) + '. ' + text;
+            } else {
+              link.textContent = text;
+            }
+
+            var li = document.createElement('li');
+            li.appendChild(link);
+
+            if (level === 'h2') {
+              tocList.appendChild(li);
+              currentH2 = li;
+              currentH3 = null;
+            } else if (level === 'h3' && currentH2) {
+              if (!currentH2.querySelector('ul')) {
+                var ul = document.createElement('ul');
+                currentH2.appendChild(ul);
+              }
+              currentH2.querySelector('ul').appendChild(li);
+              currentH3 = li;
+            } else if (level === 'h4' && currentH3) {
+              if (!currentH3.querySelector('ul')) {
+                var ul = document.createElement('ul');
+                currentH3.appendChild(ul);
+              }
+              currentH3.querySelector('ul').appendChild(li);
+            }
+          });
+
+          tocContainer.appendChild(tocTitle);
+          tocContainer.appendChild(tocList);
+        });
+
+        // Add anchor links to headers
+        document.querySelectorAll('.post-content h2[id], .post-content h3[id], .post-content h4[id]').forEach(function(header) {
+          var anchor = document.createElement('span');
+          anchor.className = 'header-anchor';
+          anchor.innerHTML = '#';
+          anchor.setAttribute('aria-label', 'Copy link to ' + header.textContent);
+          header.insertBefore(anchor, header.firstChild);
+
+          // Make entire header clickable to copy URL
+          header.style.cursor = 'pointer';
+          header.addEventListener('click', function(e) {
+            var url = window.location.origin + window.location.pathname + '#' + header.id;
+
+            // Update URL bar
+            window.history.pushState(null, '', '#' + header.id);
+
+            // Copy to clipboard
+            navigator.clipboard.writeText(url).then(function() {
+              // Show feedback
+              var originalText = anchor.innerHTML;
+              anchor.innerHTML = '✓';
+              setTimeout(function() {
+                anchor.innerHTML = originalText;
+              }, 1000);
+            }).catch(function(err) {
+              console.error('Failed to copy:', err);
+            });
+          });
+        });
+
+        // Generate Documentation Sidebar TOC
+        var docsToc = document.getElementById('docs-toc');
+        if (docsToc) {
+          var headers = document.querySelectorAll('.doc-content h2[id], .doc-content h3[id], .doc-content h4[id]');
+
+          if (headers.length > 0) {
+            // Function to convert number to Roman numeral
+            function toRomanDoc(num) {
+              var romans = [
+                ['X', 10], ['IX', 9], ['V', 5], ['IV', 4], ['I', 1]
+              ];
+              var result = '';
+              for (var i = 0; i < romans.length; i++) {
+                while (num >= romans[i][1]) {
+                  result += romans[i][0];
+                  num -= romans[i][1];
+                }
+              }
+              return result;
+            }
+
+            // Function to convert number to letter (1=a, 2=b, etc.)
+            function toLetterDoc(num) {
+              return String.fromCharCode(96 + num); // 97 is 'a'
+            }
+
+            var tocList = document.createElement('ul');
+            var currentH2Li = null;
+            var currentH3Li = null;
+            var h2Count = 0;
+            var h3Count = 0;
+            var h4Count = 0;
+
+            headers.forEach(function(header) {
+              var level = header.tagName.toLowerCase();
+              var text = header.textContent.replace('#', '').trim();
+              var link = document.createElement('a');
+              link.href = '#' + header.id;
+
+              if (level === 'h2') {
+                h2Count++;
+                h3Count = 0;
+                h4Count = 0;
+                link.textContent = toRomanDoc(h2Count) + '. ' + text;
+              } else if (level === 'h3') {
+                h3Count++;
+                h4Count = 0;
+                link.textContent = toLetterDoc(h3Count) + '. ' + text;
+              } else if (level === 'h4') {
+                h4Count++;
+                link.textContent = h4Count + '. ' + text;
+              }
+
+              var li = document.createElement('li');
+              li.appendChild(link);
+
+              if (level === 'h2') {
+                tocList.appendChild(li);
+                currentH2Li = li;
+                currentH3Li = null;
+              } else if (level === 'h3' && currentH2Li) {
+                if (!currentH2Li.querySelector('ul')) {
+                  var subList = document.createElement('ul');
+                  currentH2Li.appendChild(subList);
+                }
+                currentH2Li.querySelector('ul').appendChild(li);
+                currentH3Li = li;
+              } else if (level === 'h4' && currentH3Li) {
+                if (!currentH3Li.querySelector('ul')) {
+                  var subList = document.createElement('ul');
+                  currentH3Li.appendChild(subList);
+                }
+                currentH3Li.querySelector('ul').appendChild(li);
+              }
+            });
+
+            docsToc.appendChild(tocList);
+          }
+
+          // Add anchor links to doc headers
+          document.querySelectorAll('.doc-content h2[id], .doc-content h3[id], .doc-content h4[id]').forEach(function(header) {
+            var anchor = document.createElement('span');
+            anchor.className = 'header-anchor';
+            anchor.innerHTML = '#';
+            anchor.setAttribute('aria-label', 'Copy link to ' + header.textContent);
+            header.insertBefore(anchor, header.firstChild);
+
+            header.style.cursor = 'pointer';
+            header.addEventListener('click', function(e) {
+              var url = window.location.origin + window.location.pathname + '#' + header.id;
+              window.history.pushState(null, '', '#' + header.id);
+              navigator.clipboard.writeText(url).then(function() {
+                var originalText = anchor.innerHTML;
+                anchor.innerHTML = '✓';
+                setTimeout(function() {
+                  anchor.innerHTML = originalText;
+                }, 1000);
+              }).catch(function(err) {
+                console.error('Failed to copy:', err);
+              });
+            });
+          });
+        }
+
+        // Generate Standard Library Sidebar TOC
+        var stdlibToc = document.getElementById('stdlib-toc');
+        if (stdlibToc) {
+          var headers = document.querySelectorAll('.stdlib-content h2[id], .stdlib-content h3[id]');
+
+          if (headers.length > 0) {
+            // Function to convert number to Roman numeral
+            function toRomanStdlib(num) {
+              var romans = [
+                ['X', 10], ['IX', 9], ['V', 5], ['IV', 4], ['I', 1]
+              ];
+              var result = '';
+              for (var i = 0; i < romans.length; i++) {
+                while (num >= romans[i][1]) {
+                  result += romans[i][0];
+                  num -= romans[i][1];
+                }
+              }
+              return result;
+            }
+
+            // Function to convert number to letter (1=a, 2=b, etc.)
+            function toLetterStdlib(num) {
+              return String.fromCharCode(96 + num); // 97 is 'a'
+            }
+
+            var tocList = document.createElement('ul');
+            var currentH2Li = null;
+            var h2Count = 0;
+            var h3Count = 0;
+
+            headers.forEach(function(header) {
+              var level = header.tagName.toLowerCase();
+              var text = header.textContent.replace('#', '').trim();
+              var link = document.createElement('a');
+              link.href = '#' + header.id;
+
+              if (level === 'h2') {
+                h2Count++;
+                h3Count = 0;
+                link.textContent = toRomanStdlib(h2Count) + '. ' + text;
+              } else if (level === 'h3') {
+                h3Count++;
+                link.textContent = toLetterStdlib(h3Count) + '. ' + text;
+              }
+
+              var li = document.createElement('li');
+              li.appendChild(link);
+
+              if (level === 'h2') {
+                tocList.appendChild(li);
+                currentH2Li = li;
+              } else if (level === 'h3' && currentH2Li) {
+                if (!currentH2Li.querySelector('ul')) {
+                  var subList = document.createElement('ul');
+                  currentH2Li.appendChild(subList);
+                }
+                currentH2Li.querySelector('ul').appendChild(li);
+              }
+            });
+
+            stdlibToc.appendChild(tocList);
+          }
+
+          // Add anchor links to stdlib headers
+          document.querySelectorAll('.stdlib-content h2[id], .stdlib-content h3[id], .stdlib-content h4[id]').forEach(function(header) {
+            var anchor = document.createElement('span');
+            anchor.className = 'header-anchor';
+            anchor.innerHTML = '#';
+            anchor.setAttribute('aria-label', 'Copy link to ' + header.textContent);
+            header.insertBefore(anchor, header.firstChild);
+
+            header.style.cursor = 'pointer';
+            header.addEventListener('click', function(e) {
+              var url = window.location.origin + window.location.pathname + '#' + header.id;
+              window.history.pushState(null, '', '#' + header.id);
+              navigator.clipboard.writeText(url).then(function() {
+                var originalText = anchor.innerHTML;
+                anchor.innerHTML = '✓';
+                setTimeout(function() {
+                  anchor.innerHTML = originalText;
+                }, 1000);
+              }).catch(function(err) {
+                console.error('Failed to copy:', err);
+              });
+            });
+          });
+        }
+      </script></body></html>

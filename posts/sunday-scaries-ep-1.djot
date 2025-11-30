@@ -1,0 +1,286 @@
+---
+title = "Sunday Scaries ep. 1: Verbosity, Complexity, OOP, Oh My!"
+date = "2025-11-30"
+summary = "A story of when I really came to understand the pipe operator"
+author = "Rob Durst"
+tags = ["Gleam"]
+---
+
+*I'm building [Caffeine](https://github.com/Brickell-Research/caffeine_lang), a compiler written in Gleam that compiles service expectations to reliability artifacts.
+This post documents the learnings from a Sunday morning refactor following a late Saturday night coding session.*
+
+***
+
+## Setting the Scene
+
+With a [Chris Luno mix](https://www.youtube.com/watch?v=V-La6hkgnCU&list=RDV-La6hkgnCU&start_radio=1) on, I am taking a slow walk on my under-desk treadmill writing this post.
+
+{.figure}
+![view from my desk](/images/sunday-scaries-ep-1_pov_desk.jpg)
+
+Low quality picture of my current setup - MacBook pro, 2 external screens, my wife's ring light, and ofc my Lucy mug
+
+Last night I was working on the `Artifact` type ([as per docs](https://caffeine-lang.run/docs#Standard-Library-Developers)): _"an artifact surfaces the standard library or a plugin's interface - it defines the expected values on which the logic operates. An SLO artifact would require thresholds and queries while a systems modelling artifact might require dependency relationships."_
+
+In yaml, an example `artifacts.yaml` looks like:
+
+```yaml
+artifacts:
+  - name: SLO
+    version: 0.0.1
+    base_params:
+      threshold: Decimal
+      window_in_days: Optional(Integer)
+    params:
+      queries: Dict(String, String)
+      value: String
+```
+
+As you can see, part of this is a version field which must be a legal [semver](https://semver.org/) value.
+
+![brace yourself](https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExcW0wemVsM3M3MmlrOHRuZGpmdW52b2VoOTBkejQ2Y2M1anJ5dGR5ciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/11JeH5lk2G494A/giphy.gif)
+
+In order to achieve this, it felt like a smart constructor would be the right solution, so I decided to leverage (for the first time) [Gleam's opaque](https://tour.gleam.run/everything/#advanced-features-opaque-types) types. Here is a simplified version of my original definition:
+
+```gleam
+pub opaque type Artifact {
+  Artifact(
+    name: String,
+    version: String,
+  )
+}
+
+pub fn make_artifact(
+  name name: String,
+  version version: String,
+) -> Result(Artifact, String) {
+  // Fail early if the version isn't valid semver
+  use _ <- result.try(try_parse_semver_string(version))
+
+  Ok(Artifact(name:, version:))
+}
+
+fn try_parse_semver_string(version: String) -> Result(Bool, String) {
+  case string.split(version, ".") {
+    [major, minor, patch] -> {
+      let parts = [major, minor, patch]
+
+      case list.all(parts, is_int) {
+        True -> Ok(True)
+        False -> Error("bad semver")
+      }
+    }
+    _ -> Error("bad semver")
+  }
+}
+
+pub fn is_int(integer_string: String) -> Bool {
+  string.split(integer_string, "")
+  |> list.map(fn(digit) {
+    case digit {
+      "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" -> True
+      _ -> False
+    }
+  })
+  |> list.all(fn(a) { a == True })
+}
+```
+
+[See code in playground here](https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9DPlHEgwB0kFarUYt2HKBBgBXJviEia9Zm05M43IUMqyARnQSVWAR1kQ6+AJ6VLAQVpwAZqxz1gQunUf4Xb/AAKL286JHYIVDoAZR4+BkwQ70hYRCQo2N5+RKRvAEohAF8dJD1DZ1zyVgBrCAB9VidXd2DcsIj28kiYuOyQlPhkOgG0jN6EoTy6AFoAPjoAJRl5IN9/d0werIYpzzaODjoAMVY4Jjo2KCZrOhcrAAtLEaGtJAByejBWTQATOhgIOQUiFZAC6HU6AAeaZ0aRyBQAOh41kCyLqJlg9QBQOgdW420CzyQeQKSBCAHlqoE1s0guEuqhNkTUCSiiUKlYoNZ0Y0AXjASk8eNCdBBuktvEpnNFssFIEAEIIBBMTaZSV0PbeFj0aBQGh1cgwBh0AC8SToAhAADVRWk6ORQfRnMqmAgAO7/QGsYhwHDDW3IeJ0QIADQRAE0EQAtPIImIQbr3fD4SgwVAHbEpBE0BgcONLHAQOCQP5vS3myHzIkV+aWt4I8tkto4Vhg/HxBEwSiaIJEzaWhsgXbmgDaVQAVjRNuQ+FO6CZ8Dh7gBdGbzTWhLUQegY/AwU10MesSdQaez0/z1iLlclTfeFtgzTcBHfJiBXcwTZaOp8fDDtp3nQAAqUAWGudCUoEIEWKSgHeCcTBgtKACiUB6lAgS6vqho7Oa3jFABdAEZuEIoWhNCYeRUAGkasFEWyTZlHQHLfr+gS/hADC4u2/BjNsUrzIqyoaiEPEMJ23ZwEEHFcdRYn9iAlp0QAPvMT74AiVSUIEFSBD8cAMFJ/6bg+lj6YZHh4RaIAAAyWnQynWeg9mOZaABMLnWQAzJ5loACy+SAACsgUAGyBQA7IFAAcgUAJz2dK0EQFZpHzAhALmsRREqWpWgaa+OlIIErC7HQrCmiawGgZYhSkgRugGMxlSnMVxkXEuCD2jU9SNH4tLBCALAMN8ACEloKegCI2Qi6AeUOIQQJ13W1A0TQBINZzDd8dCALwbgC0exNTnTbNbmsEpDEgIUQA).
+
+This snippet has a few parts: the first is the opaque type itself, followed by a smart constructor that will fail if the semver is illegal and then two supporting functions to parse the semver.
+
+We can do significantly better here! With a fresh cup of joe in my Lucy mug, I started up the under-desk treadmill and got to work.
+
+***
+
+## Towards a Better Solution
+
+### Thou Shalt Use the Standard Library 🙏
+
+The first rather obvious refactor here is to leverage the standard library. A quick perusal of the [gleam/int module docs](https://hexdocs.pm/gleam_stdlib/gleam/int.html) and I come across [parse](https://hexdocs.pm/gleam_stdlib/gleam/int.html#parse).
+
+This gets us the first refactor:
+
+```gleam
+pub opaque type Artifact {
+  Artifact(
+    name: String,
+    version: String,
+  )
+}
+
+pub fn make_artifact(
+  name name: String,
+  version version: String,
+) -> Result(Artifact, String) {
+  // Fail early if the version isn't valid semver
+  use _ <- result.try(try_parse_semver_string(version))
+
+  Ok(Artifact(name:, version:))
+}
+
+fn try_parse_semver_string(version: String) -> Result(Bool, String) {
+  case string.split(version, ".") {
+    [major, minor, patch] -> {
+      case int.parse(major), int.parse(minor), int.parse(patch) {
+        Ok(_), Ok(_), Ok(_) -> Ok(True)
+        _, _, _ -> Error("bad semver")
+      }
+    }
+    _ -> Error("bad semver")
+  }
+}
+```
+
+[See code in playground here](https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9HMQDpIXVajFuw5QIMAK5N8fATXrM2nGPijcGfPpUkAjOgkqsAjpIh18AT0rmAgrTgAzVjnrA+dOvfxOX+ABRI7BCodADKahqYdJCwiEihEepIDACUfAC+Wkg6+o5IdOSsANYQAPqsDs6u/h50QeTmDSHhkSmYdbHwyDHQ3QmtyQwdSKl0ALQAfHQAShLSAd6+rtFJGmPuBXQcHHQAYqxwTHRsUEyWdE4WABbmXfGXMEgA5PRgrExwACZ0MBDksTqkj+dDKdAAPOM6OIpDIAHRqSz+RFlIywcp/AHQMqqIb+e7IVLpJB1ADyxX8S2qAWaqGiBISRMy2XyFigllRlT+OP+sRxbQY+L68USArGU1m8xk/gAQggEExVmK6JtPCx6NAoDQyuQYAw6ABeOqeHggABqwp65GB9EcCqYCAA7r9/qxiHAcL04sgNHR/AANOEATThAC1UnDwhAWtd8PhKDBUDtMbE4TQGBxI3McBA4JAfs9TcaIdMGcXwdNTc84UWSVscKwQbiNHCYJRPgEGdFTTWQBtiwBtIoAKxo0XI3DHdCM+Bw1wAuhNpqrPKuGyDuPg4Wi/v4RzRUtFN9uuRA95OoIfLsQT+j/DO5/2tqvV+T/GUr2+P9Ev+Lpm+ABUoDMYkXxfMpogg0ElzoABRKAtSgfxNW1XU0mLTwsmfOgsPAmD4MQ5CENQvVQJw5k61yOhWSKbh/CfTwIDnBBChKcpKh8alahAFgGA+ABCU1uxAdA4QABjhdAACZTTIpjrhYopSgqKo/G4o5eI+OhAF4NwBaPaEuhTVEiTpNYWTMhADIgA)
+
+Ok, we're now in a moderately better state, down from 4 functions to 3.
+
+### Love Thy Pipe Operator 🪈
+
+The `try_parse_semver_string` function does however leave a lot to be desired: the parsing within the split feels clunky. Furthermore, even the `string.split(version, ".")` feels less "gleam-y".
+
+Turns out, we can actually leverage pipe operators to clean this up a ton going from:
+
+```gleam
+case string.split(version, ".") {
+    [major, minor, patch] -> {
+      case int.parse(major), int.parse(minor), int.parse(patch) {
+        Ok(_), Ok(_), Ok(_) -> Ok(True)
+        _, _, _ -> Error("bad semver")
+      }
+    }
+    _ -> Error("bad semver")
+  }
+```
+
+to:
+
+```gleam
+  case version |> string.split(".") |> list.try_map(int.parse) {
+    Ok([_, _, _]) -> Ok(True)
+    _ -> Error("bad semver")
+  }
+```
+
+[See code in playground here](https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9HMQDpIXVajFuw5QIMAK5N8fATXrM2nGPijcGcqguHKOTOKr59KkgEZ0ElVgEdJEOvgCelBwEFacAGasc9YHx0dB743r74ABRI7BCodADKahqYdJCwiEhxiepIDACUfAC+xkimFl5IdOSsANYQAPqsnj5+EYF00eQOnbEJSbmY7WnwyKnQI5l9OQyDSHl0ALQAfHQAShLSkSFhfinZGvMBlXQcHHQAYqxwTHRsUExOdN6OABYOwxlPMEgA5PRgrAMABM6DAIOQ0u1JGC6PU6AAeBZ0cRSGQAOjUTgimPq1lgDTBEOg9VU0wiH2QeQKSHaAHkahFti1Ij1UCkKZkqUUShVHFAnLimmCSeC0iT+gxyeMMlkJfNlmsNjIIgAhBAIJh7OV0I5BFj0aBQGj1cgwBh0AC87SCPBAADVpaNyND6F4NUwEAB3UHg1jEOA4MbpZAaOgRAAaaIAmmiAFp5NEJCC9F74fCUGCoU6EtJomgMDiJ9Y4CBwSAgn6260IlYc6vwla2n5oqs0yo4Vgwjl0AA+K1JGjRMEoBkitpbIHmfboBlUaOqlAi3HwaLxYMO1YA2vSIvU8ikd3uDwy9wBdRYrHcAFSg9mpQSCcIVAFEoEaoBFDcbTfl2sUkP+JjmHQvLVNwEQbscEA4C8CBVLUDRNKEzJtCALAMICACEtopLa6BogADGi6AAEy2vetwwXB1R1I0zThKh1zoYCdCALwbgC0ezhdB4YRxEkaw5FFCAhRAA===).
+
+Here we move `version` to the left of `string.split` to make the expression more "sentence-like". We use `list.try_map`, which applies `int.parse` to each dot-delimited string and ensures they all succeed—returning `Ok(List(Int))` only if every parse passes, or `Error` if any fails. Then, as before, we leverage pattern-based matching within the case statement to assert the `major.minor.patch` structure.
+
+### What Color is Your Type 🎨
+
+A famous article from 2015 [titled _What Color is Your Function_ by Robert Nystrom](https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/) details
+the challenge of explicit asynchronous function labelling. In a similar vein, arguing against boilerplate and code complexity, I'd argue that if you allow for _opaqueness creep_ of your types,
+you end up in a similarly sad state of needing to know which types are opaque and which are "normal". Now, opaque types aren't _infectious_ like async (you can freely mix them), but the mental overhead and boilerplate tax is real.
+
+Again, consider my type and smart constructor:
+
+```gleam
+pub opaque type Artifact {
+  Artifact(
+    name: String,
+    version: String,
+  )
+}
+
+pub fn make_artifact(
+  name name: String,
+  version version: String,
+) -> Result(Artifact, String) {
+  // Fail early if the version isn't valid semver
+  use _ <- result.try(try_parse_semver_string(version))
+
+  Ok(Artifact(name:, version:))
+}
+```
+
+Well, to access the innards requires getter and setter functions like this:
+
+```gleam
+pub fn set_name(artifact: Artifact, name: String) -> Artifact {
+  Artifact(..artifact, name:)
+}
+
+pub fn get_name(artifact: Artifact) -> String {
+  artifact.name
+}
+
+pub fn set_version(artifact: Artifact, version: String) -> Result(Artifact, String) {
+  use _ <- result.try(try_parse_semver_string(version))
+  Ok(Artifact(..artifact, version:))
+}
+
+pub fn get_version(artifact: Artifact) -> String {
+  artifact.version
+}
+```
+
+Before long, I am starting to feel like a Java or Ruby developer back in [object-oriented programming](https://en.wikipedia.org/wiki/Object-oriented_programming) land. No shade to those folks, but I came to Gleam for the functional bliss.
+
+Instead of making the entire type opaque, we can limit to just the subset which _really needs it_. Thanks to [Gears](https://github.com/GearsDatapacks) on Discord for setting me straight!
+
+So we'd end up with something like this:
+
+```gleam
+pub type Artifact {
+  Artifact(
+    name: String,
+    version: Semver,
+  )
+}
+
+pub opaque type Semver {
+  Semver(version: String)
+}
+
+pub fn make_semver(
+  version version: String,
+) -> Result(Semver, String) {
+  // Fail early if the version isn't valid semver
+  use _ <- result.try(try_parse_semver_string(version))
+
+  Ok(Semver(version:))
+}
+```
+
+And furthermore, we really don't even need the opaque type. [`qua_qua_qua`](https://github.com/gavinmorrow) challenged me on Discord to just use a more sane type definition:
+
+```gleam
+pub type Semver {
+  Semver(major: Int, minor: Int, patch: Int)
+}
+```
+
+The beauty of this is that when Caffeine parses the semver, it can use the "smart constructor" but otherwise, we can stay opaque free, avoiding _opaqueness creep_ and any OOP nonsense.
+
+Our final version:
+
+```gleam
+pub type Artifact {
+  Artifact(name: String, version: Semver)
+}
+
+pub type Semver {
+  Semver(major: Int, minor: Int, patch: Int)
+}
+
+pub fn make_semver(version version: String) -> Result(Semver, String) {
+  case version |> string.split(".") |> list.try_map(int.parse) {
+    Ok([major, minor, patch]) -> Ok(Semver(major:, minor:, patch:))
+    _ -> Error("bad semver")
+  }
+}
+```
+
+[See code in playground here](https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9HMQDpIXVajFuw5M4MfHwE16zNp0lRuDPn0oBXAEZ18AT0oQ6AQVpwAZqxz1gfOibOXrACiTsIqOgGV8ypA0w6SFhEJE8vCHJggEo+AF81JE0dfUNvSOC6WyR7CKjoZ3JWACsaTwBJYkDybjK6SvxAylZ8HAALCuJYpASkdW06cxyigGsIAH0YDILg+GQg6Dmw718VaLoAWgA+OgAlCBgNJnxnPODAnz8Gdez7FnpoKBpx8hgGOgBeO3s6HhAANUWoTo5A0kkGCCYTAQAHc6FMisQ4DgFiFkCo6M4ABoAOgAmjiAFrRHHpDx0Nr4fCUGCoDgcBHBHE0BgcUn7HAQOCQAAmdAA5H9vvYADw7WahYV0MW/ED8nFCvo5Og4VhTVFLOgAHx2ShUOJglHEJz+CpA6x1dHEkhxvj0L1YlGc3HwOOasAgNylAHkRs4ANpFUpQaq1EN0ZqtNoAXXW2zovtO0yghRKZVDSHTEZa7VQ0W6Pzo402OwAolAninHs9Xtdvr1ev0dEMQaxuM4vcr7nQ1VMhInGdB1h9W2NJsnnBLkJ4/ugcQAGHHoABMfwLdAg7QQDnwFisJpALAYrCYAEI/oFB1But9N21t6MJlfJ0Dp7K54uV6w1/E+CA4kAA=)
+
+*Minor Notes:*
+
+* Instead of `Result(Semver, String)` we'd very likely introduce an error type, such as `SemverError` with a variant called `InvalidFormat`.
+* The above still isn't completely correct since `int.parse` accepts negative numbers, meaning `"1.-2.3"` would be valid...
+
+However, this is really a thing of beauty compared to where we started (and this doesn't even show the bonus downstream cleanup since we don't need any more getters or setters...).
+
+![chef's kiss](https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExMmJ1bTJyY2JkcDJ1czV5Mm9zYWM1ejFqa2hsbHN0aHRvNDBrYTZzOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7aCWJavAgtBzLWrS/giphy.gif)
+
