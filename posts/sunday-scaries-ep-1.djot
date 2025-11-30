@@ -168,7 +168,7 @@ to:
 
 Here we move `version` to the left of `string.split` to make the expression more "sentence-like". We use `list.try_map`, which applies `int.parse` to each dot-delimited string and ensures they all succeed—returning `Ok(List(Int))` only if every parse passes, or `Error` if any fails. Then, as before, we leverage pattern-based matching within the case statement to assert the `major.minor.patch` structure.
 
-### What Color is Your Type 🎨
+### What Colour Be Thy Type 🎨
 
 A famous article from 2015 [titled _What Color is Your Function_ by Robert Nystrom](https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/) details
 the challenge of explicit asynchronous function labelling. In a similar vein, arguing against boilerplate and code complexity, I'd argue that if you allow for _opaqueness creep_ of your types,
