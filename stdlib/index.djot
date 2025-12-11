@@ -18,18 +18,26 @@ as noted in [the origin story blog post](/blog/origins), improving the SLO devel
 
 ### Definition
 
-*Last modified:* `11/27/25`
+*Last modified:* `12/10/25`
 
-```yaml
-artifacts:
-  - name: SLO
-    version: 0.0.1
-    base_params:
-      threshold: Decimal
-      window_in_days: Optional(Integer) -> 30
-    params:
-      queries: Dict(String, String)
-      value: String
+```json
+{
+  "artifacts": [
+    {
+      "name": "SLO",
+      "version": "0.0.1",
+      "base_params": {
+        "threshold": "Float",
+        "window_in_days": "Integer"
+      },
+      "params": {
+        "queries": "Dict(String, String)",
+        "value": "String",
+        "vendor": "String"
+      }
+    }
+  ]
+}
 ```
 
 ***

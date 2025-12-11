@@ -37,7 +37,7 @@ An artifact surfaces the standard library or a plugin's interface - it defines t
 while a systems modelling artifact might require dependency relationships.
 
 
-An artifact is a `.yaml` file with the following required fields per artifact.
+An artifact is a `.json` file with the following required fields per artifact.
 
 ``` =html
 <table>
@@ -52,7 +52,7 @@ An artifact is a `.yaml` file with the following required fields per artifact.
     <tr>
       <td>name</td>
       <td><code>String</code></td>
-      <td>Unique within a single <code>artifacts.yaml</code> file.</td>
+      <td>Unique within a single <code>artifacts.json</code> file.</td>
     </tr>
     <tr>
       <td>version</td>
@@ -62,7 +62,7 @@ An artifact is a `.yaml` file with the following required fields per artifact.
     <tr>
       <td>base_params</td>
       <td><code>Dict(String, AcceptedTypes)</code></td>
-      <td>Parameters that flow through blueprints to service owners. Blueprints may leave these for service owners to specify, or provide defaults using the <code>-></code> operator.</td>
+      <td>Parameters that flow through blueprints to service owners. Blueprints may leave these for service owners to specify, or provide defaults in blueprint inputs.</td>
     </tr>
     <tr>
       <td>params</td>
@@ -75,16 +75,24 @@ An artifact is a `.yaml` file with the following required fields per artifact.
 
 So, an example would look like:
 
-```yaml
-artifacts:
-  - name: SLO
-    version: 0.0.1
-    base_params:
-      threshold: Float
-      window_in_days: Optional(Integer) -> 30
-    params:
-      queries: Dict(String, String)
-      value: String
+```json
+{
+  "artifacts": [
+    {
+      "name": "SLO",
+      "version": "0.0.1",
+      "base_params": {
+        "threshold": "Float",
+        "window_in_days": "Integer"
+      },
+      "params": {
+        "queries": "Dict(String, String)",
+        "value": "String",
+        "vendor": "String"
+      }
+    }
+  ]
+}
 ```
 
 
@@ -114,10 +122,10 @@ take the form of:
     <tr>
       <td>name</td>
       <td><code>String</code></td>
-      <td>Unique within a single <code>blueprints.yaml</code> file.</td>
+      <td>Unique within a single <code>blueprints.json</code> file.</td>
     </tr>
     <tr>
-      <td>artifact</td>
+      <td>artifact_ref</td>
       <td><code>String</code></td>
       <td>An identifier referencing an artifact.</td>
     </tr>
@@ -137,33 +145,43 @@ take the form of:
 
 So, an example would look like:
 
-```yaml
-blueprints:
-  - name: LCP_Latency
-    artifact: SLO
-    params:
-      view: String
-      p95_latency_in_seconds: Integer
-    inputs:
-      queries:
-        numerator:   ___________________
-        denominator: ___________________
-      value: "numerator / denominator"
+```json
+{
+  "blueprints": [
+    {
+      "name": "LCP_Latency",
+      "artifact_ref": "SLO",
+      "params": {
+        "view": "String",
+        "p95_latency_in_seconds": "Integer"
+      },
+      "inputs": {
+        "vendor": "datadog",
+        "queries": {
+          "numerator": "___________________",
+          "denominator": "___________________"
+        },
+        "value": "numerator / denominator"
+      }
+    }
+  ]
+}
 ```
 
 In the example above, `numerator` and `denominator` are left as placeholders (indicated by underscores). The actual query strings will be provided in each service's expectation. A complete blueprint might look like:
 
-```yaml
-...
-      queries:
-        numerator: "SELECT COUNT(*) FROM events WHERE lcp < {p95_latency_in_seconds} AND view = '{view}'"
-        denominator: "SELECT COUNT(*) FROM events WHERE view = '{view}'"
-...
+```json
+{
+  "queries": {
+    "numerator": "sum:lcp.duration{view:$$view->view$$,duration<$$p95_latency_in_seconds->threshold$$}",
+    "denominator": "sum:lcp.duration{view:$$view->view$$}"
+  }
+}
 ```
 
 ### File Organization
 
-Blueprints are typically defined in one or more `blueprints.yaml` files owned by the observability team and referenced by service teams in their expectation files. At this time we don't expect to dstribute any common blueprints due to the content typically being organization specific.
+Blueprints are typically defined in one or more `blueprints.json` files owned by the observability team and referenced by service teams in their expectation files. At this time we don't expect to distribute any common blueprints due to the content typically being organization specific.
 
 ***
 
@@ -171,13 +189,13 @@ Blueprints are typically defined in one or more `blueprints.yaml` files owned by
 
 ### Service Expectation Explained
 
-*Definition:* a service expectation is a single blueprint invocation for a single service within the domain of an owning team. 
+*Definition:* a service expectation is a single blueprint invocation for a single service within the domain of an owning team.
 
-The organization name, team name, and service name are baked into the filepath: 
+The organization name, team name, and service name are baked into the filepath:
 
-`ORGANIZATION_NAME/TEAM_NAME/SERVICE_NAME.yaml`
+`ORGANIZATION_NAME/TEAM_NAME/SERVICE_NAME.json`
 
-As all other configurations, an expectation is a `.yaml` file with the following required fields.
+As all other configurations, an expectation is a `.json` file with the following required fields.
 
 ``` =html
 <table>
@@ -192,10 +210,10 @@ As all other configurations, an expectation is a `.yaml` file with the following
     <tr>
       <td>name</td>
       <td><code>String</code></td>
-      <td>Unique within a single <code>SERVICE_NAME.yaml</code> file.</td>
+      <td>Unique within a single <code>SERVICE_NAME.json</code> file.</td>
     </tr>
     <tr>
-      <td>blueprint</td>
+      <td>blueprint_ref</td>
       <td><code>String</code></td>
       <td>An identifier referencing a blueprint.</td>
     </tr>
@@ -210,17 +228,23 @@ As all other configurations, an expectation is a `.yaml` file with the following
 
 So, an example would look like:
 
-```yaml
-expectations:
-  - name: "Admin Portal Home Page LCP Latency"
-    blueprint: LCP_Latency
-    inputs:
-      view: /admin/home
-      p95_latency_in_seconds: 5
-      threshold: 99.5
+```json
+{
+  "expectations": [
+    {
+      "name": "Admin Portal Home Page LCP Latency",
+      "blueprint_ref": "LCP_Latency",
+      "inputs": {
+        "view": "/admin/home",
+        "p95_latency_in_seconds": 5,
+        "threshold": 99.5
+      }
+    }
+  ]
+}
 ```
 
-Note that `window_in_days` is not specified above. Since the SLO artifact defines a default of 30 for this base parameter, the compiler will use that value automatically.
+Note that `window_in_days` is not specified above. If the blueprint provides a default value for this parameter, the compiler will use that value automatically.
 
 ### File Organization
 
@@ -260,16 +284,16 @@ Accepted Types are type names leveraged throughout Caffeine configuration files 
       <td>A text value (e.g., "my-service").</td>
     </tr>
     <tr>
-      <td>NonEmptyList(T)</td>
-      <td>A list containing at least one element of type T. Supported inner types: <code>String</code>, <code>Integer</code>, <code>Boolean</code>, <code>Float</code>.</td>
+      <td>List(T)</td>
+      <td>A list of elements of type T. Supported inner types: <code>String</code>, <code>Integer</code>, <code>Boolean</code>, <code>Float</code>.</td>
     </tr>
     <tr>
       <td>Optional(T)</td>
-      <td>A value that may or may not be present. Supported inner types: <code>String</code>, <code>Integer</code>, <code>Boolean</code>, <code>Float</code>, <code>NonEmptyList(String)</code>, <code>NonEmptyList(Integer)</code>, <code>NonEmptyList(Boolean)</code>, <code>NonEmptyList(Float)</code>.</td>
+      <td>A value that may or may not be present. Supported inner types: <code>String</code>, <code>Integer</code>, <code>Boolean</code>, <code>Float</code>, <code>List(String)</code>, <code>List(Integer)</code>, <code>List(Boolean)</code>, <code>List(Float)</code>, <code>Dict(String, String)</code>, <code>Dict(String, Integer)</code>, <code>Dict(String, Boolean)</code>, <code>Dict(String, Float)</code>.</td>
     </tr>
     <tr>
       <td>Dict(String, T)</td>
-      <td>A key-value mapping where <code>String</code> is the key type and T is the value type (e.g., <code>Dict(String, Integer)</code>). Supported inner types: <code>String</code>, <code>Integer</code>, <code>Boolean</code>, <code>Float</code>, <code>NonEmptyList(String)</code>, <code>NonEmptyList(Integer)</code>, <code>NonEmptyList(Boolean)</code>, <code>NonEmptyList(Float)</code>.</td>
+      <td>A key-value mapping where <code>String</code> is the key type and T is the value type (e.g., <code>Dict(String, Integer)</code>). Supported inner types: <code>String</code>, <code>Integer</code>, <code>Boolean</code>, <code>Float</code>.</td>
     </tr>
   </tbody>
 </table>
@@ -277,7 +301,7 @@ Accepted Types are type names leveraged throughout Caffeine configuration files 
 
 #### Technical Details
 
-While the _type_ definition technically allows infinite recursion as it is currendtly defined:
+While the _type_ definition technically allows infinite recursion as it is currently defined:
 
 ```gleam
 pub type AcceptedTypes {
@@ -285,7 +309,8 @@ pub type AcceptedTypes {
   Float
   Integer
   String
-  NonEmptyList(AcceptedTypes)
+  List(AcceptedTypes)
+  Dict(AcceptedTypes, AcceptedTypes)
   Optional(AcceptedTypes)
 }
 ```
