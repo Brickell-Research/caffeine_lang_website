@@ -40,4 +40,29 @@ as noted in [the origin story blog post](/blog/origins), improving the SLO devel
 }
 ```
 
+### Supported Artifacts
+
+At this time, we only support one vendor: [Datadog](https://docs.datadoghq.com/service_management/service_level_objectives/).
+
+``` =html
+<table>
+  <thead>
+    <tr>
+      <th>Vendor</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Datadog</td>
+      <td>Supported SLO Types<br>
+<ul>
+<li><strong>good over bad</strong>: successful events over valid events.<br>Will look like <code>value: numerator / denominator</code></li>
+</ul>
+</td>
+    </tr>
+  </tbody>
+</table>
+```
+
 ***

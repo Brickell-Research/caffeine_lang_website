@@ -17,7 +17,24 @@ as noted in <a href="/blog/origins">the origin story blog post</a>, improving th
     }
   ]
 }
-</code></pre><hr></div></article><aside class="stdlib-sidebar"><h3>On This Page</h3><nav class="stdlib-nav" id="stdlib-toc"></nav></aside></div></main><footer class="site-footer"><div class="footer-content"><p>Built with <a href="https://gleam.run" target="_blank">Gleam</a> and <a href="https://github.com/lustre-labs/ssg" target="_blank">Lustre SSG</a></p><p>© 2025 <a href="https://brickellresearch.org/" target="_blank">Brickell Research</a></p></div></footer><script>
+</code></pre><h3 id="Supported-Artifacts">Supported Artifacts</h3><p>At this time, we only support one vendor: <a href="https://docs.datadoghq.com/service_management/service_level_objectives/">Datadog</a>.</p><div><table>
+  <thead>
+    <tr>
+      <th>Vendor</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Datadog</td>
+      <td>Supported SLO Types<br>
+<ul>
+<li><strong>good over bad</strong>: successful events over valid events.<br>Will look like <code>value: numerator / denominator</code></li>
+</ul>
+</td>
+    </tr>
+  </tbody>
+</table></div><hr></div></article><aside class="stdlib-sidebar"><h3>On This Page</h3><nav class="stdlib-nav" id="stdlib-toc"></nav></aside></div></main><footer class="site-footer"><div class="footer-content"><p>Built with <a href="https://gleam.run" target="_blank">Gleam</a> and <a href="https://github.com/lustre-labs/ssg" target="_blank">Lustre SSG</a></p><p>© 2025 <a href="https://brickellresearch.org/" target="_blank">Brickell Research</a></p></div></footer><script>
         // Convert data-lang to language-* class for Prism
         document.querySelectorAll('code[data-lang]').forEach(function(code) {
           var lang = code.getAttribute('data-lang').toLowerCase();
