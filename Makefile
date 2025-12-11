@@ -1,7 +1,11 @@
-.PHONY: build serve clean deps build-watch
+.PHONY: build serve clean deps build-watch fetch-version
+
+# Fetch latest Caffeine version from GitHub
+fetch-version:
+	./scripts/fetch_version.sh
 
 # Build the static site
-build: deps
+build: deps fetch-version
 	gleam run -m build
 
 # Serve the site locally

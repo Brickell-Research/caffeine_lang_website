@@ -2,6 +2,7 @@ import components/layout
 import lustre/attribute
 import lustre/element.{type Element}
 import lustre/element/html
+import version
 
 pub fn view() -> Element(Nil) {
   layout.view(
@@ -18,11 +19,11 @@ pub fn view() -> Element(Nil) {
           html.a(
             [
               attribute.href(
-                "https://github.com/Brickell-Research/caffeine_lang",
+                "https://github.com/Brickell-Research/caffeine_lang/releases",
               ),
               attribute.class("btn btn-primary"),
             ],
-            [html.text("Get Started")],
+            [html.text("Get Started (" <> version.latest_version <> ")")],
           ),
           html.a(
             [attribute.href("/blog"), attribute.class("btn btn-secondary")],
@@ -38,7 +39,7 @@ pub fn view() -> Element(Nil) {
           html.pre([attribute.class("code-block")], [
             html.code([attribute.class("language-bash")], [
               html.text(
-                "brew tap Brickell-Research/caffeine_lang && brew update && brew install caffeine",
+                "brew tap Brickell-Research/caffeine_lang && brew install caffeine",
               ),
             ]),
           ]),

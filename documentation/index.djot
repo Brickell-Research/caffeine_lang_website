@@ -320,7 +320,7 @@ We do limit it intentionally within the Caffeine compiler at this time with the 
 ### Multi-Inheritance
 
 There is no support for [multi-inheritance](https://en.wikipedia.org/wiki/Multiple_inheritance) within the existing design of Caffeine: we do not support a single service expectation referencing multiple blueprints or a single blueprint referencing multiple artifacts. This 1:1 relationship seems sensible and we do not want
-to think hard about the diamond problem...
+to think hard about the [diamond problem](https://www.geeksforgeeks.org/cpp/diamond-problem-in-cpp/)...
 
 ***
 
