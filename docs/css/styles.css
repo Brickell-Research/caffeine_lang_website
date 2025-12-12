@@ -1674,7 +1674,7 @@ a:hover {
   font-family: var(--font-mono);
   font-size: 0.75rem;
   font-weight: normal;
-  color: var(--color-primary);
+  color: #888;
   text-transform: none;
 }
 
@@ -1708,7 +1708,7 @@ a:hover {
 .auto-compile-badge {
   font-size: 0.75rem;
   font-weight: normal;
-  color: var(--color-primary);
+  color: #888;
   font-style: italic;
   text-transform: none;
 }
