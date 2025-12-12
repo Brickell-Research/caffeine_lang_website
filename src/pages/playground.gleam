@@ -17,7 +17,7 @@ pub fn view() -> Element(Nil) {
         ]),
         html.p([attribute.class("playground-intro")], [
           html.text(
-            "Try Caffeine in your browser. Edit the blueprints and expectations below, then click Compile to see the generated Terraform output.",
+            "Try Caffeine in your browser. Edit the blueprints and expectations below to see the generated Terraform output.",
           ),
         ]),
       ]),
@@ -65,7 +65,7 @@ pub fn view() -> Element(Nil) {
                 [attribute.id("output-display"), attribute.class("output-code")],
                 [
                   html.code([attribute.class("language-hcl")], [
-                    html.text("// Click 'Compile' to generate Terraform output"),
+                    html.text("// Edit the inputs to generate Terraform output"),
                   ]),
                 ],
               ),
