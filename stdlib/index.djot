@@ -57,7 +57,8 @@ At this time, we only support one vendor: [Datadog](https://docs.datadoghq.com/s
       <td>Datadog</td>
       <td>Supported SLO Types<br>
 <ul>
-<li><strong>good over bad</strong>: successful events over valid events.<br>Will look like <code>value: numerator / denominator</code></li>
+<li><strong>good over bad</strong>: successful events over valid events.<br>Looks like <code>value: numerator / denominator</code></li>
+<li><strong>time slice</strong>: percentage of time a metric meets a threshold.<br>Looks like <code>value: time_slice(query comparator threshold "per" interval)</code><br>Supports comparators: <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>, <code>&lt;=</code><br>Interval format: <code>Ns</code> (seconds) or <code>Nm</code> (minutes)</li>
 </ul>
 </td>
     </tr>
