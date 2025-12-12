@@ -140,6 +140,15 @@ pub fn view_with_meta(meta: PageMeta, content: Element(Nil)) -> Element(Nil) {
       ],
       "",
     ),
+    // HCL/Terraform syntax highlighting
+    html.script(
+      [
+        attribute.src(
+          "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js",
+        ),
+      ],
+      "",
+    ),
     // Gleam syntax highlighting (community package)
     html.script(
       [attribute.src("https://unpkg.com/prismjs-gleam@1/gleam.js")],

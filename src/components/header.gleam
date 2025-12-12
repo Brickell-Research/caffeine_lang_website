@@ -17,6 +17,9 @@ pub fn view() -> Element(Nil) {
         html.li([], [html.a([attribute.href("/")], [html.text("Home")])]),
         html.li([], [html.a([attribute.href("/docs")], [html.text("Docs")])]),
         html.li([], [html.a([attribute.href("/stdlib")], [html.text("Stdlib")])]),
+        html.li([], [
+          html.a([attribute.href("/playground")], [html.text("Playground")]),
+        ]),
         html.li([], [html.a([attribute.href("/blog")], [html.text("Blog")])]),
       ]),
     ]),

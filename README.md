@@ -19,6 +19,16 @@ Further documentation can be found at <https://hexdocs.pm/caffeine_lang_website>
 ## Development
 
 ```sh
-gleam run   # Run the project
-gleam test  # Run the tests
+gleam run -m build  # Build the site to ./docs
+gleam test          # Run the tests
 ```
+
+## Updating the Playground Compiler
+
+To update the Caffeine compiler in the playground:
+
+```sh
+./scripts/update_compiler.sh
+```
+
+This fetches the latest version from `../caffeine`, rebuilds the browser bundle, and rebuilds the site.
