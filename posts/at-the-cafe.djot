@@ -104,7 +104,7 @@ outputCode.className = 'language-hcl';
 ```
 
 
-*Compile on save*: and finally, to auto-compile, we add a debounced event listener on input to each of the `blueprint` and `expectation` editors.
+*Auto-compile on edit*: and finally, to auto-compile, we add a debounced event listener on input to each of the `blueprint` and `expectation` editors.
 
 The debounce method looks like this:
 
