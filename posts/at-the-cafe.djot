@@ -1,0 +1,144 @@
+---
+title = "At the Cafe"
+date = "2025-12-12"
+summary = "How Caffeine's playground feature came to be"
+author = "Rob Durst"
+tags = ["Gleam", "Javascript", "Deno"]
+---
+
+*I'm building [Caffeine](https://github.com/Brickell-Research/caffeine_lang), a compiler written in Gleam that compiles service expectations to reliability artifacts.
+This post documents how I set up a simple playground environment so folks can experiment with Caffeine right here from their browser.*
+
+***
+
+## Overview
+
+### At the Cafe
+
+
+{.figure}
+![Florencia y Fortuna cafe](/images/at-the-cafe_florenciayfortuna.png)
+
+Truly one of the most beautiful cafes my wife and I have been to! Florencia y Fortuna in Cusco, Perú. Coffee was spectacular as well. Image [from their website](https://florenciayfortunata.com/).
+
+Ah, how nice. You stroll into a new cafe, the air filled with the aroma of freshly ground beans, the chatter of lively conversations hums about. There's really nothing like a cafe to inspire. Experimentation,
+creativity, focus, engaging discussions. One of my favorite places to go on a free Friday morning.
+
+While I will stop here before I make an outlandish analogy that Caffeine's minimal, in-browser IDE is a virtual version of _the perfect cafe experience_, it at least shares the name, even if that's where the semblance stops.
+
+### Background on the Site
+
+Caffeine's website is a static site built from [Lustre Lab](https://github.com/lustre-labs)'s [static site generator](https://github.com/lustre-labs/ssg). Of the many static site generators
+out there, this _ssg_ is fairly simple. In the words of its README:
+
+_"lustre_ssg is a low-config static site generator for simple things like a personal blog or documentation site. Declare your routes, tell lustre_ssg how to render them, and it will spit out a bunch of HTML files for you.
+lustre_ssg is not a batteries-included framework for generating static sites. There is no CLI, no built-in server, no fancy data fetching, and no client-side hydration. If you need those things, you will have to build them yourself!"_
+
+I will be the first to admit I am not a frontend person, and lean fairly heavily on AI tools like [Claude Code](https://code.claude.com/docs/en/overview) and [Cursor](https://cursor.com/)
+to bring my website ideas to life (especially CSS 😤). However, per [the definition from Wikipedia](https://en.wikipedia.org/wiki/Vibe_coding), I am not a _true_ vibe coder because I still like to ensure
+I have some idea how everything works, so let's dive in.
+
+***
+
+## Making the Compiler Browser Friendly
+
+As of last month, Caffeine has been shipping binary releases targeting Mac, Linux, and Windows via GitHub ([see here](https://github.com/Brickell-Research/caffeine_lang/releases)) by way of a
+process I [automated in a GitHub Action](https://github.com/Brickell-Research/caffeine_lang/blob/main/.github/workflows/release.yml) that is triggered whenever I push new git tags. The gist
+of the packaging process is [detailed in an earlier post titled "Packaging Caffeine"](https://caffeine-lang.run/blog/packaging-caffeine). The TL;DR of that is:
+
+1. Ensure you can target JavaScript (likely have to fill in some FFI gaps)
+
+2. Add a JavaScript entry point
+
+3. Compile with Deno
+
+Really, not too hard once you get past (1). From here, heavily borrowing from existing work (i.e. [the Gleam playground](https://github.com/gleam-lang/playground)),
+we established a process for fetching the latest JavaScript build for the compiler via a bundle script [which includes some shims for Node.js modules and actually calling the main compilation method](https://github.com/Brickell-Research/caffeine_lang/blob/7d505abf932467659cbf73827e054295b451523b/scripts/bundle-browser.sh).
+
+One detail worth highlighting: even though Caffeine's browser mode bypasses all file I/O, we still need shims for `node:fs`, `node:path`, and `node:process`. This is because `simplifile` (a Gleam file I/O library Caffeine depends on) imports these Node.js modules at the top level. When esbuild bundles with `--platform=browser`, these built-ins don't exist, so we provide stub implementations via `--alias` flags. The stubs throw errors if called, but the imports themselves need to resolve for the bundle to build.
+
+With this, we just need an editor and we're ready to begin integration.
+
+## The Fun Part - A Live Editor
+
+The cafe itself is a fairly simple <100 lines of code Lustre view with three panels: (1) an editor for a single `expectation`, (2) an editor for the `blueprints`, and an
+output panel to show the generated Terraform. Ignoring all the CSS/styling for now, much of which was aided by existing code editor packages/libraries such as [Prism](https://github.com/PrismJS/prism), the interesting
+bits here are the JavaScript to continuously compile the code.
+
+For this there are a few parts.
+
+*The actual compilation*: for this we basically just have a compile method that wraps the `compile_from_strings` method we shimmed in the bundle above, directly calling
+Caffeine:
+
+```Javascript
+function compile(blueprintsJson, expectationsJson) {
+  const result = compile_from_strings(
+    blueprintsJson,
+    expectationsJson,
+    "cafe/demo/service.json"
+  );
+
+  if (result.isOk()) {
+    return result[0];
+  } else {
+    throw new Error(result[0]);
+  }
+}
+```
+
+We predominantly call this from a method that passes in the text values from each code editor:
+
+```javascript
+const result = compile(
+  blueprintsEditor.value,
+  expectationsEditor.value
+);
+```
+
+
+*Updating the editors*: with the result of executing compilation, updating the output editor's content is as simple as an assignment:
+
+```javascript
+outputCode.textContent = result;
+outputCode.className = 'language-hcl';
+```
+
+
+*Compile on save*: and finally, to auto-compile, we add a debounced event listener on input to each of the `blueprint` and `expectation` editors.
+
+The debounce method looks like this:
+
+```javascript
+function debounce(fn, delay) {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn(...args), delay);
+  };
+}
+```
+
+Which is then leveraged like so:
+
+```javascript
+// Debounced auto-compile (500ms delay)
+const debouncedCompile = debounce(runCompile, 500);
+
+// Auto-compile on edit
+blueprintsEditor.addEventListener('input', debouncedCompile);
+expectationsEditor.addEventListener('input', debouncedCompile);
+```
+
+***
+
+## Try It Out Today
+
+The playground, or as we call it, `the cafe`, can be found at the tab at the top of the website or [at this link](https://caffeine-lang.run/cafe). While Caffeine is pretty niche and likely calls for some sort of interactive
+tour-like tutorial along with its docs to help the average passerby get started, this online tool has been beneficial when explaining Caffeine concepts at work, enabling experimentation without an initial download process.
+
+Here is me changing some text and seeing the compilation results (and apologies for how small the `gif` is 😓):
+
+{.wide}
+![A Demo of the Cafe](/images/at-the-cafe_cafe.gif)
+
+***

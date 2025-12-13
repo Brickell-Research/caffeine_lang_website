@@ -5,7 +5,7 @@ import lustre/ssg
 import pages/blog
 import pages/docs as docs_page
 import pages/home
-import pages/playground
+import pages/cafe
 import pages/stdlib as stdlib_page
 import posts/posts
 import stdlib/stdlib
@@ -34,7 +34,7 @@ pub fn main() {
     })
     |> ssg.add_static_route("/docs", docs_view)
     |> ssg.add_static_route("/stdlib", stdlib_view)
-    |> ssg.add_static_route("/playground", playground.view())
+    |> ssg.add_static_route("/cafe", cafe.view())
     |> ssg.build
 
   case build {

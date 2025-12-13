@@ -1,4 +1,4 @@
-// Playground JavaScript - Real Caffeine compiler
+// The Cafe JavaScript - Real Caffeine compiler
 import { compile_from_strings } from './caffeine-browser.js';
 
 // Example blueprints JSON
@@ -69,7 +69,7 @@ function compile(blueprintsJson, expectationsJson) {
   const result = compile_from_strings(
     blueprintsJson,
     expectationsJson,
-    "playground/demo/service.json"
+    "cafe/demo/service.json"
   );
 
   if (result.isOk()) {
@@ -79,14 +79,14 @@ function compile(blueprintsJson, expectationsJson) {
   }
 }
 
-// Initialize playground
+// Initialize the cafe
 function init() {
   const blueprintsEditor = createEditor('blueprints-editor', defaultBlueprints);
   const expectationsEditor = createEditor('expectations-editor', defaultExpectations);
   const outputDisplay = document.getElementById('output-display');
 
   if (!blueprintsEditor || !expectationsEditor || !outputDisplay) {
-    console.error('Playground: Missing required elements');
+    console.error('The Cafe: Missing required elements');
     return;
   }
 

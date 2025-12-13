@@ -6,24 +6,24 @@ import version
 
 pub fn view() -> Element(Nil) {
   layout.view(
-    "Playground",
-    html.div([attribute.class("playground-container")], [
-      html.div([attribute.class("playground-header")], [
-        html.div([attribute.class("playground-title-row")], [
-          html.h1([], [html.text("Playground")]),
-          html.span([attribute.class("playground-version")], [
+    "The Cafe",
+    html.div([attribute.class("cafe-container")], [
+      html.div([attribute.class("cafe-header")], [
+        html.div([attribute.class("cafe-title-row")], [
+          html.h1([], [html.text("The Cafe")]),
+          html.span([attribute.class("cafe-version")], [
             html.text(version.latest_version),
           ]),
         ]),
-        html.p([attribute.class("playground-intro")], [
+        html.p([attribute.class("cafe-intro")], [
           html.text(
             "Try Caffeine in your browser. Edit the blueprints and expectations below to see the generated Terraform output.",
           ),
         ]),
       ]),
-      html.div([attribute.class("playground-layout")], [
+      html.div([attribute.class("cafe-layout")], [
         // Left side: editors
-        html.div([attribute.class("playground-editors")], [
+        html.div([attribute.class("cafe-editors")], [
           // Blueprints editor
           html.div([attribute.class("editor-panel")], [
             html.div([attribute.class("editor-header")], [
@@ -42,7 +42,7 @@ pub fn view() -> Element(Nil) {
             html.div([attribute.class("editor-header")], [
               html.span([attribute.class("editor-label")], [html.text("Expectation")]),
               html.span([attribute.class("editor-filename")], [
-                html.text("playground/demo/service.json"),
+                html.text("cafe/demo/service.json"),
               ]),
             ]),
             html.div(
@@ -52,7 +52,7 @@ pub fn view() -> Element(Nil) {
           ]),
         ]),
         // Right side: output
-        html.div([attribute.class("playground-output")], [
+        html.div([attribute.class("cafe-output")], [
           html.div([attribute.class("output-panel")], [
             html.div([attribute.class("output-header")], [
               html.span([], [html.text("Output")]),
@@ -73,8 +73,8 @@ pub fn view() -> Element(Nil) {
           ]),
         ]),
       ]),
-      // Load playground JS (ES module)
-      html.script([attribute.src("/js/playground.js"), attribute.type_("module")], ""),
+      // Load cafe JS (ES module)
+      html.script([attribute.src("/js/cafe.js"), attribute.type_("module")], ""),
     ]),
   )
 }

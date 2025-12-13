@@ -23,9 +23,9 @@ gleam run -m build  # Build the site to ./docs
 gleam test          # Run the tests
 ```
 
-## Updating the Playground Compiler
+## Updating the Cafe Compiler
 
-To update the Caffeine compiler in the playground:
+To update the Caffeine compiler in the cafe:
 
 ```sh
 ./scripts/update_compiler.sh

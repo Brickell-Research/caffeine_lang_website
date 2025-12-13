@@ -29,4 +29,4 @@ cd "$PROJECT_DIR"
 gleam run -m build
 
 echo ""
-echo "Done! Caffeine $VERSION is now available in the playground."
+echo "Done! Caffeine $VERSION is now available in the cafe."
