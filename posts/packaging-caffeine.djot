@@ -291,6 +291,7 @@ brew install caffeine_lang
 *To upgrade:*
 
 ```
+brew update
 brew upgrade caffeine_lang
 ```
 

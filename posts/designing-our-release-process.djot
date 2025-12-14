@@ -1,0 +1,155 @@
+---
+title = "Designing Our Release Process"
+date = "2025-12-13"
+summary = "How Caffeine Releases Work"
+author = "Rob Durst"
+tags = ["Gleam", "DevOps"]
+---
+
+*I'm building [Caffeine](https://github.com/Brickell-Research/caffeine_lang), a compiler written in Gleam that compiles service expectations to reliability artifacts.
+This post documents how we release new versions of Caffeine across our various distribution channels.
+
+***
+
+## At The Beginning It Was Just a Single CICD Pipeline
+
+The initial use case for Caffeine was to plug in to a CICD-esque Github Action at my day job to maintain our SLOs. In the ["Origin Story"](https://caffeine-lang.run/blog/origins) post I detail how we went from Terraform to a Ruby Terraform
+generator, to an early Caffeine prototype in Ruby, to Caffeine itself. The workflow for developers was a bit like this:
+
+*(1) Modify some simplified representation of SLO state in a Github Repo*
+
+{.figure}
+![Makeing Some Changes](/images/designing-our-release-process_make_some_changes.png)
+
+I didn't use [the cafe](https://caffeine-lang.run/cafe) to write Caffeine here... but nothing is stopping you 🤔
+
+
+*(2) Put up a PR.*
+
+{.figure}
+![Putting up a PR](/images/designing-our-release-process_put_up_a_pr.png)
+
+Merging the PR to then kick off CICD.
+
+*(3) CICD will execute the compiler against this input, generating and then applying the generated Terraform (with the terraform state living local to the repo).*
+
+{.figure}
+![Github Actions View](/images/designing-our-release-process_github_action.png)
+
+Successful CICD executions.
+
+*(4) Users then navigate and see the changes to SLOs in Datadog.*
+
+{.figure}
+![Datadog SLO View](/images/designing-our-release-process_datadog.png)
+
+A random overview of where I was collecting a subset of SLOs generated from caffeine.
+
+To more easily facilitate this effort, [I created a Github Action that enables folks to leverage this workflow](https://github.com/Brickell-Research/caffeine_lang_github_action) and I detail how it came to be in my ["Packaging Caffeine"](https://caffeine-lang.run/blog/packaging-caffeine)
+blog post.
+
+For better or worse, this Github Action just fetches the lates release, which for Caffeine, [is actually automated per a Github Action](https://github.com/Brickell-Research/caffeine_lang/blob/main/.github/workflows/release.yml) whenever I push a new release like so:
+
+```bash
+git tag v0.2.10
+git push origin v0.2.10
+```
+
+So we were set! All use cases were covered by some automation. No brain, no headache. 
+
+![Very nice gif](https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExOTYwYWtoNnplM2d3dTN4M3NkbHBydXNlMDZjYmRma2V3MDgwMGxpaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Od0QRnzwRBYmDU3eEO/giphy.gif)
+
+***
+
+## Onward and Upward (or rather Outward)
+
+### Homebrew 🏠☕️
+
+As I began to roll out tooling to more coworkers, I needed to use Caffeine in different environments. First off, the whole go install a binary process wasn't as easy as I'd have liked. "Oh yeah dude just go to
+my release page, unzip, etc. etc." Not great. Not [a pit of success](https://blog.codinghorror.com/falling-into-the-pit-of-success/). To solve this we just needed to leverage existing distribution mediums, a.k.a.
+OS package managers. Now I'm, at times, a "coolness-driven-development" guy. Who doesn't like to feel 😎 about the things they build. However, this is (not yet) my main line of work so I needed to stay pragmatic with a YAGNI mindset.
+Thus, since where I work is a MacBook shop, I targetted homebrew. Actually ended up being super easy: [see repo](https://github.com/Brickell-Research/homebrew-caffeine) and a brief note on [how I did it here](https://caffeine-lang.run/blog/packaging-caffeine#Update-(11/22/25):-Homebrew-Distribution-Support).
+
+So, if you're on a Mac, you're in luck!
+
+*Initial install:*
+
+```bash
+brew tap brickell-research/caffeine
+brew install caffeine_lang
+```
+
+
+*Updating for a new version:*
+
+```bash
+brew update
+brew upgrade caffeine_lang
+```
+
+### But I Don't Wanna Install Your Bits
+
+Time is always of the essence ([and if that theme of business hits home, I'd recommend one of Oliver Burkeman's books](https://en.wikipedia.org/wiki/Four_Thousand_Weeks:_Time_Management_for_Mortals)). So while I have a decent
+reputation at my place of work and even have the homebrew setup above, expecting people to install tools _before even demonstrating any value_ is an obstacle to adoption. Thus, I setup a playground (named `the cafe`) on the Caffeine
+website. This enabled me to say "hey, have five minutes" and very quickly demonstrate what exactly Caffeine was and how it worked.
+
+Check it out here: [the cafe](https://caffeine-lang.run/cafe). Pairs well with [the docs](https://caffeine-lang.run/docs).
+
+I do have plans to make this a full tour _at some point_ but since the language is very much in its `0.X.Y` phase of rapid development, this feels like a more useful post `1.0.0` launch when things are more stable.
+
+### Ok So What's the Problem?
+
+We now have four different distribution channels:
+
+* Caffeine compiler releases (main repo) - automated by Github Action ✅
+* Official Github Action -  automatically just picks up the latest version ✅
+* Homebrew - script to download SHA checksums and copy-paste ❌
+* The Cafe - script to build and copy over from local copy of Caffeine ❌
+
+Only two of the four are automated and while not the _most pressing issue right now_, something I'm interested in solving as it's become annoying to do a bunch of copy-pasta and script wrangling on every release.
+
+***
+
+## An Initial Brainstorm
+
+### Idea #1: Scripted Locally
+
+While it may be attractive to find a fancy automatic solution, we could also just leverage what we already have and script a complete local solution that pulls all the right bits to then oush up to the various distribution channels we have.
+
+The main issues here are:
+
+1. accidentally using different versions (i.e. for the cafe not building the latest branch and then pushing it up)
+
+2. forgetting to run the scripts
+
+As one might expect, the tradeoff here is simplicity vs. consistency and correctness.
+
+### Idea #2: Cross Repo Insanity
+
+Ok bare with me. Some context to my initial approach requires mentioning the "C" word.... cryptocurrency. 
+
+![Stick with me](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExNTJnb2lpY2JvMXNxems2cGNqdmNoeG15aWw2ODR2ODRidXljeXB5ayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ukwPlCmJ5RmlqvQCpA/giphy.gif).
+
+A previous project of mine was a [visual programming language for smart contracts](https://spaced-out-thoughts-development-foundation.org/2024/10/10/digicus-whitepaper.html). The way this worked was we had a common intermediate
+representation of smart contracts that we could compile smart contracts to, manipulate via a limited frontend interface, then compile back to smart contracts from. In a different life I may have taken this project all the way to
+the point of it being the LLVM of smart contract land (that was the vision...), _however_, adoption was exceptionally limited as smart contracts, unlike [Scratch](https://scratch.mit.edu/) require serious security and correctness and thus a visual
+programming language abstraction that peeled out these bits and made it decevingly easy for beginners to get started wasn't as effective as I initially hoped.
+
+Yet, from this work I figured out a way to automatically distribute new versions of various plugins that powered this programming environment.
+
+
+1. From a single repository ([for some reason called bean stock](https://github.com/spaced-out-thoughts-dev-foundation/bean-stock)), I would add each plugin as a submodule.
+
+2. Then from the plugin repository I had a manifest with some common interesting information (irrelevant here) and had a Github Action to remotely trigger the bean stock repo's module update Github Action to pull the latest versions of each submodule directory. 
+
+3. Finally, whenever I rebuilt the main application, it would clone the bean stock plugin directory and have the latest versions. 
+
+An obvious issue here is that we may not necesarily get the latest version of a plugin if the bean stock repo didn't also kick off a new build of the main application.
+
+... ok you survived, back to Caffeine land ....
+
+***
+
+## A Combination
+
+***
