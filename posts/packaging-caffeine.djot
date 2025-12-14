@@ -3,7 +3,7 @@ title = "Packaging Caffeine"
 date = "2025-11-18"
 summary = "A step-by-step guide to creating distributable binaries from Gleam code by targeting JavaScript and compiling with Deno."
 author = "Rob Durst"
-tags = ["Gleam", "Build tools"]
+tags = ["Gleam", "DevOps", "Homebrew"]
 ---
 
 Ok so I actually do roast my own coffee and for a brief while sold it on the internet.
