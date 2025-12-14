@@ -69,7 +69,7 @@ my release page, unzip, etc. etc." Not great. Not [a pit of success](https://blo
 OS package managers. Now I'm, at times, a "coolness-driven-development" guy. Who doesn't like to feel 😎 about the things they build. However, this is (not yet) my main line of work so I needed to stay pragmatic with a YAGNI mindset.
 Thus, since where I work is a MacBook shop, I targeted Homebrew. Actually ended up being super easy: [see repo](https://github.com/Brickell-Research/homebrew-caffeine) and a brief note on [how I did it here](https://caffeine-lang.run/blog/packaging-caffeine).
 
-So, if you're on a Mac, you're in luck!
+So, if you're on a Mac or Linux (x64), you're in luck!
 
 *Initial install:*
 
