@@ -40,12 +40,10 @@ pub fn all() -> List(Post) {
 
 fn load_post(slug: String, filepath: String) -> Result(Post, Nil) {
   use content <- result.try(
-    simplifile.read(filepath) |> result.replace_error(Nil)
+    simplifile.read(filepath) |> result.replace_error(Nil),
   )
 
-  use meta <- result.try(
-    djot.metadata(content) |> result.replace_error(Nil)
-  )
+  use meta <- result.try(djot.metadata(content) |> result.replace_error(Nil))
 
   let title = get_string(meta, "title", "Untitled")
   let date = get_string(meta, "date", "")
@@ -74,7 +72,11 @@ pub fn as_dict() -> Dict(String, Post) {
   |> dict.from_list
 }
 
-fn get_string(meta: Dict(String, tom.Toml), key: String, default: String) -> String {
+fn get_string(
+  meta: Dict(String, tom.Toml),
+  key: String,
+  default: String,
+) -> String {
   case dict.get(meta, key) {
     Ok(tom.String(s)) -> s
     _ -> default
@@ -98,7 +100,8 @@ fn get_tags(meta: Dict(String, tom.Toml), key: String) -> List(String) {
 
 pub fn calculate_reading_time(content: String) -> Int {
   // Calculate word count (split by whitespace)
-  let words = string.split(content, " ")
+  let words =
+    string.split(content, " ")
     |> list.length
 
   // Average reading speed: 200 words per minute

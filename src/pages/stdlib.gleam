@@ -24,7 +24,10 @@ pub fn view(ref: StdlibRef) -> Element(Nil) {
       ]),
       html.aside([attribute.class("stdlib-sidebar")], [
         html.h3([], [html.text("On This Page")]),
-        html.nav([attribute.class("stdlib-nav"), attribute.id("stdlib-toc")], []),
+        html.nav(
+          [attribute.class("stdlib-nav"), attribute.id("stdlib-toc")],
+          [],
+        ),
       ]),
     ]),
   )
@@ -44,7 +47,10 @@ pub fn fallback_view() -> Element(Nil) {
       ]),
       html.aside([attribute.class("stdlib-sidebar")], [
         html.h3([], [html.text("On This Page")]),
-        html.nav([attribute.class("stdlib-nav"), attribute.id("stdlib-toc")], []),
+        html.nav(
+          [attribute.class("stdlib-nav"), attribute.id("stdlib-toc")],
+          [],
+        ),
       ]),
     ]),
   )

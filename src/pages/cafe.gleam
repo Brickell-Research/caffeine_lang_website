@@ -27,7 +27,9 @@ pub fn view() -> Element(Nil) {
           // Blueprints editor
           html.div([attribute.class("editor-panel")], [
             html.div([attribute.class("editor-header")], [
-              html.span([attribute.class("editor-label")], [html.text("Blueprint")]),
+              html.span([attribute.class("editor-label")], [
+                html.text("Blueprint"),
+              ]),
               html.span([attribute.class("editor-filename")], [
                 html.text("blueprints.json"),
               ]),
@@ -40,7 +42,9 @@ pub fn view() -> Element(Nil) {
           // Expectations editor
           html.div([attribute.class("editor-panel")], [
             html.div([attribute.class("editor-header")], [
-              html.span([attribute.class("editor-label")], [html.text("Expectation")]),
+              html.span([attribute.class("editor-label")], [
+                html.text("Expectation"),
+              ]),
               html.span([attribute.class("editor-filename")], [
                 html.text("cafe/demo/service.json"),
               ]),

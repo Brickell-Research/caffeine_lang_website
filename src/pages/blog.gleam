@@ -44,20 +44,36 @@ fn list_posts(all_posts: List(Post)) -> List(Element(Nil)) {
           n -> int.to_string(n) <> " min read"
         }
 
-        html.li([attribute.class("post-item"), attribute.attribute("data-tags", string.join(post.tags, ","))], [
-          html.a([attribute.href("/blog/" <> post.slug)], [
-            html.h2([], [html.text(post.title)]),
-            html.p([attribute.class("post-date")], [
-              html.text(post.date <> " · by " <> post.author <> " · " <> reading_time_text),
+        html.li(
+          [
+            attribute.class("post-item"),
+            attribute.attribute("data-tags", string.join(post.tags, ",")),
+          ],
+          [
+            html.a([attribute.href("/blog/" <> post.slug)], [
+              html.h2([], [html.text(post.title)]),
+              html.p([attribute.class("post-date")], [
+                html.text(
+                  post.date
+                  <> " · by "
+                  <> post.author
+                  <> " · "
+                  <> reading_time_text,
+                ),
+              ]),
+              html.p([attribute.class("post-summary")], [
+                html.text(post.summary),
+              ]),
+              html.div(
+                [attribute.class("post-tags")],
+                post.tags
+                  |> list.map(fn(tag) {
+                    html.span([attribute.class("tag")], [html.text(tag)])
+                  }),
+              ),
             ]),
-            html.p([attribute.class("post-summary")], [html.text(post.summary)]),
-            html.div([attribute.class("post-tags")],
-              post.tags |> list.map(fn(tag) {
-                html.span([attribute.class("tag")], [html.text(tag)])
-              })
-            ),
-          ]),
-        ])
+          ],
+        )
       })
   }
 }
@@ -83,35 +99,50 @@ fn tag_filter_sidebar(tag_counts: List(#(String, Int))) -> Element(Nil) {
       html.h3([], [html.text("Filter by Tag")]),
       html.div([attribute.class("sort-controls")], [
         html.button(
-          [attribute.class("sort-btn active"), attribute.attribute("data-sort", "alpha")],
+          [
+            attribute.class("sort-btn active"),
+            attribute.attribute("data-sort", "alpha"),
+          ],
           [html.text("A-Z")],
         ),
         html.button(
-          [attribute.class("sort-btn"), attribute.attribute("data-sort", "count")],
+          [
+            attribute.class("sort-btn"),
+            attribute.attribute("data-sort", "count"),
+          ],
           [html.text("#")],
         ),
       ]),
     ]),
-    html.div([attribute.class("tag-filters")],
+    html.div(
+      [attribute.class("tag-filters")],
       list.map(tag_counts, fn(tag_count) {
         let #(tag, count) = tag_count
         html.button(
-          [attribute.class("filter-tag"), attribute.attribute("data-tag", tag), attribute.attribute("data-count", int.to_string(count))],
-          [html.text(tag), html.span([attribute.class("tag-count")], [
-            html.text("(" <> int.to_string(count) <> ")"),
-          ])],
+          [
+            attribute.class("filter-tag"),
+            attribute.attribute("data-tag", tag),
+            attribute.attribute("data-count", int.to_string(count)),
+          ],
+          [
+            html.text(tag),
+            html.span([attribute.class("tag-count")], [
+              html.text("(" <> int.to_string(count) <> ")"),
+            ]),
+          ],
         )
-      })
+      }),
     ),
   ])
 }
 
 pub fn post_view(post: Post) -> Element(Nil) {
-  let meta = PageMeta(
-    title: post.title,
-    description: Some(post.summary),
-    url: Some("https://caffeine-lang.org/blog/" <> post.slug),
-  )
+  let meta =
+    PageMeta(
+      title: post.title,
+      description: Some(post.summary),
+      url: Some("https://caffeine-lang.org/blog/" <> post.slug),
+    )
 
   // Add TOC div before post content
   let toc_div = html.div([attribute.class("toc")], [])

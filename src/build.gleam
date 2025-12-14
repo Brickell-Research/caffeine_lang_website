@@ -3,9 +3,9 @@ import gleam/io
 import gleam/string
 import lustre/ssg
 import pages/blog
+import pages/cafe
 import pages/docs as docs_page
 import pages/home
-import pages/cafe
 import pages/stdlib as stdlib_page
 import posts/posts
 import stdlib/stdlib
