@@ -39,7 +39,7 @@ pub fn view() -> Element(Nil) {
           html.pre([attribute.class("code-block")], [
             html.code([attribute.class("language-bash")], [
               html.text(
-                "brew tap Brickell-Research/caffeine_lang && brew install caffeine",
+                "brew tap Brickell-Research/caffeine && brew install caffeine_lang",
               ),
             ]),
           ]),
