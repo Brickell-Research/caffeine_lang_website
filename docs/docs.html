@@ -178,15 +178,20 @@ take the form of:</p><div><table>
       <td>Dict(String, T)</td>
       <td>A key-value mapping where <code>String</code> is the key type and T is the value type (e.g., <code>Dict(String, Integer)</code>). Supported inner types: <code>String</code>, <code>Integer</code>, <code>Boolean</code>, <code>Float</code>.</td>
     </tr>
+    <tr>
+      <td>Defaulted(T, value)</td>
+      <td>A value with a default. The first argument is the type, the second is the default value as a string (e.g., <code>Defaulted(Integer, 10)</code> means an optional integer with default 10). Supported inner types: <code>String</code>, <code>Integer</code>, <code>Boolean</code>, <code>Float</code>, <code>List(String)</code>, <code>List(Integer)</code>, <code>List(Boolean)</code>, <code>List(Float)</code>.</td>
+    </tr>
   </tbody>
 </table></div><h4 id="Technical-Details">Technical Details</h4><p>While the <em>type</em> definition technically allows infinite recursion as it is currently defined:</p><pre><code data-lang="gleam">pub type AcceptedTypes {
   Boolean
   Float
   Integer
   String
-  List(AcceptedTypes)
   Dict(AcceptedTypes, AcceptedTypes)
+  List(AcceptedTypes)
   Optional(AcceptedTypes)
+  Defaulted(AcceptedTypes, String)
 }
 </code></pre><p>We do limit it intentionally within the Caffeine compiler at this time with the restrictions on collection types noted in the table above.</p><h3 id="Multi-Inheritance">Multi-Inheritance</h3><p>There is no support for <a href="https://en.wikipedia.org/wiki/Multiple_inheritance">multi-inheritance</a> within the existing design of Caffeine: we do not support a single service expectation referencing multiple blueprints or a single blueprint referencing multiple artifacts. This 1:1 relationship seems sensible and we do not want
 to think hard about the <a href="https://www.geeksforgeeks.org/cpp/diamond-problem-in-cpp/">diamond problem</a>...</p><hr></div></article><aside class="docs-sidebar"><h3>On This Page</h3><nav class="docs-nav" id="docs-toc"></nav></aside></div></main><footer class="site-footer"><div class="footer-content"><p>Built with <a href="https://gleam.run" target="_blank">Gleam</a> and <a href="https://github.com/lustre-labs/ssg" target="_blank">Lustre SSG</a></p><p>© 2025 <a href="https://brickellresearch.org/" target="_blank">Brickell Research</a></p></div></footer><script>
