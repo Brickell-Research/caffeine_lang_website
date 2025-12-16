@@ -295,6 +295,10 @@ Accepted Types are type names leveraged throughout Caffeine configuration files 
       <td>Dict(String, T)</td>
       <td>A key-value mapping where <code>String</code> is the key type and T is the value type (e.g., <code>Dict(String, Integer)</code>). Supported inner types: <code>String</code>, <code>Integer</code>, <code>Boolean</code>, <code>Float</code>.</td>
     </tr>
+    <tr>
+      <td>Defaulted(T, value)</td>
+      <td>A value with a default. The first argument is the type, the second is the default value as a string (e.g., <code>Defaulted(Integer, 10)</code> means an optional integer with default 10). Supported inner types: <code>String</code>, <code>Integer</code>, <code>Boolean</code>, <code>Float</code>, <code>List(String)</code>, <code>List(Integer)</code>, <code>List(Boolean)</code>, <code>List(Float)</code>.</td>
+    </tr>
   </tbody>
 </table>
 ```
@@ -309,9 +313,10 @@ pub type AcceptedTypes {
   Float
   Integer
   String
-  List(AcceptedTypes)
   Dict(AcceptedTypes, AcceptedTypes)
+  List(AcceptedTypes)
   Optional(AcceptedTypes)
+  Defaulted(AcceptedTypes, String)
 }
 ```
 
