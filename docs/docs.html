@@ -209,7 +209,7 @@ to think hard about the <a href="https://www.geeksforgeeks.org/cpp/diamond-probl
         if (typeof Prism !== 'undefined') { Prism.highlightAll(); }
         // Generate Table of Contents
         document.querySelectorAll('.post-content .toc').forEach(function(tocContainer) {
-          var headers = document.querySelectorAll('.post-content h2[id], .post-content h3[id], .post-content h4[id]');
+          var headers = document.querySelectorAll('.post-content h1[id], .post-content h2[id], .post-content h3[id], .post-content h4[id]');
 
           if (headers.length === 0) return;
 
@@ -238,8 +238,10 @@ to think hard about the <a href="https://www.geeksforgeeks.org/cpp/diamond-probl
           tocTitle.textContent = 'Table of Contents';
 
           var tocList = document.createElement('ul');
+          var currentH1 = null;
           var currentH2 = null;
           var currentH3 = null;
+          var h1Count = 0;
           var h2Count = 0;
           var h3Count = 0;
 
@@ -249,13 +251,18 @@ to think hard about the <a href="https://www.geeksforgeeks.org/cpp/diamond-probl
             var link = document.createElement('a');
             link.href = '#' + header.id;
 
-            if (level === 'h2') {
+            if (level === 'h1') {
+              h1Count++;
+              h2Count = 0;
+              h3Count = 0;
+              link.textContent = toRoman(h1Count) + '. ' + text;
+            } else if (level === 'h2') {
               h2Count++;
-              h3Count = 0; // Reset h3 counter for new h2 section
-              link.textContent = toRoman(h2Count) + '. ' + text;
+              h3Count = 0;
+              link.textContent = toLetter(h2Count) + '. ' + text;
             } else if (level === 'h3') {
               h3Count++;
-              link.textContent = toLetter(h3Count) + '. ' + text;
+              link.textContent = h3Count + '. ' + text;
             } else {
               link.textContent = text;
             }
@@ -263,7 +270,20 @@ to think hard about the <a href="https://www.geeksforgeeks.org/cpp/diamond-probl
             var li = document.createElement('li');
             li.appendChild(link);
 
-            if (level === 'h2') {
+            if (level === 'h1') {
+              tocList.appendChild(li);
+              currentH1 = li;
+              currentH2 = null;
+              currentH3 = null;
+            } else if (level === 'h2' && currentH1) {
+              if (!currentH1.querySelector('ul')) {
+                var ul = document.createElement('ul');
+                currentH1.appendChild(ul);
+              }
+              currentH1.querySelector('ul').appendChild(li);
+              currentH2 = li;
+              currentH3 = null;
+            } else if (level === 'h2') {
               tocList.appendChild(li);
               currentH2 = li;
               currentH3 = null;
@@ -288,7 +308,7 @@ to think hard about the <a href="https://www.geeksforgeeks.org/cpp/diamond-probl
         });
 
         // Add anchor links to headers
-        document.querySelectorAll('.post-content h2[id], .post-content h3[id], .post-content h4[id]').forEach(function(header) {
+        document.querySelectorAll('.post-content h1[id], .post-content h2[id], .post-content h3[id], .post-content h4[id]').forEach(function(header) {
           var anchor = document.createElement('span');
           anchor.className = 'header-anchor';
           anchor.innerHTML = '#';

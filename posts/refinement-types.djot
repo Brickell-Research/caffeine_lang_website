@@ -1,0 +1,233 @@
+---
+title = "Refinement Types"
+date = "2025-12-18"
+summary = "An overview on the motivation and design of refinement types in Caffeine"
+author = "Rob Durst"
+tags = ["Gleam", "Type Theory"]
+---
+
+*I'm building [Caffeine](https://github.com/Brickell-Research/caffeine_lang), a compiler written in Gleam that compiles service expectations to reliability artifacts.
+This post documents the motivation and design of refinement type support in Caffeine.*
+
+***
+
+# Motivation
+
+## The Basics
+
+One of the core functions of Caffeine is to resolve _"cascading"_ input ➡️ param configurations. Within the [docs](https://caffeine-lang.run/docs) we define the three different personas for each level of the
+configuration hierarchy:
+
+1. artifacts    -> caffeine core developer
+
+2. blueprints   -> observability expert
+
+3. expectations -> service owner
+
+Thus, since it may not be the same person defining each specification here, we, from the initial [`0.2.2`](https://github.com/Brickell-Research/caffeine_lang/releases/tag/v0.2.2) release, enabled developers to bind a type to each param. As an example, consider artifact:
+
+```json
+{
+  "artifacts": [
+    {
+      "name": "SLO",
+      "version": "0.0.1",
+      "base_params": {
+        "threshold": "Float",
+        "window_in_days": "Integer"
+      },
+      "params": {
+        "queries": "Dict(String, String)",
+        "value": "String",
+        "vendor": "String"
+      }
+    }
+  ]
+}
+```
+
+With this, we place a constraint on the input values (even if not super restrictive). Here we had two basic "categories" of types:
+
+
+*primitive types:*
+
+```
+Boolean
+Integer
+Float
+String
+```
+
+*collection types:*
+
+```
+List(T): T must be a primitive
+Dict(T, V): T and V must both be primitives
+```
+
+As noted, there are a few restrictions on the collection types themselves. These may be lifted in the future, but the goal here was to simplify the initial design and also not enable infinitely recursive collections, i.e.:
+
+```
+List(List(Dict(Int, List(String))))
+```
+
+For an initial rollout, this was nice as it (a) got initial users comfortable with types and (b) forced us to lay the groundwork within the Caffeine compiler to support type checking.
+
+
+## Modifier Types
+
+The more we wrote `artifacts`, `blueprints`, and `expectations`, the more we began to desire some additional param behavior.
+
+### Optional Types
+
+It turns out some queries required certain inputs only in some circumstances. One specific example is an http success rate query which might optionally include a _"status code exclusion"_ `List(Int)` param.
+
+I.E. consider the following.
+
+```
+sum.http_requests{$$status_codes:exclusion_status_codes:not$$}
+```
+
+For one endpoint we may want to ignore `400` and `401` but for another endpoint all status codes might be valid. With the `Optional` type, which has a form of:
+
+```
+Optional(T): T can be a primitive or a collection
+```
+
+So for this specific situation we'd specify:
+
+```json
+"exclusion_status_codes": "Optional(List(Integer))"
+```
+
+Thus when we resolve the query, if the attribute is excluded in the input specifying configuration, we'd ignore it.
+
+### Defaulted Types
+
+While `Optional` _enabled_ more use cases and extended flexibility, `Defaulted` seeks to improve developer experience by reducing duplication and boilerplate.
+
+As an example, most queries we'd written thus far relied on an `environment` param:
+
+```json
+"params": {
+  "environment": "String"
+}
+```
+
+Unsurprisingly, most expectations would then specify: `environment: production`. In fact, >95% of all SLOs I've written with Caffeine at work fall within this category. So, we introduced `Defaulted` to handle this 
+redundancy issue. Now, instead of the above, we could specify a default value for the `environment` param as so:
+
+
+```json
+"params": {
+  "environment": "Defaulted(String, production)"
+}
+```
+
+With this, where we'd previously had to specify `environment: production`, we could just drop that input. Some might righteously argue that implicit params might lead to confusion and unintentional errors. However,
+we believe this is a tradeoff we should at least leave up to the developers and not take a strong stance ourselves (and thus to hold ourselves, the core team, to this standard, there will be _no_ `Defaulted` types in
+the standard library... as appealing as that may seem for `window_in_days`).
+
+As of the [`0.2.11`](https://github.com/Brickell-Research/caffeine_lang/releases/tag/v0.2.11) release both of these types are available!
+
+### Refinement Types
+
+Ok, so with `primitive` and `collection` types we get the basics most folks would expect, and with `modifier` types we get a few handy types to enable more use cases and enable reduction of repeated common input specification. But what if
+we want to further guide consumers of our artifacts and blueprints? What if we want to not just constrain the general shape of a value (e.g., "it's an integer") but further restrict which specific values are valid? For this, we need [refinement types](https://en.wikipedia.org/wiki/Refinement_type)!
+
+Formally, a refinement type has the form `{ x : T | P(x) }` where `T` is the base type and `P` is a predicate that must hold for all values of the refined type.
+
+As an example, let's say we have a `String` type, such as environment, in which we know the possible values are just a subset. With refinement types we could say:
+
+```json
+"environment": "String { x | x in { production, staging, development } }"
+```
+ 
+Or imagine we have an integer, say threshold, which we want to limit to just a specific range. With refinement types we could say:
+
+```json
+"threshold": "Integer { x | x in (0, 100) }"
+```
+
+Or finally, imagine a list, say pair, which we want to ensure is just two values. With refinement types we could say:
+
+```json
+"pair": "List(String) { x | length(x) = 2 }"
+```
+
+This allows the compiler to provide stronger guidance when writing expectations.
+
+***
+
+# Design
+
+## The Four L's of Caffeine's Refinement Type Design
+
+From the get-go we started by (a) keeping the type inputs as they are, appending the refinement to the end and (b) surrounding the refinement with curly braces.
+
+```
+EXISTING_TYPE { REFINEMENT }
+```
+
+From here we defined the principles for `REFINEMENT`, ending up with the "four L's":
+
+1. (L)egible
+
+2. (L)ight Notation
+
+3. (L)ow Effort
+
+4. (L)imited
+
+### Legible
+
+We should be able to reason about the predicate by reading it from left to right.
+
+### Light Notation
+
+Avoid notation that is _"too mathy"_: prefer `in` over `∈`, `and` over `&&`, etc. However, `|` is fine to divide the bound variable from the predicate. Even if folks don't know that the `|` means "such that" it should
+at least be understood at _face value_ as the thing on the left where it is restricted in some way by the thing on the right.
+
+### Low Effort
+
+While overly concise syntax might actually diminish legibility, prefer fewer characters to more. We want adding refinements to feel simple and easy, not cumbersome. They should require very little brainpower: even the tired
+dev after a strenuous day at work should be able to quickly write a `REFINEMENT`.
+
+### Limited
+
+We will start small and expand. In fact, we will do this over two dimensions:
+
+1. *type support:* start with just primitives where it makes sense
+
+2. *refinement support*: pick a simple one like `OneOf` and implement in full to get the design right. Test with a few folks. Then go from there. Don't overcommit before getting feedback and a full end-to-end implementation.
+
+## Starting with OneOf
+
+Here is a full design spec for our first refinement predicate: `OneOf` (set membership).
+
+### Supported Types
+
+To begin, we will just support a subset of primitives: `Integer`, `Float`, and `String` (technically we could support all but `Boolean` would be weird...).
+
+### Full Example
+
+```json
+Integer { x | x in { 7, 30, 90 } }
+```
+
+Here the syntax is hopefully fairly straightforward. As we mentioned above, the `REFINEMENT` is appended to the right of the type, within two curly braces. In this refinement specifically, we have our type variable `x` to the left
+of the "such that" divisor line (`|`). Then we have a predicate that states `x` must be within some set.
+
+This set has two restrictions:
+
+1. each element must be the type left of the `REFINEMENT`
+
+2. the set must be non-empty
+
+Furthermore, values within the set are comma delimited.
+
+***
+
+# Conclusion
+
+The caffeine refinement types journey is in the early stages of development. We expect `OneOf` to be released sometime in the next couple weeks as part of `1.1.0`. Stay tuned!
