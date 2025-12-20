@@ -65,7 +65,7 @@ List(T): T must be a primitive
 Dict(T, V): T and V must both be primitives
 ```
 
-As noted, there are a few restrictions on the collection types themselves. These may be lifted in the future, but the goal here was to simplify the initial design and also not enable infinitely recursive collections, i.e.:
+As noted, there are a few restrictions on the collection types themselves. These may be lifted in the future, but the goal here was to simplify the initial design and also not enable arbitrarily nested collections, i.e.:
 
 ```
 List(List(Dict(Int, List(String))))
@@ -135,25 +135,28 @@ As of the [`0.2.11`](https://github.com/Brickell-Research/caffeine_lang/releases
 Ok, so with `primitive` and `collection` types we get the basics most folks would expect, and with `modifier` types we get a few handy types to enable more use cases and enable reduction of repeated common input specification. But what if
 we want to further guide consumers of our artifacts and blueprints? What if we want to not just constrain the general shape of a value (e.g., "it's an integer") but further restrict which specific values are valid? For this, we need [refinement types](https://en.wikipedia.org/wiki/Refinement_type)!
 
-Formally, a refinement type has the form `{ x : T | P(x) }` where `T` is the base type and `P` is a predicate that must hold for all values of the refined type.
+Formally, a refinement type has the form `{ x : T | P(x) }` where `T` is the base type and `P` is a predicate that must hold for all values of the refined type. In Caffeine, refinements are compile-time constraints checked when validating expectations (configuration), not a runtime type system. We're starting with _decidable, finite_ refinements (e.g., membership in an explicit set) rather than a general SMT-backed refinement logic.
 
 As an example, let's say we have a `String` type, such as environment, in which we know the possible values are just a subset. With refinement types we could say:
 
 ```json
 "environment": "String { x | x in { production, staging, development } }"
 ```
- 
-Or imagine we have an integer, say threshold, which we want to limit to just a specific range. With refinement types we could say:
+
+Or imagine we have an integer, say `window_in_days`, which we want to limit to a known set of values:
 
 ```json
-"threshold": "Integer { x | x in (0, 100) }"
+"window_in_days": "Integer { x | x in { 7, 30, 90 } }"
 ```
 
-Or finally, imagine a list, say pair, which we want to ensure is just two values. With refinement types we could say:
+_Looking ahead_, we could imagine extending refinements to support other predicates like numeric ranges or collection constraints:
 
 ```json
+"threshold": "Integer { x | x > 0 and x < 100 }"
 "pair": "List(String) { x | length(x) = 2 }"
 ```
+
+These are aspirational examples; for now, we're focused on `OneOf` (set membership) as described below.
 
 This allows the compiler to provide stronger guidance when writing expectations.
 
@@ -185,8 +188,7 @@ We should be able to reason about the predicate by reading it from left to right
 
 ### Light Notation
 
-Avoid notation that is _"too mathy"_: prefer `in` over `∈`, `and` over `&&`, etc. However, `|` is fine to divide the bound variable from the predicate. Even if folks don't know that the `|` means "such that" it should
-at least be understood at _face value_ as the thing on the left where it is restricted in some way by the thing on the right.
+Avoid notation that is _"too mathy"_: prefer `in` over `∈`. The `|` is fine to divide the bound variable from the predicate. Even if folks don't know that the `|` means "such that" it should at least be understood at _face value_ as the thing on the left where it is restricted in some way by the thing on the right. (For future refinements that support boolean connectives, we'll prefer `and` over `&&`, etc.)
 
 ### Low Effort
 
@@ -199,7 +201,7 @@ We will start small and expand. In fact, we will do this over two dimensions:
 
 1. *type support:* start with just primitives where it makes sense
 
-2. *refinement support*: pick a simple one like `OneOf` and implement in full to get the design right. Test with a few folks. Then go from there. Don't overcommit before getting feedback and a full end-to-end implementation.
+2. *refinement support*: pick a simple one like `OneOf` and implement in full (parser, type-checker, error messages, docs) to get the design right. Test with a few folks. Then go from there. Don't overcommit before getting feedback and a full end-to-end implementation.
 
 ## Starting with OneOf
 
@@ -226,11 +228,27 @@ This set has two restrictions:
 
 Furthermore, values within the set are comma delimited.
 
+### Literal Syntax
+
+String values within refinement sets can be bare identifiers matching `[a-zA-Z_][a-zA-Z0-9_]*`. For values containing dashes, dots, spaces, or other special characters, use double quotes: `{ "prod-us-east-1", "staging-eu" }`. Numeric literals follow standard integer/float syntax.
+
+### Float Equality
+
+`Float` membership in `OneOf` uses exact numeric equality after parsing. Be aware that floating-point representation quirks (e.g., `0.1 + 0.2 != 0.3`) may cause surprises. For most use cases, `Integer` or `String` membership is more predictable.
+
+### Composing with Optional and Defaulted
+
+Refinements compose with `Optional` and `Defaulted` as follows:
+
+- `Optional(String { x | x in { ... } })`: the key may be omitted; if present, the value must satisfy the refinement.
+- `Defaulted(String { x | x in { ... } }, "production")`: the default value must satisfy the refinement.
+- Refinements apply to the _underlying value_ when present.
+
 ***
 
 # Conclusion
 
-The caffeine refinement types journey is in the early stages of development. We expect `OneOf` to be released sometime in the next couple weeks as part of `1.1.0`. Stay tuned! 
+The Caffeine refinement types journey is in the early stages of development. We expect `OneOf` to be released as part of `1.1.0`. (Status: design in progress; not released as of v1.0.2.) Stay tuned! 
 
 And Happy Holidays!!! 🎄🕎❄️
 
