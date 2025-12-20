@@ -68,7 +68,7 @@ Dict(T, V): T and V must both be primitives
 As noted, there are a few restrictions on the collection types themselves. These may be lifted in the future, but the goal here was to simplify the initial design and also not enable arbitrarily nested collections, i.e.:
 
 ```
-List(List(Dict(Int, List(String))))
+List(List(Dict(Integer, List(String))))
 ```
 
 For an initial rollout, this was nice as it (a) got initial users comfortable with types and (b) forced us to lay the groundwork within the Caffeine compiler to support type checking.
@@ -80,7 +80,7 @@ The more we wrote `artifacts`, `blueprints`, and `expectations`, the more we beg
 
 ### Optional Types
 
-It turns out some queries required certain inputs only in some circumstances. One specific example is an http success rate query which might optionally include a _"status code exclusion"_ `List(Int)` param.
+It turns out some queries required certain inputs only in some circumstances. One specific example is an http success rate query which might optionally include a _"status code exclusion"_ `List(Integer)` param.
 
 I.E. consider the following.
 
@@ -248,7 +248,7 @@ Refinements compose with `Optional` and `Defaulted` as follows:
 
 # Conclusion
 
-The Caffeine refinement types journey is in the early stages of development. We expect `OneOf` to be released as part of `1.1.0`. (Status: design in progress; not released as of v1.0.2.) Stay tuned! 
+The Caffeine refinement types journey is in the early stages of development. We expect `OneOf` to be released as part of `1.1.0`. Stay tuned! 
 
 And Happy Holidays!!! 🎄🕎❄️
 
