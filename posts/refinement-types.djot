@@ -217,7 +217,7 @@ To begin, we will just support a subset of primitives: `Integer`, `Float`, and `
 Integer { x | x in { 7, 30, 90 } }
 ```
 
-Here the syntax is hopefully fairly straightforward. As we mentioned above, the `REFINEMENT` is appended to the right of the type, within two curly braces. In this refinement specifically, we have our type variable `x` to the left
+Here the syntax is hopefully fairly straightforward. As we mentioned above, the `REFINEMENT` is appended to the right of the type, inside curly braces. In this refinement specifically, we have our type variable `x` to the left
 of the "such that" divisor line (`|`). Then we have a predicate that states `x` must be within some set.
 
 This set has two restrictions:
