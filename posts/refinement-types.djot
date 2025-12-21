@@ -228,14 +228,6 @@ This set has two restrictions:
 
 Furthermore, values within the set are comma delimited.
 
-### Literal Syntax
-
-String values within refinement sets can be bare identifiers matching `[a-zA-Z_][a-zA-Z0-9_]*`. For values containing dashes, dots, spaces, or other special characters, use double quotes: `{ "prod-us-east-1", "staging-eu" }`. Numeric literals follow standard integer/float syntax.
-
-### Float Equality
-
-`Float` membership in `OneOf` uses exact numeric equality after parsing. Be aware that floating-point representation quirks (e.g., `0.1 + 0.2 != 0.3`) may cause surprises. For most use cases, `Integer` or `String` membership is more predictable.
-
 ### Composing with Optional and Defaulted
 
 Refinements compose with `Optional` and `Defaulted` as follows:
