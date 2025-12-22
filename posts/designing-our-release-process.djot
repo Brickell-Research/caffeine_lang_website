@@ -1,9 +1,10 @@
 ---
 title = "Designing Our Unified Release Process"
 date = "2025-12-13"
+updated = "2025-12-22"
 summary = "How Caffeine Releases Work"
 author = "Rob Durst"
-tags = ["DevOps", "Github Actions", "Homebrew"]
+tags = ["DevOps", "Github Actions", "Homebrew", "Hex"]
 ---
 
 *I'm building [Caffeine](https://github.com/Brickell-Research/caffeine_lang), a compiler written in Gleam that compiles service expectations to reliability artifacts.
@@ -106,6 +107,8 @@ We now have four different distribution channels:
 
 Only two of the four are automated. While not the _most pressing issue right now_, it's something I'm interested in solving as it's become annoying to do a bunch of copy-pasta and script wrangling on every release.
 
+_Note: This has since been solved! See the [update below](#update-hex-publishing-december-2025) for how we now handle all five distribution channels automatically._
+
 ***
 
 ## Brainstorming
@@ -190,5 +193,60 @@ Briefly, the two automated release processes work like this:
 ```
 
 At time of writing, this is our solution. It does its job, it's easy to grok, and it's only ~200 lines of code... feels like a win!
+
+***
+
+## Update: Hex Publishing (December 2025)
+
+With Caffeine reaching 1.0, it felt like time to add another distribution channel: [Hex](https://hex.pm/), the package manager for the Erlang ecosystem. While Caffeine is primarily distributed as a CLI binary, publishing to Hex enables Gleam developers to use Caffeine as a library dependency directly.
+
+### Adding Hex to the Pipeline
+
+Hex publishing turned out to be the simplest addition to our release workflow. Since `gleam.toml` already contains all the metadata Hex needs (name, version, description, license, repository), publishing is just:
+
+```bash
+gleam publish --yes
+```
+
+The `HEXPM_API_KEY` environment variable (sourced from a GitHub secret) handles authentication. We added this step right after creating the GitHub release but before updating Homebrew and the website.
+
+### Making It Idempotent
+
+One thing I wanted to ensure was that the entire release pipeline could be re-run safely. If a release partially failed (say, Homebrew updated but the website didn't), I wanted to be able to re-trigger the workflow without it failing on already-completed steps.
+
+For Hex, this meant handling the case where a version is already published:
+
+```yaml
+- name: Publish to Hex
+  env:
+    HEXPM_API_KEY: ${{ secrets.HEX_RELEASE_KEY }}
+  run: |
+    VERSION=${{ steps.version.outputs.version }}
+    echo "Publishing caffeine_lang v${VERSION} to Hex..."
+    if gleam publish --yes 2>&1; then
+      echo "Published to Hex successfully"
+    else
+      echo "Hex publish failed (version may already exist) - continuing"
+    fi
+```
+
+We applied similar idempotency patterns across the pipeline:
+
+* `GitHub Release`: Check if release exists before creating
+* `Hex`: Gracefully handle "already published" errors
+* `Homebrew`: Only commit if the formula actually changed
+* `Website (The Cafe)`: Only commit if files actually changed
+
+Now our five distribution channels all update atomically on `git push origin vX.Y.Z`, and re-running is always safe.
+
+### Current Distribution Channels
+
+* ✅ Caffeine compiler releases (main repo) - automated
+* ✅ Official Github Action - automatically picks up latest
+* ✅ Hex - automated
+* ✅ Homebrew - automated
+* ✅ The Cafe - automated
+
+All five channels. All automated. One `git tag` and `git push` 🤘.
 
 ***
