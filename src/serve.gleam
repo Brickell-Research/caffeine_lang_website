@@ -11,10 +11,10 @@ import simplifile
 pub fn main() {
   let assert Ok(_) =
     mist.new(handler)
-    |> mist.port(8000)
+    |> mist.port(8080)
     |> mist.start
 
-  io.println("Server running at http://localhost:8000")
+  io.println("Server running at http://localhost:8080")
   process.sleep_forever()
 }
 
