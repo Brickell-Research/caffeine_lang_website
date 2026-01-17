@@ -185,6 +185,7 @@ pub fn view_with_meta(meta: PageMeta, content: Element(Nil)) -> Element(Nil) {
       sessionReplaySampleRate: 20,
       trackBfcacheViews: true,
       defaultPrivacyLevel: 'mask-user-input',
+      allowFallbackToLocalStorage: true,
     });
   })",
     ),
