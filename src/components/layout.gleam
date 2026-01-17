@@ -166,6 +166,28 @@ pub fn view_with_meta(meta: PageMeta, content: Element(Nil)) -> Element(Nil) {
       [],
       "window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()",
     ),
+    // Datadog RUM
+    html.script(
+      [],
+      "(function(h,o,u,n,d) {
+    h=h[d]=h[d]||{q:[],onReady:function(c){h.q.push(c)}}
+    d=o.createElement(u);d.async=1;d.src=n
+    n=o.getElementsByTagName(u)[0];n.parentNode.insertBefore(d,n)
+  })(window,document,'script','https://www.datadoghq-browser-agent.com/us1/v6/datadog-rum.js','DD_RUM')
+  window.DD_RUM.onReady(function() {
+    window.DD_RUM.init({
+      clientToken: 'pub29dda8cc665a99e590dd250a5c032b10',
+      applicationId: '95e6c5af-bff4-443c-a6bb-36b3238e0e1b',
+      site: 'datadoghq.com',
+      service: 'caffeine-lang-website',
+      env: 'production',
+      sessionSampleRate: 100,
+      sessionReplaySampleRate: 20,
+      trackBfcacheViews: true,
+      defaultPrivacyLevel: 'mask-user-input',
+    });
+  })",
+    ),
   ]
 
   let head_content =
