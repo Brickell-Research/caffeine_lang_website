@@ -1,0 +1,23 @@
+src/components/layout.gleam
+  913533620ce25428 169-190
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.0.35",
+  "base_commit_sha": "f882b5b2907c07d497d6c819da8d1b5a246093c0",
+  "prompts": {
+    "913533620ce25428": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c549ae82-3e3b-4958-bbaa-16d718619228",
+        "model": "claude-opus-4-5-20251101"
+      },
+      "human_author": "surf-bob <l030f5ca6ef4b5a7@c-mercor.com>",
+      "messages": [],
+      "total_additions": 22,
+      "total_deletions": 0,
+      "accepted_lines": 22,
+      "overriden_lines": 0
+    }
+  }
+}
