@@ -75,7 +75,7 @@ function compile(blueprintsJson, expectationsJson) {
   if (result.isOk()) {
     return result[0];
   } else {
-    throw new Error(result[0]);
+    throw new Error(result[0].msg);
   }
 }
 
