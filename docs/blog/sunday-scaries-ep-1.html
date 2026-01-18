@@ -17,7 +17,7 @@
       defaultPrivacyLevel: 'mask-user-input',
       allowFallbackToLocalStorage: true,
     });
-  })</script></head><body><div class="announcement-banner"><a class="banner-link" href="https://gleamgathering.com/" target="_blank"><span class="banner-text-full">📣 I will be speaking at Gleam Gathering! Join me for &quot;10,000 Lines Later: When a Tool Became a Compiler (and I Became a Gleamlin)&quot;</span><span class="banner-text-mobile">📣 Speaking at Gleam Gathering</span><span class="banner-arrow"> →</span></a></div><header class="site-header"><nav class="nav"><a class="logo" href="/"><img alt="Caffeine" class="logo-img" src="/images/temp_caffeine_icon.png">Caffeine</a><ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/docs">Docs</a></li><li><a href="/stdlib">Stdlib</a></li><li><a href="/cafe">The Cafe</a></li><li><a href="/blog">Blog</a></li></ul></nav></header><main class="main-content"><article class="blog-post"><header class="post-header"><h1>Sunday Scaries ep. 1: Verbosity, Complexity, OOP, Oh My!</h1><p class="post-date">2025-11-30 · by Rob Durst</p></header><div class="post-content"><div class="toc"></div><p><strong>I&#39;m building <a href="https://github.com/Brickell-Research/caffeine_lang">Caffeine</a>, a compiler written in Gleam that compiles service expectations to reliability artifacts.
+  })</script><link href="https://challenges.cloudflare.com" rel="preconnect"><script async defer src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script></head><body><div class="announcement-banner"><a class="banner-link" href="https://gleamgathering.com/" target="_blank"><span class="banner-text-full">📣 I will be speaking at Gleam Gathering! Join me for &quot;10,000 Lines Later: When a Tool Became a Compiler (and I Became a Gleamlin)&quot;</span><span class="banner-text-mobile">📣 Speaking at Gleam Gathering</span><span class="banner-arrow"> →</span></a></div><header class="site-header"><nav class="nav"><a class="logo" href="/"><img alt="Caffeine" class="logo-img" src="/images/temp_caffeine_icon.png">Caffeine</a><ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/docs">Docs</a></li><li><a href="/stdlib">Stdlib</a></li><li><a href="/cafe">The Cafe</a></li><li><a href="/blog">Blog</a></li></ul></nav></header><main class="main-content"><article class="blog-post"><header class="post-header"><h1>Sunday Scaries ep. 1: Verbosity, Complexity, OOP, Oh My!</h1><p class="post-date">2025-11-30 · by Rob Durst</p></header><div class="post-content"><div class="toc"></div><p><strong>I&#39;m building <a href="https://github.com/Brickell-Research/caffeine_lang">Caffeine</a>, a compiler written in Gleam that compiles service expectations to reliability artifacts.
 This post documents the learnings from a Sunday morning refactor following a late Saturday night coding session.</strong></p><hr><h2 id="Setting-the-Scene">Setting the Scene</h2><p>With a <a href="https://www.youtube.com/watch?v=V-La6hkgnCU&amp;list=RDV-La6hkgnCU&amp;start_radio=1">Chris Luno mix</a> on, I am taking a slow walk on my under-desk treadmill writing this post.</p><p class="figure"><img alt="view from my desk" src="/images/sunday-scaries-ep-1_pov_desk.jpg"></p><p>Low quality picture of my current setup - MacBook pro, 2 external screens, my wife&#39;s ring light, and ofc my Lucy mug</p><p>Last night I was working on the <code>Artifact</code> type (<a href="https://caffeine-lang.run/docs#Standard-Library-Developers">as per docs</a>): <em>&quot;an artifact surfaces the standard library or a plugin&#39;s interface - it defines the expected values on which the logic operates. An SLO artifact would require thresholds and queries while a systems modelling artifact might require dependency relationships.&quot;</em></p><p>In yaml, an example <code>artifacts.yaml</code> looks like:</p><pre><code data-lang="yaml">artifacts:
   - name: SLO
     version: 0.0.1
@@ -179,7 +179,7 @@ pub fn make_semver(version version: String) -&gt; Result(Semver, String) {
     _ -&gt; Error(&quot;bad semver&quot;)
   }
 }
-</code></pre><p><a href="https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9HMQDpIXVajFuw5M4MfHwE16zNp0lRuDPn0oBXAEZ18AT0oQ6AQVpwAZqxz1gfOibOXrACiTsIqOgGV8ypA0w6SFhEJE8vCHJggEo+AF81JE0dfUNvSOC6WyR7CKjoZ3JWACsaTwBJYkDybjK6SvxAylZ8HAALCuJYpASkdW06cxyigGsIAH0YDILg+GQg6Dmw718VaLoAWgA+OgAlCBgNJnxnPODAnz8Gdez7FnpoKBpx8hgGOgBeO3s6HhAANUWoTo5A0kkGCCYTAQAHc6FMisQ4DgFiFkCo6M4ABoAOgAmjiAFrRHHpDx0Nr4fCUGCoDgcBHBHE0BgcUn7HAQOCQAAmdAA5H9vvYADw7WahYV0MW/ED8nFCvo5Og4VhTVFLOgAHx2ShUOJglHEJz+CpA6x1dHEkhxvj0L1YlGc3HwOOasAgNylAHkRs4ANpFUpQaq1EN0ZqtNoAXXW2zovtO0yghRKZVDSHTEZa7VQ0W6Pzo402OwAolAninHs9Xtdvr1ev0dEMQaxuM4vcr7nQ1VMhInGdB1h9W2NJsnnBLkJ4/ugcQAGHHoABMfwLdAg7QQDnwFisJpALAYrCYAEI/oFB1But9N21t6MJlfJ0Dp7K54uV6w1/E+CA4kAA=">See code in playground here</a></p><p><strong>Minor Notes:</strong></p><ul style="list-style-type:disc;"><li><p>Instead of <code>Result(Semver, String)</code> we&#39;d very likely introduce an error type, such as <code>SemverError</code> with a variant called <code>InvalidFormat</code>.</p></li><li><p>The above still isn&#39;t completely correct since <code>int.parse</code> accepts negative numbers, meaning <code>&quot;1.-2.3&quot;</code> would be valid...</p></li></ul><p>However, this is really a thing of beauty compared to where we started (and this doesn&#39;t even show the bonus downstream cleanup since we don&#39;t need any more getters or setters...).</p><p><img alt="chef&#39;s kiss" src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExMmJ1bTJyY2JkcDJ1czV5Mm9zYWM1ejFqa2hsbHN0aHRvNDBrYTZzOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7aCWJavAgtBzLWrS/giphy.gif"></p></div></article></main><footer class="site-footer"><div class="footer-content"><p>Built with <a href="https://gleam.run" target="_blank">Gleam</a> and <a href="https://github.com/lustre-labs/ssg" target="_blank">Lustre SSG</a></p><p>© 2025 <a href="https://brickellresearch.org/" target="_blank">Brickell Research</a></p></div></footer><script>
+</code></pre><p><a href="https://playground.gleam.run/#N4IgbgpgTgzglgewHYgFwEYA0IDGyAuES+aIcAtgA4JT4AEA5gDYQCG5A9HMQDpIXVajFuw5M4MfHwE16zNp0lRuDPn0oBXAEZ18AT0oQ6AQVpwAZqxz1gfOibOXrACiTsIqOgGV8ypA0w6SFhEJE8vCHJggEo+AF81JE0dfUNvSOC6WyR7CKjoZ3JWACsaTwBJYkDybjK6SvxAylZ8HAALCuJYpASkdW06cxyigGsIAH0YDILg+GQg6Dmw718VaLoAWgA+OgAlCBgNJnxnPODAnz8Gdez7FnpoKBpx8hgGOgBeO3s6HhAANUWoTo5A0kkGCCYTAQAHc6FMisQ4DgFiFkCo6M4ABoAOgAmjiAFrRHHpDx0Nr4fCUGCoDgcBHBHE0BgcUn7HAQOCQAAmdAA5H9vvYADw7WahYV0MW/ED8nFCvo5Og4VhTVFLOgAHx2ShUOJglHEJz+CpA6x1dHEkhxvj0L1YlGc3HwOOasAgNylAHkRs4ANpFUpQaq1EN0ZqtNoAXXW2zovtO0yghRKZVDSHTEZa7VQ0W6Pzo402OwAolAninHs9Xtdvr1ev0dEMQaxuM4vcr7nQ1VMhInGdB1h9W2NJsnnBLkJ4/ugcQAGHHoABMfwLdAg7QQDnwFisJpALAYrCYAEI/oFB1But9N21t6MJlfJ0Dp7K54uV6w1/E+CA4kAA=">See code in playground here</a></p><p><strong>Minor Notes:</strong></p><ul style="list-style-type:disc;"><li><p>Instead of <code>Result(Semver, String)</code> we&#39;d very likely introduce an error type, such as <code>SemverError</code> with a variant called <code>InvalidFormat</code>.</p></li><li><p>The above still isn&#39;t completely correct since <code>int.parse</code> accepts negative numbers, meaning <code>&quot;1.-2.3&quot;</code> would be valid...</p></li></ul><p>However, this is really a thing of beauty compared to where we started (and this doesn&#39;t even show the bonus downstream cleanup since we don&#39;t need any more getters or setters...).</p><p><img alt="chef&#39;s kiss" src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExMmJ1bTJyY2JkcDJ1czV5Mm9zYWM1ejFqa2hsbHN0aHRvNDBrYTZzOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7aCWJavAgtBzLWrS/giphy.gif"></p></div></article></main><footer class="site-footer"><div class="footer-content"><div class="subscribe-section"><p class="subscribe-title">Stay updated on Caffeine</p><form class="subscribe-form" id="subscribe-form"><input class="subscribe-input" id="subscribe-email" name="email" placeholder="your@email.com" required type="email"><input autocomplete="off" name="website" style="position: absolute; left: -9999px;" tabindex="-1" type="text"><div class="cf-turnstile" data-callback="onTurnstileSuccess" data-error-callback="onTurnstileError" data-expired-callback="onTurnstileExpired" data-sitekey="0x4AAAAAACNHy9TzUWzOgn_A" data-size="compact" data-theme="dark" id="turnstile-widget"></div><button class="subscribe-button" type="submit">Subscribe</button></form><p class="subscribe-message" id="subscribe-message"></p></div><p>Built with <a href="https://gleam.run" target="_blank">Gleam</a> and <a href="https://github.com/lustre-labs/ssg" target="_blank">Lustre SSG</a></p><p>© 2025 <a href="https://brickellresearch.org/" target="_blank">Brickell Research</a></p></div></footer><script>
         // Convert data-lang to language-* class for Prism
         document.querySelectorAll('code[data-lang]').forEach(function(code) {
           var lang = code.getAttribute('data-lang').toLowerCase();
@@ -511,6 +511,123 @@ pub fn make_semver(version version: String) -&gt; Result(Semver, String) {
               }).catch(function(err) {
                 console.error('Failed to copy:', err);
               });
+            });
+          });
+        }
+
+        // Turnstile callbacks
+        window.onTurnstileSuccess = function(token) {
+          console.log('Turnstile success:', token);
+          var button = document.querySelector('#subscribe-form button');
+          if (button) {
+            button.disabled = false;
+          }
+        };
+
+        window.onTurnstileError = function(errorCode) {
+          console.error('Turnstile error:', errorCode);
+          var button = document.querySelector('#subscribe-form button');
+          var message = document.getElementById('subscribe-message');
+          if (button) {
+            button.disabled = true;
+          }
+          if (message) {
+            message.textContent = 'Please complete the verification challenge.';
+            message.className = 'subscribe-message error';
+          }
+        };
+
+        window.onTurnstileExpired = function() {
+          console.warn('Turnstile token expired');
+          var button = document.querySelector('#subscribe-form button');
+          var message = document.getElementById('subscribe-message');
+          if (button) {
+            button.disabled = true;
+          }
+          if (message) {
+            message.textContent = 'Verification expired. Please try again.';
+            message.className = 'subscribe-message error';
+          }
+        };
+
+        // Subscribe form handler
+        var subscribeForm = document.getElementById('subscribe-form');
+        if (subscribeForm) {
+          // Disable submit button initially until Turnstile completes
+          var button = subscribeForm.querySelector('button');
+          if (button) {
+            button.disabled = true;
+          }
+
+          subscribeForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            var email = document.getElementById('subscribe-email').value;
+            var website = subscribeForm.querySelector('input[name="website"]').value;
+            var message = document.getElementById('subscribe-message');
+            var button = subscribeForm.querySelector('button');
+
+            // Get Turnstile token
+            var turnstileResponse = '';
+            var turnstileInput = subscribeForm.querySelector('input[name="cf-turnstile-response"]');
+            if (turnstileInput) {
+              turnstileResponse = turnstileInput.value;
+            }
+
+            // Validate Turnstile token exists
+            if (!turnstileResponse) {
+              message.textContent = 'Please complete the verification challenge.';
+              message.className = 'subscribe-message error';
+              return;
+            }
+
+            // Disable button while submitting
+            button.disabled = true;
+            button.textContent = 'Subscribing...';
+            message.textContent = '';
+            message.className = 'subscribe-message';
+
+            fetch('https://notifications.brickellresearch.org/subscribe', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: email,
+                website: website,
+                'cf-turnstile-response': turnstileResponse
+              })
+            })
+            .then(function(response) {
+              return response.json().then(function(data) {
+                return { ok: response.ok, data: data };
+              });
+            })
+            .then(function(result) {
+              if (result.ok) {
+                message.textContent = result.data.message || 'Check your email to confirm!';
+                message.className = 'subscribe-message success';
+                subscribeForm.reset();
+                // Reset Turnstile widget
+                if (typeof turnstile !== 'undefined') {
+                  var widget = document.getElementById('turnstile-widget');
+                  if (widget) {
+                    turnstile.reset('#turnstile-widget');
+                  }
+                }
+                // Disable button again until new challenge completes
+                button.disabled = true;
+              } else {
+                message.textContent = result.data.error || 'Something went wrong';
+                message.className = 'subscribe-message error';
+                button.disabled = false;
+              }
+            })
+            .catch(function(err) {
+              message.textContent = 'Network error. Please try again.';
+              message.className = 'subscribe-message error';
+              button.disabled = false;
+            })
+            .finally(function() {
+              button.textContent = 'Subscribe';
             });
           });
         }

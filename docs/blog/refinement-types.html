@@ -17,7 +17,7 @@
       defaultPrivacyLevel: 'mask-user-input',
       allowFallbackToLocalStorage: true,
     });
-  })</script></head><body><div class="announcement-banner"><a class="banner-link" href="https://gleamgathering.com/" target="_blank"><span class="banner-text-full">📣 I will be speaking at Gleam Gathering! Join me for &quot;10,000 Lines Later: When a Tool Became a Compiler (and I Became a Gleamlin)&quot;</span><span class="banner-text-mobile">📣 Speaking at Gleam Gathering</span><span class="banner-arrow"> →</span></a></div><header class="site-header"><nav class="nav"><a class="logo" href="/"><img alt="Caffeine" class="logo-img" src="/images/temp_caffeine_icon.png">Caffeine</a><ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/docs">Docs</a></li><li><a href="/stdlib">Stdlib</a></li><li><a href="/cafe">The Cafe</a></li><li><a href="/blog">Blog</a></li></ul></nav></header><main class="main-content"><article class="blog-post"><header class="post-header"><h1>Refinement Types</h1><p class="post-date">2025-12-18 · by Rob Durst</p></header><div class="post-content"><div class="toc"></div><p><strong>I&#39;m building <a href="https://github.com/Brickell-Research/caffeine_lang">Caffeine</a>, a compiler written in Gleam that compiles service expectations to reliability artifacts.
+  })</script><link href="https://challenges.cloudflare.com" rel="preconnect"><script async defer src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script></head><body><div class="announcement-banner"><a class="banner-link" href="https://gleamgathering.com/" target="_blank"><span class="banner-text-full">📣 I will be speaking at Gleam Gathering! Join me for &quot;10,000 Lines Later: When a Tool Became a Compiler (and I Became a Gleamlin)&quot;</span><span class="banner-text-mobile">📣 Speaking at Gleam Gathering</span><span class="banner-arrow"> →</span></a></div><header class="site-header"><nav class="nav"><a class="logo" href="/"><img alt="Caffeine" class="logo-img" src="/images/temp_caffeine_icon.png">Caffeine</a><ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/docs">Docs</a></li><li><a href="/stdlib">Stdlib</a></li><li><a href="/cafe">The Cafe</a></li><li><a href="/blog">Blog</a></li></ul></nav></header><main class="main-content"><article class="blog-post"><header class="post-header"><h1>Refinement Types</h1><p class="post-date">2025-12-18 · by Rob Durst</p></header><div class="post-content"><div class="toc"></div><p><strong>I&#39;m building <a href="https://github.com/Brickell-Research/caffeine_lang">Caffeine</a>, a compiler written in Gleam that compiles service expectations to reliability artifacts.
 This post documents the motivation and design of refinement type support in Caffeine.</strong></p><hr><h1 id="Motivation">Motivation</h1><h2 id="The-Basics">The Basics</h2><p>One of the core functions of Caffeine is to resolve <em>&quot;cascading&quot;</em> input ➡️ param configurations. Within the <a href="https://caffeine-lang.run/docs">docs</a> we define the three different personas for each level of the
 configuration hierarchy:</p><p>1. artifacts    -&gt; caffeine core developer</p><p>2. blueprints   -&gt; observability expert</p><p>3. expectations -&gt; service owner</p><p>Thus, since it may not be the same person defining each specification here, we, from the initial <a href="https://github.com/Brickell-Research/caffeine_lang/releases/tag/v0.2.2"><code>0.2.2</code></a> release, enabled developers to bind a type to each param. As an example, consider artifact:</p><pre><code data-lang="json">{
   &quot;artifacts&quot;: [
@@ -64,7 +64,7 @@ we want to further guide consumers of our artifacts and blueprints? What if we w
 </code></pre><p>From here we defined the principles for <code>REFINEMENT</code>, ending up with the &quot;four L&#39;s&quot;:</p><p>1. (L)egible</p><p>2. (L)ight Notation</p><p>3. (L)ow Effort</p><p>4. (L)imited</p><h3 id="Legible">Legible</h3><p>We should be able to reason about the predicate by reading it from left to right.</p><h3 id="Light-Notation">Light Notation</h3><p>Avoid notation that is <em>&quot;too mathy&quot;</em>: prefer <code>in</code> over <code>∈</code>. The <code>|</code> is fine to divide the bound variable from the predicate. Even if folks don&#39;t know that the <code>|</code> means &quot;such that&quot; it should at least be understood at <em>face value</em> as the thing on the left where it is restricted in some way by the thing on the right. (For future refinements that support boolean connectives, we&#39;ll prefer <code>and</code> over <code>&amp;&amp;</code>, etc.)</p><h3 id="Low-Effort">Low Effort</h3><p>While overly concise syntax might actually diminish legibility, prefer fewer characters to more. We want adding refinements to feel simple and easy, not cumbersome. They should require very little brainpower: even the tired
 dev after a strenuous day at work should be able to quickly write a <code>REFINEMENT</code>.</p><h3 id="Limited">Limited</h3><p>We will start small and expand. In fact, we will do this over two dimensions:</p><p>1. <strong>type support:</strong> start with just primitives where it makes sense</p><p>2. <strong>refinement support</strong>: pick a simple one like <code>OneOf</code> and implement in full (parser, type-checker, error messages, docs) to get the design right. Test with a few folks. Then go from there. Don&#39;t overcommit before getting feedback and a full end-to-end implementation.</p><h2 id="Starting-with-OneOf">Starting with OneOf</h2><p>Here is a full design spec for our first refinement predicate: <code>OneOf</code> (set membership).</p><h3 id="Supported-Types">Supported Types</h3><p>To begin, we will just support a subset of primitives: <code>Integer</code>, <code>Float</code>, and <code>String</code> (technically we could support all but <code>Boolean</code> would be weird...).</p><h3 id="Full-Example">Full Example</h3><pre><code data-lang="json">Integer { x | x in { 7, 30, 90 } }
 </code></pre><p>Here the syntax is hopefully fairly straightforward. As we mentioned above, the <code>REFINEMENT</code> is appended to the right of the type, inside curly braces. In this refinement specifically, we have our type variable <code>x</code> to the left
-of the &quot;such that&quot; divisor line (<code>|</code>). Then we have a predicate that states <code>x</code> must be within some set.</p><p>This set has two restrictions:</p><p>1. each element must be the type left of the <code>REFINEMENT</code></p><p>2. the set must be non-empty</p><p>Furthermore, values within the set are comma delimited.</p><h3 id="Composing-with-Optional-and-Defaulted">Composing with Optional and Defaulted</h3><p>Refinements compose with <code>Optional</code> and <code>Defaulted</code> as follows:</p><ul style="list-style-type:&#39;-&#39;;"><li><p><code>Optional(String { x | x in { ... } })</code>: the key may be omitted; if present, the value must satisfy the refinement.</p></li><li><p><code>Defaulted(String { x | x in { ... } }, &quot;production&quot;)</code>: the default value must satisfy the refinement.</p></li><li><p>Refinements apply to the <em>underlying value</em> when present.</p></li></ul><hr><h1 id="Conclusion">Conclusion</h1><p>The Caffeine refinement types journey is in the early stages of development. We expect <code>OneOf</code> to be released as part of <code>1.1.0</code>. Stay tuned! </p><p>And Happy Holidays!!! 🎄🕎❄️</p><p class="figure"><img alt="Tired guy with Christmas lights" src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExODNqZHF6eWZrNTMwOHZqOHRxcWx1NDRlZ3Fmd3lsZ2MwdTZzdzFkZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/wZD7RX1fHKsU7FckHH/giphy.gif"></p><p>Long night of coding followed by festivities... definitely not me right now.</p><hr></div></article></main><footer class="site-footer"><div class="footer-content"><p>Built with <a href="https://gleam.run" target="_blank">Gleam</a> and <a href="https://github.com/lustre-labs/ssg" target="_blank">Lustre SSG</a></p><p>© 2025 <a href="https://brickellresearch.org/" target="_blank">Brickell Research</a></p></div></footer><script>
+of the &quot;such that&quot; divisor line (<code>|</code>). Then we have a predicate that states <code>x</code> must be within some set.</p><p>This set has two restrictions:</p><p>1. each element must be the type left of the <code>REFINEMENT</code></p><p>2. the set must be non-empty</p><p>Furthermore, values within the set are comma delimited.</p><h3 id="Composing-with-Optional-and-Defaulted">Composing with Optional and Defaulted</h3><p>Refinements compose with <code>Optional</code> and <code>Defaulted</code> as follows:</p><ul style="list-style-type:&#39;-&#39;;"><li><p><code>Optional(String { x | x in { ... } })</code>: the key may be omitted; if present, the value must satisfy the refinement.</p></li><li><p><code>Defaulted(String { x | x in { ... } }, &quot;production&quot;)</code>: the default value must satisfy the refinement.</p></li><li><p>Refinements apply to the <em>underlying value</em> when present.</p></li></ul><hr><h1 id="Conclusion">Conclusion</h1><p>The Caffeine refinement types journey is in the early stages of development. We expect <code>OneOf</code> to be released as part of <code>1.1.0</code>. Stay tuned! </p><p>And Happy Holidays!!! 🎄🕎❄️</p><p class="figure"><img alt="Tired guy with Christmas lights" src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExODNqZHF6eWZrNTMwOHZqOHRxcWx1NDRlZ3Fmd3lsZ2MwdTZzdzFkZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/wZD7RX1fHKsU7FckHH/giphy.gif"></p><p>Long night of coding followed by festivities... definitely not me right now.</p><hr></div></article></main><footer class="site-footer"><div class="footer-content"><div class="subscribe-section"><p class="subscribe-title">Stay updated on Caffeine</p><form class="subscribe-form" id="subscribe-form"><input class="subscribe-input" id="subscribe-email" name="email" placeholder="your@email.com" required type="email"><input autocomplete="off" name="website" style="position: absolute; left: -9999px;" tabindex="-1" type="text"><div class="cf-turnstile" data-callback="onTurnstileSuccess" data-error-callback="onTurnstileError" data-expired-callback="onTurnstileExpired" data-sitekey="0x4AAAAAACNHy9TzUWzOgn_A" data-size="compact" data-theme="dark" id="turnstile-widget"></div><button class="subscribe-button" type="submit">Subscribe</button></form><p class="subscribe-message" id="subscribe-message"></p></div><p>Built with <a href="https://gleam.run" target="_blank">Gleam</a> and <a href="https://github.com/lustre-labs/ssg" target="_blank">Lustre SSG</a></p><p>© 2025 <a href="https://brickellresearch.org/" target="_blank">Brickell Research</a></p></div></footer><script>
         // Convert data-lang to language-* class for Prism
         document.querySelectorAll('code[data-lang]').forEach(function(code) {
           var lang = code.getAttribute('data-lang').toLowerCase();
@@ -396,6 +396,123 @@ of the &quot;such that&quot; divisor line (<code>|</code>). Then we have a predi
               }).catch(function(err) {
                 console.error('Failed to copy:', err);
               });
+            });
+          });
+        }
+
+        // Turnstile callbacks
+        window.onTurnstileSuccess = function(token) {
+          console.log('Turnstile success:', token);
+          var button = document.querySelector('#subscribe-form button');
+          if (button) {
+            button.disabled = false;
+          }
+        };
+
+        window.onTurnstileError = function(errorCode) {
+          console.error('Turnstile error:', errorCode);
+          var button = document.querySelector('#subscribe-form button');
+          var message = document.getElementById('subscribe-message');
+          if (button) {
+            button.disabled = true;
+          }
+          if (message) {
+            message.textContent = 'Please complete the verification challenge.';
+            message.className = 'subscribe-message error';
+          }
+        };
+
+        window.onTurnstileExpired = function() {
+          console.warn('Turnstile token expired');
+          var button = document.querySelector('#subscribe-form button');
+          var message = document.getElementById('subscribe-message');
+          if (button) {
+            button.disabled = true;
+          }
+          if (message) {
+            message.textContent = 'Verification expired. Please try again.';
+            message.className = 'subscribe-message error';
+          }
+        };
+
+        // Subscribe form handler
+        var subscribeForm = document.getElementById('subscribe-form');
+        if (subscribeForm) {
+          // Disable submit button initially until Turnstile completes
+          var button = subscribeForm.querySelector('button');
+          if (button) {
+            button.disabled = true;
+          }
+
+          subscribeForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            var email = document.getElementById('subscribe-email').value;
+            var website = subscribeForm.querySelector('input[name="website"]').value;
+            var message = document.getElementById('subscribe-message');
+            var button = subscribeForm.querySelector('button');
+
+            // Get Turnstile token
+            var turnstileResponse = '';
+            var turnstileInput = subscribeForm.querySelector('input[name="cf-turnstile-response"]');
+            if (turnstileInput) {
+              turnstileResponse = turnstileInput.value;
+            }
+
+            // Validate Turnstile token exists
+            if (!turnstileResponse) {
+              message.textContent = 'Please complete the verification challenge.';
+              message.className = 'subscribe-message error';
+              return;
+            }
+
+            // Disable button while submitting
+            button.disabled = true;
+            button.textContent = 'Subscribing...';
+            message.textContent = '';
+            message.className = 'subscribe-message';
+
+            fetch('https://notifications.brickellresearch.org/subscribe', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: email,
+                website: website,
+                'cf-turnstile-response': turnstileResponse
+              })
+            })
+            .then(function(response) {
+              return response.json().then(function(data) {
+                return { ok: response.ok, data: data };
+              });
+            })
+            .then(function(result) {
+              if (result.ok) {
+                message.textContent = result.data.message || 'Check your email to confirm!';
+                message.className = 'subscribe-message success';
+                subscribeForm.reset();
+                // Reset Turnstile widget
+                if (typeof turnstile !== 'undefined') {
+                  var widget = document.getElementById('turnstile-widget');
+                  if (widget) {
+                    turnstile.reset('#turnstile-widget');
+                  }
+                }
+                // Disable button again until new challenge completes
+                button.disabled = true;
+              } else {
+                message.textContent = result.data.error || 'Something went wrong';
+                message.className = 'subscribe-message error';
+                button.disabled = false;
+              }
+            })
+            .catch(function(err) {
+              message.textContent = 'Network error. Please try again.';
+              message.className = 'subscribe-message error';
+              button.disabled = false;
+            })
+            .finally(function() {
+              button.textContent = 'Subscribe';
             });
           });
         }

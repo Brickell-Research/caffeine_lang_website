@@ -1838,3 +1838,109 @@ a:hover {
     justify-content: flex-end;
   }
 }
+
+/* Subscribe Form in Footer */
+.subscribe-section {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid var(--color-border);
+}
+
+.subscribe-title {
+  font-family: var(--font-heading);
+  color: var(--color-primary);
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.subscribe-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.subscribe-input {
+  padding: 0.75rem 1rem;
+  border: 3px solid var(--color-primary);
+  background: var(--color-background);
+  color: var(--color-text-bright);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  min-width: 220px;
+}
+
+.subscribe-input:focus {
+  outline: none;
+  border-color: var(--color-text-bright);
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+.subscribe-input::placeholder {
+  color: var(--color-border);
+}
+
+.subscribe-button {
+  padding: 0.75rem 1.5rem;
+  background: var(--color-primary);
+  color: var(--color-background);
+  border: 3px solid var(--color-primary);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+  box-shadow: 4px 4px 0 0 var(--color-border);
+}
+
+.subscribe-button:hover {
+  background: #ffb3e3;
+  border-color: #ffb3e3;
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 0 var(--color-border);
+}
+
+.subscribe-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 4px 4px 0 0 var(--color-border);
+}
+
+.subscribe-message {
+  width: 100%;
+  text-align: center;
+  font-size: 0.85rem;
+  margin-top: 0.75rem;
+  min-height: 1.2em;
+  font-family: var(--font-mono);
+}
+
+.subscribe-message.success {
+  color: #4ade80;
+}
+
+.subscribe-message.error {
+  color: var(--color-secondary);
+}
+
+/* Turnstile widget styling */
+.cf-turnstile {
+  margin: 0.25rem 0;
+}
+
+@media (max-width: 600px) {
+  .subscribe-form {
+    flex-direction: column;
+  }
+
+  .subscribe-input {
+    width: 100%;
+  }
+
+  .subscribe-button {
+    width: 100%;
+  }
+}
