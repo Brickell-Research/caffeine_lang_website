@@ -36,7 +36,7 @@ pub fn view() -> Element(Nil) {
               ],
               [html.text("Subscribe")],
             ),
-            // Turnstile widget container
+            // Turnstile widget container (execute-on-demand mode)
             html.div(
               [
                 attribute.id("turnstile-widget"),
@@ -44,12 +44,7 @@ pub fn view() -> Element(Nil) {
                 attribute.attribute("data-sitekey", "0x4AAAAAACNHy9TzUWzOgn_A"),
                 attribute.attribute("data-theme", "dark"),
                 attribute.attribute("data-size", "compact"),
-                attribute.attribute("data-callback", "onTurnstileSuccess"),
-                attribute.attribute("data-error-callback", "onTurnstileError"),
-                attribute.attribute(
-                  "data-expired-callback",
-                  "onTurnstileExpired",
-                ),
+                attribute.attribute("data-execution", "execute"),
               ],
               [],
             ),

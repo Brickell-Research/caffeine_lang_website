@@ -212,7 +212,7 @@ take the form of:</p><div><table>
   Defaulted(AcceptedTypes, String)
 }
 </code></pre><p>We do limit it intentionally within the Caffeine compiler at this time with the restrictions on collection types noted in the table above.</p><h3 id="Multi-Inheritance">Multi-Inheritance</h3><p>There is no support for <a href="https://en.wikipedia.org/wiki/Multiple_inheritance">multi-inheritance</a> within the existing design of Caffeine: we do not support a single service expectation referencing multiple blueprints or a single blueprint referencing multiple artifacts. This 1:1 relationship seems sensible and we do not want
-to think hard about the <a href="https://www.geeksforgeeks.org/cpp/diamond-problem-in-cpp/">diamond problem</a>...</p><hr></div></article><aside class="docs-sidebar"><h3>On This Page</h3><nav class="docs-nav" id="docs-toc"></nav></aside></div></main><footer class="site-footer"><div class="footer-content"><div class="subscribe-section"><p class="subscribe-title">Stay updated on Caffeine</p><form class="subscribe-form" id="subscribe-form"><input class="subscribe-input" id="subscribe-email" name="email" placeholder="your@email.com" required type="email"><input autocomplete="off" name="website" style="position: absolute; left: -9999px;" tabindex="-1" type="text"><button class="subscribe-button" type="submit">Subscribe</button><div class="cf-turnstile" data-callback="onTurnstileSuccess" data-error-callback="onTurnstileError" data-expired-callback="onTurnstileExpired" data-sitekey="0x4AAAAAACNHy9TzUWzOgn_A" data-size="compact" data-theme="dark" id="turnstile-widget"></div></form><p class="subscribe-message" id="subscribe-message"></p></div><p>Built with <a href="https://gleam.run" target="_blank">Gleam</a> and <a href="https://github.com/lustre-labs/ssg" target="_blank">Lustre SSG</a></p><p>© 2025 <a href="https://brickellresearch.org/" target="_blank">Brickell Research</a></p></div></footer><script>
+to think hard about the <a href="https://www.geeksforgeeks.org/cpp/diamond-problem-in-cpp/">diamond problem</a>...</p><hr></div></article><aside class="docs-sidebar"><h3>On This Page</h3><nav class="docs-nav" id="docs-toc"></nav></aside></div></main><footer class="site-footer"><div class="footer-content"><div class="subscribe-section"><p class="subscribe-title">Stay updated on Caffeine</p><form class="subscribe-form" id="subscribe-form"><input class="subscribe-input" id="subscribe-email" name="email" placeholder="your@email.com" required type="email"><input autocomplete="off" name="website" style="position: absolute; left: -9999px;" tabindex="-1" type="text"><button class="subscribe-button" type="submit">Subscribe</button><div class="cf-turnstile" data-execution="execute" data-sitekey="0x4AAAAAACNHy9TzUWzOgn_A" data-size="compact" data-theme="dark" id="turnstile-widget"></div></form><p class="subscribe-message" id="subscribe-message"></p></div><p>Built with <a href="https://gleam.run" target="_blank">Gleam</a> and <a href="https://github.com/lustre-labs/ssg" target="_blank">Lustre SSG</a></p><p>© 2025 <a href="https://brickellresearch.org/" target="_blank">Brickell Research</a></p></div></footer><script>
         // Convert data-lang to language-* class for Prism
         document.querySelectorAll('code[data-lang]').forEach(function(code) {
           var lang = code.getAttribute('data-lang').toLowerCase();
@@ -548,50 +548,9 @@ to think hard about the <a href="https://www.geeksforgeeks.org/cpp/diamond-probl
           });
         }
 
-        // Turnstile callbacks
-        window.onTurnstileSuccess = function(token) {
-          console.log('Turnstile success:', token);
-          var button = document.querySelector('#subscribe-form button');
-          if (button) {
-            button.disabled = false;
-          }
-        };
-
-        window.onTurnstileError = function(errorCode) {
-          console.error('Turnstile error:', errorCode);
-          var button = document.querySelector('#subscribe-form button');
-          var message = document.getElementById('subscribe-message');
-          if (button) {
-            button.disabled = true;
-          }
-          if (message) {
-            message.textContent = 'Please complete the verification challenge.';
-            message.className = 'subscribe-message error';
-          }
-        };
-
-        window.onTurnstileExpired = function() {
-          console.warn('Turnstile token expired');
-          var button = document.querySelector('#subscribe-form button');
-          var message = document.getElementById('subscribe-message');
-          if (button) {
-            button.disabled = true;
-          }
-          if (message) {
-            message.textContent = 'Verification expired. Please try again.';
-            message.className = 'subscribe-message error';
-          }
-        };
-
-        // Subscribe form handler
+        // Subscribe form handler with execute-on-demand Turnstile
         var subscribeForm = document.getElementById('subscribe-form');
         if (subscribeForm) {
-          // Disable submit button initially until Turnstile completes
-          var button = subscribeForm.querySelector('button');
-          if (button) {
-            button.disabled = true;
-          }
-
           subscribeForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -600,67 +559,68 @@ to think hard about the <a href="https://www.geeksforgeeks.org/cpp/diamond-probl
             var message = document.getElementById('subscribe-message');
             var button = subscribeForm.querySelector('button');
 
-            // Get Turnstile token
-            var turnstileResponse = '';
-            var turnstileInput = subscribeForm.querySelector('input[name="cf-turnstile-response"]');
-            if (turnstileInput) {
-              turnstileResponse = turnstileInput.value;
-            }
-
-            // Validate Turnstile token exists
-            if (!turnstileResponse) {
-              message.textContent = 'Please complete the verification challenge.';
-              message.className = 'subscribe-message error';
-              return;
-            }
-
-            // Disable button while submitting
+            // Show verifying state
             button.disabled = true;
-            button.textContent = 'Subscribing...';
+            button.textContent = 'Verifying...';
             message.textContent = '';
             message.className = 'subscribe-message';
 
-            fetch('https://notifications.brickellresearch.org/subscribe', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                email: email,
-                website: website,
-                'cf-turnstile-response': turnstileResponse
-              })
-            })
-            .then(function(response) {
-              return response.json().then(function(data) {
-                return { ok: response.ok, data: data };
-              });
-            })
-            .then(function(result) {
-              if (result.ok) {
-                message.textContent = result.data.message || 'Check your email to confirm!';
-                message.className = 'subscribe-message success';
-                subscribeForm.reset();
-                // Reset Turnstile widget
-                if (typeof turnstile !== 'undefined') {
-                  var widget = document.getElementById('turnstile-widget');
-                  if (widget) {
-                    turnstile.reset('#turnstile-widget');
-                  }
-                }
-                // Disable button again until new challenge completes
-                button.disabled = true;
-              } else {
-                message.textContent = result.data.error || 'Something went wrong';
-                message.className = 'subscribe-message error';
-                button.disabled = false;
-              }
-            })
-            .catch(function(err) {
-              message.textContent = 'Network error. Please try again.';
+            // Execute Turnstile verification on-demand
+            if (typeof turnstile === 'undefined') {
+              message.textContent = 'Verification not loaded. Please refresh.';
               message.className = 'subscribe-message error';
               button.disabled = false;
-            })
-            .finally(function() {
               button.textContent = 'Subscribe';
+              return;
+            }
+
+            // Get fresh token by executing Turnstile
+            turnstile.execute('#turnstile-widget', {
+              callback: function(token) {
+                button.textContent = 'Subscribing...';
+
+                fetch('https://notifications.brickellresearch.org/subscribe', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    email: email,
+                    website: website,
+                    'cf-turnstile-response': token
+                  })
+                })
+                .then(function(response) {
+                  return response.json().then(function(data) {
+                    return { ok: response.ok, data: data };
+                  });
+                })
+                .then(function(result) {
+                  if (result.ok) {
+                    message.textContent = result.data.message || 'Check your email to confirm!';
+                    message.className = 'subscribe-message success';
+                    subscribeForm.reset();
+                  } else {
+                    message.textContent = result.data.error || 'Something went wrong';
+                    message.className = 'subscribe-message error';
+                  }
+                })
+                .catch(function(err) {
+                  message.textContent = 'Network error. Please try again.';
+                  message.className = 'subscribe-message error';
+                })
+                .finally(function() {
+                  button.textContent = 'Subscribe';
+                  button.disabled = false;
+                  // Reset for next submission
+                  turnstile.reset('#turnstile-widget');
+                });
+              },
+              'error-callback': function() {
+                message.textContent = 'Verification failed. Please try again.';
+                message.className = 'subscribe-message error';
+                button.textContent = 'Subscribe';
+                button.disabled = false;
+                turnstile.reset('#turnstile-widget');
+              }
             });
           });
         }

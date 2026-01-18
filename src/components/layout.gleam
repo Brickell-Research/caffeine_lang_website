@@ -554,50 +554,9 @@ pub fn view_with_meta(meta: PageMeta, content: Element(Nil)) -> Element(Nil) {
           });
         }
 
-        // Turnstile callbacks
-        window.onTurnstileSuccess = function(token) {
-          console.log('Turnstile success:', token);
-          var button = document.querySelector('#subscribe-form button');
-          if (button) {
-            button.disabled = false;
-          }
-        };
-
-        window.onTurnstileError = function(errorCode) {
-          console.error('Turnstile error:', errorCode);
-          var button = document.querySelector('#subscribe-form button');
-          var message = document.getElementById('subscribe-message');
-          if (button) {
-            button.disabled = true;
-          }
-          if (message) {
-            message.textContent = 'Please complete the verification challenge.';
-            message.className = 'subscribe-message error';
-          }
-        };
-
-        window.onTurnstileExpired = function() {
-          console.warn('Turnstile token expired');
-          var button = document.querySelector('#subscribe-form button');
-          var message = document.getElementById('subscribe-message');
-          if (button) {
-            button.disabled = true;
-          }
-          if (message) {
-            message.textContent = 'Verification expired. Please try again.';
-            message.className = 'subscribe-message error';
-          }
-        };
-
-        // Subscribe form handler
+        // Subscribe form handler with execute-on-demand Turnstile
         var subscribeForm = document.getElementById('subscribe-form');
         if (subscribeForm) {
-          // Disable submit button initially until Turnstile completes
-          var button = subscribeForm.querySelector('button');
-          if (button) {
-            button.disabled = true;
-          }
-
           subscribeForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -606,67 +565,68 @@ pub fn view_with_meta(meta: PageMeta, content: Element(Nil)) -> Element(Nil) {
             var message = document.getElementById('subscribe-message');
             var button = subscribeForm.querySelector('button');
 
-            // Get Turnstile token
-            var turnstileResponse = '';
-            var turnstileInput = subscribeForm.querySelector('input[name=\"cf-turnstile-response\"]');
-            if (turnstileInput) {
-              turnstileResponse = turnstileInput.value;
-            }
-
-            // Validate Turnstile token exists
-            if (!turnstileResponse) {
-              message.textContent = 'Please complete the verification challenge.';
-              message.className = 'subscribe-message error';
-              return;
-            }
-
-            // Disable button while submitting
+            // Show verifying state
             button.disabled = true;
-            button.textContent = 'Subscribing...';
+            button.textContent = 'Verifying...';
             message.textContent = '';
             message.className = 'subscribe-message';
 
-            fetch('https://notifications.brickellresearch.org/subscribe', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                email: email,
-                website: website,
-                'cf-turnstile-response': turnstileResponse
-              })
-            })
-            .then(function(response) {
-              return response.json().then(function(data) {
-                return { ok: response.ok, data: data };
-              });
-            })
-            .then(function(result) {
-              if (result.ok) {
-                message.textContent = result.data.message || 'Check your email to confirm!';
-                message.className = 'subscribe-message success';
-                subscribeForm.reset();
-                // Reset Turnstile widget
-                if (typeof turnstile !== 'undefined') {
-                  var widget = document.getElementById('turnstile-widget');
-                  if (widget) {
-                    turnstile.reset('#turnstile-widget');
-                  }
-                }
-                // Disable button again until new challenge completes
-                button.disabled = true;
-              } else {
-                message.textContent = result.data.error || 'Something went wrong';
-                message.className = 'subscribe-message error';
-                button.disabled = false;
-              }
-            })
-            .catch(function(err) {
-              message.textContent = 'Network error. Please try again.';
+            // Execute Turnstile verification on-demand
+            if (typeof turnstile === 'undefined') {
+              message.textContent = 'Verification not loaded. Please refresh.';
               message.className = 'subscribe-message error';
               button.disabled = false;
-            })
-            .finally(function() {
               button.textContent = 'Subscribe';
+              return;
+            }
+
+            // Get fresh token by executing Turnstile
+            turnstile.execute('#turnstile-widget', {
+              callback: function(token) {
+                button.textContent = 'Subscribing...';
+
+                fetch('https://notifications.brickellresearch.org/subscribe', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    email: email,
+                    website: website,
+                    'cf-turnstile-response': token
+                  })
+                })
+                .then(function(response) {
+                  return response.json().then(function(data) {
+                    return { ok: response.ok, data: data };
+                  });
+                })
+                .then(function(result) {
+                  if (result.ok) {
+                    message.textContent = result.data.message || 'Check your email to confirm!';
+                    message.className = 'subscribe-message success';
+                    subscribeForm.reset();
+                  } else {
+                    message.textContent = result.data.error || 'Something went wrong';
+                    message.className = 'subscribe-message error';
+                  }
+                })
+                .catch(function(err) {
+                  message.textContent = 'Network error. Please try again.';
+                  message.className = 'subscribe-message error';
+                })
+                .finally(function() {
+                  button.textContent = 'Subscribe';
+                  button.disabled = false;
+                  // Reset for next submission
+                  turnstile.reset('#turnstile-widget');
+                });
+              },
+              'error-callback': function() {
+                message.textContent = 'Verification failed. Please try again.';
+                message.className = 'subscribe-message error';
+                button.textContent = 'Subscribe';
+                button.disabled = false;
+                turnstile.reset('#turnstile-widget');
+              }
             });
           });
         }
