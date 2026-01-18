@@ -29,6 +29,13 @@ pub fn view() -> Element(Nil) {
               attribute.attribute("autocomplete", "off"),
               attribute.attribute("style", "position: absolute; left: -9999px;"),
             ]),
+            html.button(
+              [
+                attribute.type_("submit"),
+                attribute.class("subscribe-button"),
+              ],
+              [html.text("Subscribe")],
+            ),
             // Turnstile widget container
             html.div(
               [
@@ -45,13 +52,6 @@ pub fn view() -> Element(Nil) {
                 ),
               ],
               [],
-            ),
-            html.button(
-              [
-                attribute.type_("submit"),
-                attribute.class("subscribe-button"),
-              ],
-              [html.text("Subscribe")],
             ),
           ],
         ),

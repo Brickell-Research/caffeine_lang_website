@@ -1926,9 +1926,49 @@ a:hover {
   color: var(--color-secondary);
 }
 
-/* Turnstile widget styling */
+/* Turnstile widget styling - hide it visually but keep it functional */
+.subscribe-form {
+  position: relative;
+}
+
 .cf-turnstile {
-  margin: 0.25rem 0;
+  position: absolute;
+  left: -9999px;
+  width: 130px;
+  height: 65px;
+  overflow: hidden;
+  opacity: 0.01;
+  /* Keep pointer events so it can still function */
+}
+
+/* Widget container - hidden off-screen */
+#turnstile-widget {
+  position: absolute;
+  left: -9999px;
+  width: 130px;
+  height: 65px;
+  overflow: hidden;
+  opacity: 0.01;
+}
+
+/* Subtle attribution for Turnstile */
+.turnstile-attribution {
+  font-size: 0.65rem;
+  color: var(--color-border);
+  margin-top: 0.25rem;
+  text-align: center;
+  font-family: var(--font-mono);
+}
+
+.turnstile-attribution a {
+  color: var(--color-border);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--color-border);
+}
+
+.turnstile-attribution a:hover {
+  color: var(--color-text);
+  border-bottom-color: var(--color-text);
 }
 
 @media (max-width: 600px) {
