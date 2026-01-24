@@ -257,18 +257,18 @@ a:hover {
 }
 
 .install-box .code-block.copyable {
-  padding-right: 5rem;
+  padding-top: 2.2rem;
 }
 
 .copy-btn {
   position: absolute;
-  top: 50%;
-  right: 0.75rem;
-  transform: translateY(-50%);
+  top: 0.5rem;
+  right: 0.5rem;
   background: var(--color-border);
   color: var(--color-text);
   border: none;
-  padding: 0.3rem 0.6rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
   font-family: var(--font-mono);
   font-size: 0.7rem;
   cursor: pointer;
