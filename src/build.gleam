@@ -1,28 +1,14 @@
-import docs/docs
 import gleam/io
 import gleam/string
 import lustre/ssg
 import pages/blog
-import pages/cafe
-import pages/docs as docs_page
 import pages/home
-import pages/stdlib as stdlib_page
+import pages/tour
 import posts/posts
-import stdlib/stdlib
 
 pub fn main() {
   let all_posts = posts.all()
   let posts_dict = posts.as_dict()
-
-  let docs_view = case docs.load() {
-    Ok(doc) -> docs_page.view(doc)
-    Error(_) -> docs_page.fallback_view()
-  }
-
-  let stdlib_view = case stdlib.load() {
-    Ok(ref) -> stdlib_page.view(ref)
-    Error(_) -> stdlib_page.fallback_view()
-  }
 
   let build =
     ssg.new("./docs")
@@ -32,9 +18,7 @@ pub fn main() {
     |> ssg.add_dynamic_route("/blog", posts_dict, fn(post) {
       blog.post_view(post)
     })
-    |> ssg.add_static_route("/docs", docs_view)
-    |> ssg.add_static_route("/stdlib", stdlib_view)
-    |> ssg.add_static_route("/cafe", cafe.view())
+    |> ssg.add_static_route("/tour", tour.view())
     |> ssg.build
 
   case build {

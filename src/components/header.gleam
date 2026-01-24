@@ -15,10 +15,8 @@ pub fn view() -> Element(Nil) {
       ]),
       html.ul([attribute.class("nav-links")], [
         html.li([], [html.a([attribute.href("/")], [html.text("Home")])]),
-        html.li([], [html.a([attribute.href("/docs")], [html.text("Docs")])]),
-        html.li([], [html.a([attribute.href("/stdlib")], [html.text("Stdlib")])]),
         html.li([], [
-          html.a([attribute.href("/cafe")], [html.text("The Cafe")]),
+          html.a([attribute.href("/tour")], [html.text("Tour")]),
         ]),
         html.li([], [html.a([attribute.href("/blog")], [html.text("Blog")])]),
       ]),

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Home | Caffeine</title><link href="/images/temp_caffeine_icon.png" rel="icon" type="image/png"><meta content="Home | Caffeine" property="og:title"><meta content="website" property="og:type"><meta content="Caffeine" property="og:site_name"><meta content="summary" name="twitter:card"><link href="/css/styles.css" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js"></script><script src="https://unpkg.com/prismjs-gleam@1/gleam.js"></script><script async src="https://plausible.io/js/pa-vjl7vif68GwpiuXNTPtt7.js"></script><script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script><script>(function(h,o,u,n,d) {
+<html lang="en"><head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Home | Caffeine</title><link href="/images/temp_caffeine_icon.png" rel="icon" type="image/png"><meta content="Home | Caffeine" property="og:title"><meta content="website" property="og:type"><meta content="Caffeine" property="og:site_name"><meta content="summary" name="twitter:card"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"><link href="/css/styles.css" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js"></script><script src="https://unpkg.com/prismjs-gleam@1/gleam.js"></script><script async src="https://plausible.io/js/pa-vjl7vif68GwpiuXNTPtt7.js"></script><script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script><script>(function(h,o,u,n,d) {
     h=h[d]=h[d]||{q:[],onReady:function(c){h.q.push(c)}}
     d=o.createElement(u);d.async=1;d.src=n
     n=o.getElementsByTagName(u)[0];n.parentNode.insertBefore(d,n)
@@ -11,13 +11,28 @@
       site: 'datadoghq.com',
       service: 'caffeine-lang-website',
       env: 'production',
+      version: 'vunknown',
       sessionSampleRate: 100,
       sessionReplaySampleRate: 20,
+      trackUserInteractions: true,
+      trackResources: true,
+      trackLongTasks: true,
       trackBfcacheViews: true,
       defaultPrivacyLevel: 'mask-user-input',
+      compressIntakeRequests: true,
       allowFallbackToLocalStorage: true,
     });
-  })</script><link href="https://challenges.cloudflare.com" rel="preconnect"><script async defer src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script></head><body><div class="announcement-banner"><a class="banner-link" href="https://gleamgathering.com/" target="_blank"><span class="banner-text-full">📣 I will be speaking at Gleam Gathering! Join me for &quot;10,000 Lines Later: When a Tool Became a Compiler (and I Became a Gleamlin)&quot;</span><span class="banner-text-mobile">📣 Speaking at Gleam Gathering</span><span class="banner-arrow"> →</span></a></div><header class="site-header"><nav class="nav"><a class="logo" href="/"><img alt="Caffeine" class="logo-img" src="/images/temp_caffeine_icon.png">Caffeine</a><ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/docs">Docs</a></li><li><a href="/stdlib">Stdlib</a></li><li><a href="/cafe">The Cafe</a></li><li><a href="/blog">Blog</a></li></ul></nav></header><main class="main-content"><div class="home"><section class="hero"><h1>Caffeine</h1><p class="tagline">A compiler for generating reliability artifacts from service expectation definitions.</p><div class="cta-buttons"><a class="btn btn-primary" href="https://github.com/Brickell-Research/caffeine_lang/releases">Get Started (v3.0.11)</a><a class="btn btn-secondary" href="/blog">Read the Blog</a></div></section><section class="install-section"><h2>Installation</h2><p>With Homebrew:</p><div class="install-box"><pre class="code-block"><code class="language-bash">brew tap Brickell-Research/caffeine &amp;&amp; brew install caffeine_lang</code></pre></div></section></div></main><footer class="site-footer"><div class="footer-content"><div class="subscribe-section"><p class="subscribe-title">Stay updated on Caffeine</p><form class="subscribe-form" id="subscribe-form"><input class="subscribe-input" id="subscribe-email" name="email" placeholder="your@email.com" required type="email"><input autocomplete="off" name="website" style="position: absolute; left: -9999px;" tabindex="-1" type="text"><button class="subscribe-button" type="submit">Subscribe</button><div class="cf-turnstile" data-execution="execute" data-sitekey="0x4AAAAAACNHy9TzUWzOgn_A" data-size="compact" data-theme="dark" id="turnstile-widget"></div></form><p class="subscribe-message" id="subscribe-message"></p></div><p>Built with <a href="https://gleam.run" target="_blank">Gleam</a> and <a href="https://github.com/lustre-labs/ssg" target="_blank">Lustre SSG</a></p><p>© 2025 <a href="https://brickellresearch.org/" target="_blank">Brickell Research</a></p></div></footer><script>
+  })</script></head><body><div class="announcement-banner"><a class="banner-link" href="https://gleamgathering.com/" target="_blank"><span class="banner-text-full">📣 I will be speaking at Gleam Gathering! Join me for &quot;10,000 Lines Later: When a Tool Became a Compiler (and I Became a Gleamlin)&quot;</span><span class="banner-text-mobile">📣 Speaking at Gleam Gathering</span><span class="banner-arrow"> →</span></a></div><header class="site-header"><nav class="nav"><a class="logo" href="/"><img alt="Caffeine" class="logo-img" src="/images/temp_caffeine_icon.png">Caffeine</a><ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/tour">Tour</a></li><li><a href="/blog">Blog</a></li></ul></nav></header><main class="main-content"><div class="home"><section class="hero"><h1>Caffeine</h1><p class="tagline">A compiler for generating reliability artifacts from service expectation definitions.</p><div class="cta-buttons"><a class="btn btn-primary" href="https://github.com/Brickell-Research/caffeine_lang/releases">Get Started (vunknown)</a><a class="btn btn-secondary" href="/blog">Read the Blog</a></div></section><section class="install-section"><h2>Installation</h2><p>With Homebrew:</p><div class="install-box"><pre class="code-block copyable"><button aria-label="Copy to clipboard" class="copy-btn">Copy</button><code class="language-bash">brew tap Brickell-Research/caffeine &amp;&amp; brew install caffeine_lang</code></pre></div><p class="install-alt">Or download a binary from <a href="https://github.com/Brickell-Research/caffeine_lang/releases">GitHub Releases</a>.</p><p class="install-subtitle">Verify your installation:</p><div class="install-box"><pre class="code-block copyable"><button aria-label="Copy to clipboard" class="copy-btn">Copy</button><code class="language-bash">caffeine --version</code></pre></div><p class="install-platform">Supports macOS and Linux.</p></section><script>
+        document.querySelectorAll('.copy-btn').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            var code = btn.parentElement.querySelector('code').textContent;
+            navigator.clipboard.writeText(code).then(function() {
+              btn.textContent = 'Copied!';
+              setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+            });
+          });
+        });
+      </script></div></main><footer class="site-footer"><div class="footer-content"><div class="subscribe-section"><p class="subscribe-title">Stay updated on Caffeine</p><form class="subscribe-form" id="subscribe-form"><input class="subscribe-input" id="subscribe-email" name="email" placeholder="your@email.com" required type="email"><input autocomplete="off" name="website" style="position: absolute; left: -9999px;" tabindex="-1" type="text"><button class="subscribe-button" type="submit">Subscribe</button><div class="cf-turnstile" data-execution="execute" data-sitekey="0x4AAAAAACNHy9TzUWzOgn_A" data-size="compact" data-theme="dark" id="turnstile-widget"></div></form><p class="subscribe-message" id="subscribe-message"></p></div><p>Built with <a href="https://gleam.run" target="_blank">Gleam</a> and <a href="https://github.com/lustre-labs/ssg" target="_blank">Lustre SSG</a></p><p>© 2025 <a href="https://brickellresearch.org/" target="_blank">Brickell Research</a></p></div></footer><script>
         // Convert data-lang to language-* class for Prism
         document.querySelectorAll('code[data-lang]').forEach(function(code) {
           var lang = code.getAttribute('data-lang').toLowerCase();
@@ -160,199 +175,6 @@
           });
         });
 
-        // Generate Documentation Sidebar TOC
-        var docsToc = document.getElementById('docs-toc');
-        if (docsToc) {
-          var headers = document.querySelectorAll('.doc-content h2[id], .doc-content h3[id], .doc-content h4[id]');
-
-          if (headers.length > 0) {
-            // Function to convert number to Roman numeral
-            function toRomanDoc(num) {
-              var romans = [
-                ['X', 10], ['IX', 9], ['V', 5], ['IV', 4], ['I', 1]
-              ];
-              var result = '';
-              for (var i = 0; i < romans.length; i++) {
-                while (num >= romans[i][1]) {
-                  result += romans[i][0];
-                  num -= romans[i][1];
-                }
-              }
-              return result;
-            }
-
-            // Function to convert number to letter (1=a, 2=b, etc.)
-            function toLetterDoc(num) {
-              return String.fromCharCode(96 + num); // 97 is 'a'
-            }
-
-            var tocList = document.createElement('ul');
-            var currentH2Li = null;
-            var currentH3Li = null;
-            var h2Count = 0;
-            var h3Count = 0;
-            var h4Count = 0;
-
-            headers.forEach(function(header) {
-              var level = header.tagName.toLowerCase();
-              var text = header.textContent.replace('#', '').trim();
-              var link = document.createElement('a');
-              link.href = '#' + header.id;
-
-              if (level === 'h2') {
-                h2Count++;
-                h3Count = 0;
-                h4Count = 0;
-                link.textContent = toRomanDoc(h2Count) + '. ' + text;
-              } else if (level === 'h3') {
-                h3Count++;
-                h4Count = 0;
-                link.textContent = toLetterDoc(h3Count) + '. ' + text;
-              } else if (level === 'h4') {
-                h4Count++;
-                link.textContent = h4Count + '. ' + text;
-              }
-
-              var li = document.createElement('li');
-              li.appendChild(link);
-
-              if (level === 'h2') {
-                tocList.appendChild(li);
-                currentH2Li = li;
-                currentH3Li = null;
-              } else if (level === 'h3' && currentH2Li) {
-                if (!currentH2Li.querySelector('ul')) {
-                  var subList = document.createElement('ul');
-                  currentH2Li.appendChild(subList);
-                }
-                currentH2Li.querySelector('ul').appendChild(li);
-                currentH3Li = li;
-              } else if (level === 'h4' && currentH3Li) {
-                if (!currentH3Li.querySelector('ul')) {
-                  var subList = document.createElement('ul');
-                  currentH3Li.appendChild(subList);
-                }
-                currentH3Li.querySelector('ul').appendChild(li);
-              }
-            });
-
-            docsToc.appendChild(tocList);
-          }
-
-          // Add anchor links to doc headers
-          document.querySelectorAll('.doc-content h2[id], .doc-content h3[id], .doc-content h4[id]').forEach(function(header) {
-            var anchor = document.createElement('span');
-            anchor.className = 'header-anchor';
-            anchor.innerHTML = '#';
-            anchor.setAttribute('aria-label', 'Copy link to ' + header.textContent);
-            header.insertBefore(anchor, header.firstChild);
-
-            header.style.cursor = 'pointer';
-            header.addEventListener('click', function(e) {
-              var url = window.location.origin + window.location.pathname + '#' + header.id;
-              window.history.pushState(null, '', '#' + header.id);
-              navigator.clipboard.writeText(url).then(function() {
-                var originalText = anchor.innerHTML;
-                anchor.innerHTML = '✓';
-                setTimeout(function() {
-                  anchor.innerHTML = originalText;
-                }, 1000);
-              }).catch(function(err) {
-                console.error('Failed to copy:', err);
-              });
-            });
-          });
-        }
-
-        // Generate Standard Library Sidebar TOC
-        var stdlibToc = document.getElementById('stdlib-toc');
-        if (stdlibToc) {
-          var headers = document.querySelectorAll('.stdlib-content h2[id], .stdlib-content h3[id]');
-
-          if (headers.length > 0) {
-            // Function to convert number to Roman numeral
-            function toRomanStdlib(num) {
-              var romans = [
-                ['X', 10], ['IX', 9], ['V', 5], ['IV', 4], ['I', 1]
-              ];
-              var result = '';
-              for (var i = 0; i < romans.length; i++) {
-                while (num >= romans[i][1]) {
-                  result += romans[i][0];
-                  num -= romans[i][1];
-                }
-              }
-              return result;
-            }
-
-            // Function to convert number to letter (1=a, 2=b, etc.)
-            function toLetterStdlib(num) {
-              return String.fromCharCode(96 + num); // 97 is 'a'
-            }
-
-            var tocList = document.createElement('ul');
-            var currentH2Li = null;
-            var h2Count = 0;
-            var h3Count = 0;
-
-            headers.forEach(function(header) {
-              var level = header.tagName.toLowerCase();
-              var text = header.textContent.replace('#', '').trim();
-              var link = document.createElement('a');
-              link.href = '#' + header.id;
-
-              if (level === 'h2') {
-                h2Count++;
-                h3Count = 0;
-                link.textContent = toRomanStdlib(h2Count) + '. ' + text;
-              } else if (level === 'h3') {
-                h3Count++;
-                link.textContent = toLetterStdlib(h3Count) + '. ' + text;
-              }
-
-              var li = document.createElement('li');
-              li.appendChild(link);
-
-              if (level === 'h2') {
-                tocList.appendChild(li);
-                currentH2Li = li;
-              } else if (level === 'h3' && currentH2Li) {
-                if (!currentH2Li.querySelector('ul')) {
-                  var subList = document.createElement('ul');
-                  currentH2Li.appendChild(subList);
-                }
-                currentH2Li.querySelector('ul').appendChild(li);
-              }
-            });
-
-            stdlibToc.appendChild(tocList);
-          }
-
-          // Add anchor links to stdlib headers
-          document.querySelectorAll('.stdlib-content h2[id], .stdlib-content h3[id], .stdlib-content h4[id]').forEach(function(header) {
-            var anchor = document.createElement('span');
-            anchor.className = 'header-anchor';
-            anchor.innerHTML = '#';
-            anchor.setAttribute('aria-label', 'Copy link to ' + header.textContent);
-            header.insertBefore(anchor, header.firstChild);
-
-            header.style.cursor = 'pointer';
-            header.addEventListener('click', function(e) {
-              var url = window.location.origin + window.location.pathname + '#' + header.id;
-              window.history.pushState(null, '', '#' + header.id);
-              navigator.clipboard.writeText(url).then(function() {
-                var originalText = anchor.innerHTML;
-                anchor.innerHTML = '✓';
-                setTimeout(function() {
-                  anchor.innerHTML = originalText;
-                }, 1000);
-              }).catch(function(err) {
-                console.error('Failed to copy:', err);
-              });
-            });
-          });
-        }
-
         // Subscribe form handler with execute-on-demand Turnstile
         var subscribeForm = document.getElementById('subscribe-form');
         if (subscribeForm) {
@@ -370,15 +192,22 @@
             message.textContent = '';
             message.className = 'subscribe-message';
 
-            // Execute Turnstile verification on-demand
-            if (typeof turnstile === 'undefined') {
-              message.textContent = 'Verification not loaded. Please refresh.';
-              message.className = 'subscribe-message error';
-              button.disabled = false;
-              button.textContent = 'Subscribe';
-              return;
+            // Load Turnstile script on-demand if not yet loaded
+            function loadTurnstile(cb) {
+              if (typeof turnstile !== 'undefined') return cb();
+              var s = document.createElement('script');
+              s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad';
+              window.onTurnstileLoad = function() { cb(); };
+              s.onerror = function() {
+                message.textContent = 'Verification failed to load. Please try again.';
+                message.className = 'subscribe-message error';
+                button.disabled = false;
+                button.textContent = 'Subscribe';
+              };
+              document.head.appendChild(s);
             }
 
+            loadTurnstile(function() {
             // Get fresh token by executing Turnstile
             turnstile.execute('#turnstile-widget', {
               callback: function(token) {
@@ -426,6 +255,7 @@
                 button.disabled = false;
                 turnstile.reset('#turnstile-widget');
               }
+            });
             });
           });
         }

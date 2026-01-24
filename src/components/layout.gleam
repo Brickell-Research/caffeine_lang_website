@@ -1,4 +1,5 @@
 import components/banner
+import version
 import components/footer
 import components/header
 import gleam/list
@@ -73,6 +74,22 @@ pub fn view_with_meta(meta: PageMeta, content: Element(Nil)) -> Element(Nil) {
   ]
 
   let style_tags = [
+    // Google Fonts: Inter + JetBrains Mono
+    html.link([
+      attribute.rel("preconnect"),
+      attribute.href("https://fonts.googleapis.com"),
+    ]),
+    html.link([
+      attribute.rel("preconnect"),
+      attribute.href("https://fonts.gstatic.com"),
+      attribute.attribute("crossorigin", ""),
+    ]),
+    html.link([
+      attribute.rel("stylesheet"),
+      attribute.href(
+        "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap",
+      ),
+    ]),
     html.link([
       attribute.rel("stylesheet"),
       attribute.href("/css/styles.css"),
@@ -181,27 +198,18 @@ pub fn view_with_meta(meta: PageMeta, content: Element(Nil)) -> Element(Nil) {
       site: 'datadoghq.com',
       service: 'caffeine-lang-website',
       env: 'production',
+      version: '" <> version.latest_version <> "',
       sessionSampleRate: 100,
       sessionReplaySampleRate: 20,
+      trackUserInteractions: true,
+      trackResources: true,
+      trackLongTasks: true,
       trackBfcacheViews: true,
       defaultPrivacyLevel: 'mask-user-input',
+      compressIntakeRequests: true,
       allowFallbackToLocalStorage: true,
     });
   })",
-    ),
-    // Cloudflare Turnstile for subscribe form
-    // Preconnect for performance optimization
-    html.link([
-      attribute.rel("preconnect"),
-      attribute.href("https://challenges.cloudflare.com"),
-    ]),
-    html.script(
-      [
-        attribute.src("https://challenges.cloudflare.com/turnstile/v0/api.js"),
-        attribute.attribute("async", ""),
-        attribute.attribute("defer", ""),
-      ],
-      "",
     ),
   ]
 
@@ -361,199 +369,6 @@ pub fn view_with_meta(meta: PageMeta, content: Element(Nil)) -> Element(Nil) {
           });
         });
 
-        // Generate Documentation Sidebar TOC
-        var docsToc = document.getElementById('docs-toc');
-        if (docsToc) {
-          var headers = document.querySelectorAll('.doc-content h2[id], .doc-content h3[id], .doc-content h4[id]');
-
-          if (headers.length > 0) {
-            // Function to convert number to Roman numeral
-            function toRomanDoc(num) {
-              var romans = [
-                ['X', 10], ['IX', 9], ['V', 5], ['IV', 4], ['I', 1]
-              ];
-              var result = '';
-              for (var i = 0; i < romans.length; i++) {
-                while (num >= romans[i][1]) {
-                  result += romans[i][0];
-                  num -= romans[i][1];
-                }
-              }
-              return result;
-            }
-
-            // Function to convert number to letter (1=a, 2=b, etc.)
-            function toLetterDoc(num) {
-              return String.fromCharCode(96 + num); // 97 is 'a'
-            }
-
-            var tocList = document.createElement('ul');
-            var currentH2Li = null;
-            var currentH3Li = null;
-            var h2Count = 0;
-            var h3Count = 0;
-            var h4Count = 0;
-
-            headers.forEach(function(header) {
-              var level = header.tagName.toLowerCase();
-              var text = header.textContent.replace('#', '').trim();
-              var link = document.createElement('a');
-              link.href = '#' + header.id;
-
-              if (level === 'h2') {
-                h2Count++;
-                h3Count = 0;
-                h4Count = 0;
-                link.textContent = toRomanDoc(h2Count) + '. ' + text;
-              } else if (level === 'h3') {
-                h3Count++;
-                h4Count = 0;
-                link.textContent = toLetterDoc(h3Count) + '. ' + text;
-              } else if (level === 'h4') {
-                h4Count++;
-                link.textContent = h4Count + '. ' + text;
-              }
-
-              var li = document.createElement('li');
-              li.appendChild(link);
-
-              if (level === 'h2') {
-                tocList.appendChild(li);
-                currentH2Li = li;
-                currentH3Li = null;
-              } else if (level === 'h3' && currentH2Li) {
-                if (!currentH2Li.querySelector('ul')) {
-                  var subList = document.createElement('ul');
-                  currentH2Li.appendChild(subList);
-                }
-                currentH2Li.querySelector('ul').appendChild(li);
-                currentH3Li = li;
-              } else if (level === 'h4' && currentH3Li) {
-                if (!currentH3Li.querySelector('ul')) {
-                  var subList = document.createElement('ul');
-                  currentH3Li.appendChild(subList);
-                }
-                currentH3Li.querySelector('ul').appendChild(li);
-              }
-            });
-
-            docsToc.appendChild(tocList);
-          }
-
-          // Add anchor links to doc headers
-          document.querySelectorAll('.doc-content h2[id], .doc-content h3[id], .doc-content h4[id]').forEach(function(header) {
-            var anchor = document.createElement('span');
-            anchor.className = 'header-anchor';
-            anchor.innerHTML = '#';
-            anchor.setAttribute('aria-label', 'Copy link to ' + header.textContent);
-            header.insertBefore(anchor, header.firstChild);
-
-            header.style.cursor = 'pointer';
-            header.addEventListener('click', function(e) {
-              var url = window.location.origin + window.location.pathname + '#' + header.id;
-              window.history.pushState(null, '', '#' + header.id);
-              navigator.clipboard.writeText(url).then(function() {
-                var originalText = anchor.innerHTML;
-                anchor.innerHTML = '✓';
-                setTimeout(function() {
-                  anchor.innerHTML = originalText;
-                }, 1000);
-              }).catch(function(err) {
-                console.error('Failed to copy:', err);
-              });
-            });
-          });
-        }
-
-        // Generate Standard Library Sidebar TOC
-        var stdlibToc = document.getElementById('stdlib-toc');
-        if (stdlibToc) {
-          var headers = document.querySelectorAll('.stdlib-content h2[id], .stdlib-content h3[id]');
-
-          if (headers.length > 0) {
-            // Function to convert number to Roman numeral
-            function toRomanStdlib(num) {
-              var romans = [
-                ['X', 10], ['IX', 9], ['V', 5], ['IV', 4], ['I', 1]
-              ];
-              var result = '';
-              for (var i = 0; i < romans.length; i++) {
-                while (num >= romans[i][1]) {
-                  result += romans[i][0];
-                  num -= romans[i][1];
-                }
-              }
-              return result;
-            }
-
-            // Function to convert number to letter (1=a, 2=b, etc.)
-            function toLetterStdlib(num) {
-              return String.fromCharCode(96 + num); // 97 is 'a'
-            }
-
-            var tocList = document.createElement('ul');
-            var currentH2Li = null;
-            var h2Count = 0;
-            var h3Count = 0;
-
-            headers.forEach(function(header) {
-              var level = header.tagName.toLowerCase();
-              var text = header.textContent.replace('#', '').trim();
-              var link = document.createElement('a');
-              link.href = '#' + header.id;
-
-              if (level === 'h2') {
-                h2Count++;
-                h3Count = 0;
-                link.textContent = toRomanStdlib(h2Count) + '. ' + text;
-              } else if (level === 'h3') {
-                h3Count++;
-                link.textContent = toLetterStdlib(h3Count) + '. ' + text;
-              }
-
-              var li = document.createElement('li');
-              li.appendChild(link);
-
-              if (level === 'h2') {
-                tocList.appendChild(li);
-                currentH2Li = li;
-              } else if (level === 'h3' && currentH2Li) {
-                if (!currentH2Li.querySelector('ul')) {
-                  var subList = document.createElement('ul');
-                  currentH2Li.appendChild(subList);
-                }
-                currentH2Li.querySelector('ul').appendChild(li);
-              }
-            });
-
-            stdlibToc.appendChild(tocList);
-          }
-
-          // Add anchor links to stdlib headers
-          document.querySelectorAll('.stdlib-content h2[id], .stdlib-content h3[id], .stdlib-content h4[id]').forEach(function(header) {
-            var anchor = document.createElement('span');
-            anchor.className = 'header-anchor';
-            anchor.innerHTML = '#';
-            anchor.setAttribute('aria-label', 'Copy link to ' + header.textContent);
-            header.insertBefore(anchor, header.firstChild);
-
-            header.style.cursor = 'pointer';
-            header.addEventListener('click', function(e) {
-              var url = window.location.origin + window.location.pathname + '#' + header.id;
-              window.history.pushState(null, '', '#' + header.id);
-              navigator.clipboard.writeText(url).then(function() {
-                var originalText = anchor.innerHTML;
-                anchor.innerHTML = '✓';
-                setTimeout(function() {
-                  anchor.innerHTML = originalText;
-                }, 1000);
-              }).catch(function(err) {
-                console.error('Failed to copy:', err);
-              });
-            });
-          });
-        }
-
         // Subscribe form handler with execute-on-demand Turnstile
         var subscribeForm = document.getElementById('subscribe-form');
         if (subscribeForm) {
@@ -571,15 +386,22 @@ pub fn view_with_meta(meta: PageMeta, content: Element(Nil)) -> Element(Nil) {
             message.textContent = '';
             message.className = 'subscribe-message';
 
-            // Execute Turnstile verification on-demand
-            if (typeof turnstile === 'undefined') {
-              message.textContent = 'Verification not loaded. Please refresh.';
-              message.className = 'subscribe-message error';
-              button.disabled = false;
-              button.textContent = 'Subscribe';
-              return;
+            // Load Turnstile script on-demand if not yet loaded
+            function loadTurnstile(cb) {
+              if (typeof turnstile !== 'undefined') return cb();
+              var s = document.createElement('script');
+              s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad';
+              window.onTurnstileLoad = function() { cb(); };
+              s.onerror = function() {
+                message.textContent = 'Verification failed to load. Please try again.';
+                message.className = 'subscribe-message error';
+                button.disabled = false;
+                button.textContent = 'Subscribe';
+              };
+              document.head.appendChild(s);
             }
 
+            loadTurnstile(function() {
             // Get fresh token by executing Turnstile
             turnstile.execute('#turnstile-widget', {
               callback: function(token) {
@@ -627,6 +449,7 @@ pub fn view_with_meta(meta: PageMeta, content: Element(Nil)) -> Element(Nil) {
                 button.disabled = false;
                 turnstile.reset('#turnstile-widget');
               }
+            });
             });
           });
         }

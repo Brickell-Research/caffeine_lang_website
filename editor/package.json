@@ -1,0 +1,13 @@
+{
+  "name": "caffeine-editor",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@codemirror/commands": "^6.7.1",
+    "@codemirror/language": "^6.10.8",
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/view": "^6.35.3",
+    "@codemirror/theme-one-dark": "^6.1.2",
+    "esbuild": "^0.24.0"
+  }
+}

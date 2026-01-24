@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Sunday Scaries ep. 1: Verbosity, Complexity, OOP, Oh My! | Caffeine</title><link href="/images/temp_caffeine_icon.png" rel="icon" type="image/png"><meta content="Sunday Scaries ep. 1: Verbosity, Complexity, OOP, Oh My! | Caffeine" property="og:title"><meta content="website" property="og:type"><meta content="Caffeine" property="og:site_name"><meta content="summary" name="twitter:card"><meta content="A story of refactors and learnings cleaning up some verbose, complex, OOP like code from the night before" name="description"><meta content="A story of refactors and learnings cleaning up some verbose, complex, OOP like code from the night before" property="og:description"><meta content="https://caffeine-lang.org/blog/sunday-scaries-ep-1" property="og:url"><link href="/css/styles.css" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js"></script><script src="https://unpkg.com/prismjs-gleam@1/gleam.js"></script><script async src="https://plausible.io/js/pa-vjl7vif68GwpiuXNTPtt7.js"></script><script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script><script>(function(h,o,u,n,d) {
+<html lang="en"><head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Sunday Scaries ep. 1: Verbosity, Complexity, OOP, Oh My! | Caffeine</title><link href="/images/temp_caffeine_icon.png" rel="icon" type="image/png"><meta content="Sunday Scaries ep. 1: Verbosity, Complexity, OOP, Oh My! | Caffeine" property="og:title"><meta content="website" property="og:type"><meta content="Caffeine" property="og:site_name"><meta content="summary" name="twitter:card"><meta content="A story of refactors and learnings cleaning up some verbose, complex, OOP like code from the night before" name="description"><meta content="A story of refactors and learnings cleaning up some verbose, complex, OOP like code from the night before" property="og:description"><meta content="https://caffeine-lang.org/blog/sunday-scaries-ep-1" property="og:url"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"><link href="/css/styles.css" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js"></script><script src="https://unpkg.com/prismjs-gleam@1/gleam.js"></script><script async src="https://plausible.io/js/pa-vjl7vif68GwpiuXNTPtt7.js"></script><script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script><script>(function(h,o,u,n,d) {
     h=h[d]=h[d]||{q:[],onReady:function(c){h.q.push(c)}}
     d=o.createElement(u);d.async=1;d.src=n
     n=o.getElementsByTagName(u)[0];n.parentNode.insertBefore(d,n)
@@ -11,13 +11,18 @@
       site: 'datadoghq.com',
       service: 'caffeine-lang-website',
       env: 'production',
+      version: 'vunknown',
       sessionSampleRate: 100,
       sessionReplaySampleRate: 20,
+      trackUserInteractions: true,
+      trackResources: true,
+      trackLongTasks: true,
       trackBfcacheViews: true,
       defaultPrivacyLevel: 'mask-user-input',
+      compressIntakeRequests: true,
       allowFallbackToLocalStorage: true,
     });
-  })</script><link href="https://challenges.cloudflare.com" rel="preconnect"><script async defer src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script></head><body><div class="announcement-banner"><a class="banner-link" href="https://gleamgathering.com/" target="_blank"><span class="banner-text-full">📣 I will be speaking at Gleam Gathering! Join me for &quot;10,000 Lines Later: When a Tool Became a Compiler (and I Became a Gleamlin)&quot;</span><span class="banner-text-mobile">📣 Speaking at Gleam Gathering</span><span class="banner-arrow"> →</span></a></div><header class="site-header"><nav class="nav"><a class="logo" href="/"><img alt="Caffeine" class="logo-img" src="/images/temp_caffeine_icon.png">Caffeine</a><ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/docs">Docs</a></li><li><a href="/stdlib">Stdlib</a></li><li><a href="/cafe">The Cafe</a></li><li><a href="/blog">Blog</a></li></ul></nav></header><main class="main-content"><article class="blog-post"><header class="post-header"><h1>Sunday Scaries ep. 1: Verbosity, Complexity, OOP, Oh My!</h1><p class="post-date">2025-11-30 · by Rob Durst</p></header><div class="post-content"><div class="toc"></div><p><strong>I&#39;m building <a href="https://github.com/Brickell-Research/caffeine_lang">Caffeine</a>, a compiler written in Gleam that compiles service expectations to reliability artifacts.
+  })</script></head><body><div class="announcement-banner"><a class="banner-link" href="https://gleamgathering.com/" target="_blank"><span class="banner-text-full">📣 I will be speaking at Gleam Gathering! Join me for &quot;10,000 Lines Later: When a Tool Became a Compiler (and I Became a Gleamlin)&quot;</span><span class="banner-text-mobile">📣 Speaking at Gleam Gathering</span><span class="banner-arrow"> →</span></a></div><header class="site-header"><nav class="nav"><a class="logo" href="/"><img alt="Caffeine" class="logo-img" src="/images/temp_caffeine_icon.png">Caffeine</a><ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/tour">Tour</a></li><li><a href="/blog">Blog</a></li></ul></nav></header><main class="main-content"><article class="blog-post"><header class="post-header"><h1>Sunday Scaries ep. 1: Verbosity, Complexity, OOP, Oh My!</h1><p class="post-date">2025-11-30 · by Rob Durst</p></header><div class="post-content"><div class="toc"></div><p><strong>I&#39;m building <a href="https://github.com/Brickell-Research/caffeine_lang">Caffeine</a>, a compiler written in Gleam that compiles service expectations to reliability artifacts.
 This post documents the learnings from a Sunday morning refactor following a late Saturday night coding session.</strong></p><hr><h2 id="Setting-the-Scene">Setting the Scene</h2><p>With a <a href="https://www.youtube.com/watch?v=V-La6hkgnCU&amp;list=RDV-La6hkgnCU&amp;start_radio=1">Chris Luno mix</a> on, I am taking a slow walk on my under-desk treadmill writing this post.</p><p class="figure"><img alt="view from my desk" src="/images/sunday-scaries-ep-1_pov_desk.jpg"></p><p>Low quality picture of my current setup - MacBook pro, 2 external screens, my wife&#39;s ring light, and ofc my Lucy mug</p><p>Last night I was working on the <code>Artifact</code> type (<a href="https://caffeine-lang.run/docs#Standard-Library-Developers">as per docs</a>): <em>&quot;an artifact surfaces the standard library or a plugin&#39;s interface - it defines the expected values on which the logic operates. An SLO artifact would require thresholds and queries while a systems modelling artifact might require dependency relationships.&quot;</em></p><p>In yaml, an example <code>artifacts.yaml</code> looks like:</p><pre><code data-lang="yaml">artifacts:
   - name: SLO
     version: 0.0.1
@@ -322,199 +327,6 @@ pub fn make_semver(version version: String) -&gt; Result(Semver, String) {
           });
         });
 
-        // Generate Documentation Sidebar TOC
-        var docsToc = document.getElementById('docs-toc');
-        if (docsToc) {
-          var headers = document.querySelectorAll('.doc-content h2[id], .doc-content h3[id], .doc-content h4[id]');
-
-          if (headers.length > 0) {
-            // Function to convert number to Roman numeral
-            function toRomanDoc(num) {
-              var romans = [
-                ['X', 10], ['IX', 9], ['V', 5], ['IV', 4], ['I', 1]
-              ];
-              var result = '';
-              for (var i = 0; i < romans.length; i++) {
-                while (num >= romans[i][1]) {
-                  result += romans[i][0];
-                  num -= romans[i][1];
-                }
-              }
-              return result;
-            }
-
-            // Function to convert number to letter (1=a, 2=b, etc.)
-            function toLetterDoc(num) {
-              return String.fromCharCode(96 + num); // 97 is 'a'
-            }
-
-            var tocList = document.createElement('ul');
-            var currentH2Li = null;
-            var currentH3Li = null;
-            var h2Count = 0;
-            var h3Count = 0;
-            var h4Count = 0;
-
-            headers.forEach(function(header) {
-              var level = header.tagName.toLowerCase();
-              var text = header.textContent.replace('#', '').trim();
-              var link = document.createElement('a');
-              link.href = '#' + header.id;
-
-              if (level === 'h2') {
-                h2Count++;
-                h3Count = 0;
-                h4Count = 0;
-                link.textContent = toRomanDoc(h2Count) + '. ' + text;
-              } else if (level === 'h3') {
-                h3Count++;
-                h4Count = 0;
-                link.textContent = toLetterDoc(h3Count) + '. ' + text;
-              } else if (level === 'h4') {
-                h4Count++;
-                link.textContent = h4Count + '. ' + text;
-              }
-
-              var li = document.createElement('li');
-              li.appendChild(link);
-
-              if (level === 'h2') {
-                tocList.appendChild(li);
-                currentH2Li = li;
-                currentH3Li = null;
-              } else if (level === 'h3' && currentH2Li) {
-                if (!currentH2Li.querySelector('ul')) {
-                  var subList = document.createElement('ul');
-                  currentH2Li.appendChild(subList);
-                }
-                currentH2Li.querySelector('ul').appendChild(li);
-                currentH3Li = li;
-              } else if (level === 'h4' && currentH3Li) {
-                if (!currentH3Li.querySelector('ul')) {
-                  var subList = document.createElement('ul');
-                  currentH3Li.appendChild(subList);
-                }
-                currentH3Li.querySelector('ul').appendChild(li);
-              }
-            });
-
-            docsToc.appendChild(tocList);
-          }
-
-          // Add anchor links to doc headers
-          document.querySelectorAll('.doc-content h2[id], .doc-content h3[id], .doc-content h4[id]').forEach(function(header) {
-            var anchor = document.createElement('span');
-            anchor.className = 'header-anchor';
-            anchor.innerHTML = '#';
-            anchor.setAttribute('aria-label', 'Copy link to ' + header.textContent);
-            header.insertBefore(anchor, header.firstChild);
-
-            header.style.cursor = 'pointer';
-            header.addEventListener('click', function(e) {
-              var url = window.location.origin + window.location.pathname + '#' + header.id;
-              window.history.pushState(null, '', '#' + header.id);
-              navigator.clipboard.writeText(url).then(function() {
-                var originalText = anchor.innerHTML;
-                anchor.innerHTML = '✓';
-                setTimeout(function() {
-                  anchor.innerHTML = originalText;
-                }, 1000);
-              }).catch(function(err) {
-                console.error('Failed to copy:', err);
-              });
-            });
-          });
-        }
-
-        // Generate Standard Library Sidebar TOC
-        var stdlibToc = document.getElementById('stdlib-toc');
-        if (stdlibToc) {
-          var headers = document.querySelectorAll('.stdlib-content h2[id], .stdlib-content h3[id]');
-
-          if (headers.length > 0) {
-            // Function to convert number to Roman numeral
-            function toRomanStdlib(num) {
-              var romans = [
-                ['X', 10], ['IX', 9], ['V', 5], ['IV', 4], ['I', 1]
-              ];
-              var result = '';
-              for (var i = 0; i < romans.length; i++) {
-                while (num >= romans[i][1]) {
-                  result += romans[i][0];
-                  num -= romans[i][1];
-                }
-              }
-              return result;
-            }
-
-            // Function to convert number to letter (1=a, 2=b, etc.)
-            function toLetterStdlib(num) {
-              return String.fromCharCode(96 + num); // 97 is 'a'
-            }
-
-            var tocList = document.createElement('ul');
-            var currentH2Li = null;
-            var h2Count = 0;
-            var h3Count = 0;
-
-            headers.forEach(function(header) {
-              var level = header.tagName.toLowerCase();
-              var text = header.textContent.replace('#', '').trim();
-              var link = document.createElement('a');
-              link.href = '#' + header.id;
-
-              if (level === 'h2') {
-                h2Count++;
-                h3Count = 0;
-                link.textContent = toRomanStdlib(h2Count) + '. ' + text;
-              } else if (level === 'h3') {
-                h3Count++;
-                link.textContent = toLetterStdlib(h3Count) + '. ' + text;
-              }
-
-              var li = document.createElement('li');
-              li.appendChild(link);
-
-              if (level === 'h2') {
-                tocList.appendChild(li);
-                currentH2Li = li;
-              } else if (level === 'h3' && currentH2Li) {
-                if (!currentH2Li.querySelector('ul')) {
-                  var subList = document.createElement('ul');
-                  currentH2Li.appendChild(subList);
-                }
-                currentH2Li.querySelector('ul').appendChild(li);
-              }
-            });
-
-            stdlibToc.appendChild(tocList);
-          }
-
-          // Add anchor links to stdlib headers
-          document.querySelectorAll('.stdlib-content h2[id], .stdlib-content h3[id], .stdlib-content h4[id]').forEach(function(header) {
-            var anchor = document.createElement('span');
-            anchor.className = 'header-anchor';
-            anchor.innerHTML = '#';
-            anchor.setAttribute('aria-label', 'Copy link to ' + header.textContent);
-            header.insertBefore(anchor, header.firstChild);
-
-            header.style.cursor = 'pointer';
-            header.addEventListener('click', function(e) {
-              var url = window.location.origin + window.location.pathname + '#' + header.id;
-              window.history.pushState(null, '', '#' + header.id);
-              navigator.clipboard.writeText(url).then(function() {
-                var originalText = anchor.innerHTML;
-                anchor.innerHTML = '✓';
-                setTimeout(function() {
-                  anchor.innerHTML = originalText;
-                }, 1000);
-              }).catch(function(err) {
-                console.error('Failed to copy:', err);
-              });
-            });
-          });
-        }
-
         // Subscribe form handler with execute-on-demand Turnstile
         var subscribeForm = document.getElementById('subscribe-form');
         if (subscribeForm) {
@@ -532,15 +344,22 @@ pub fn make_semver(version version: String) -&gt; Result(Semver, String) {
             message.textContent = '';
             message.className = 'subscribe-message';
 
-            // Execute Turnstile verification on-demand
-            if (typeof turnstile === 'undefined') {
-              message.textContent = 'Verification not loaded. Please refresh.';
-              message.className = 'subscribe-message error';
-              button.disabled = false;
-              button.textContent = 'Subscribe';
-              return;
+            // Load Turnstile script on-demand if not yet loaded
+            function loadTurnstile(cb) {
+              if (typeof turnstile !== 'undefined') return cb();
+              var s = document.createElement('script');
+              s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad';
+              window.onTurnstileLoad = function() { cb(); };
+              s.onerror = function() {
+                message.textContent = 'Verification failed to load. Please try again.';
+                message.className = 'subscribe-message error';
+                button.disabled = false;
+                button.textContent = 'Subscribe';
+              };
+              document.head.appendChild(s);
             }
 
+            loadTurnstile(function() {
             // Get fresh token by executing Turnstile
             turnstile.execute('#turnstile-widget', {
               callback: function(token) {
@@ -588,6 +407,7 @@ pub fn make_semver(version version: String) -&gt; Result(Semver, String) {
                 button.disabled = false;
                 turnstile.reset('#turnstile-widget');
               }
+            });
             });
           });
         }
