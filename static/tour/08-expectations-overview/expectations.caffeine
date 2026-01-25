@@ -1,0 +1,17 @@
+# Extendable for common production defaults
+_defaults (Provides): { env: "production", window_in_days: 30 }
+
+# Extendable for stricter SLOs
+_strict (Provides): { threshold: 99.99, window_in_days: 7 }
+
+Expectations for "api_availability"
+  * "checkout_availability" extends [_defaults]:
+    Provides {
+      status: true,
+      threshold: 99.95
+    }
+
+  * "payment_availability" extends [_defaults, _strict]:
+    Provides {
+      status: true
+    }

@@ -20,7 +20,6 @@ const lessonFolders = [
   { id: '08-expectations-overview', title: 'Expectations: Declarative Assertions over Service Properties' },
   { id: '09-advanced-extendables', title: '[Advanced]: Extendable Basics' },
   { id: '10-advanced-type-aliases', title: '[Advanced]: Type Aliases' },
-  { id: '11-productionization-cicd', title: 'Developing a Continuous Integration Process' },
 ];
 
 // ─── Lesson Loading ─────────────────────────────────────────────────────────

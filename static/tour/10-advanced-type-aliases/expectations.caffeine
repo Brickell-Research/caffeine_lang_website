@@ -1,0 +1,16 @@
+Expectations for "api_availability"
+  * "checkout_availability":
+    Provides {
+      env: "prod",
+      window_in_days: 30,
+      status: true,
+      threshold: 99.95
+    }
+
+  * "staging_checkout":
+    Provides {
+      env: "staging",
+      window_in_days: 7,
+      status: true,
+      threshold: 95.0
+    }

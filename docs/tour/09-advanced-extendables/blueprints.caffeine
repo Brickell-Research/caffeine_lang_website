@@ -1,0 +1,22 @@
+# Requires extendable for common fields
+_common (Requires): {
+  env: String,
+  window_in_days: Integer
+}
+
+# Provides extendable for vendor config
+_datadog (Provides): { vendor: "datadog" }
+
+Blueprints for "SLO"
+  * "api_availability" extends [_datadog, _common]:
+    Requires {
+      status: Boolean,
+      threshold: Float { x | x in ( 0.0..100.0 ) }
+    }
+    Provides {
+      value: "numerator / denominator",
+      queries: {
+        numerator: "sum:http.requests{${env->env}, ${status->status.not}}",
+        denominator: "sum:http.requests{${env->env}}"
+      }
+    }

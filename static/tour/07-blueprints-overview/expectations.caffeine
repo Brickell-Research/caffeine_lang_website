@@ -1,0 +1,7 @@
+Expectations for "api_availability"
+  * "checkout_availability":
+    Provides {
+      env: "prod",
+      status: true,
+      threshold: 99.95
+    }

@@ -1,1 +1,42 @@
-A **blueprint** is a common, partially specified abstraction over one or more artifacts.
+A **blueprint** is a common, partially specified abstraction over one or more artifacts. It may `provide` for `requires` from the one or more artifacts it inherits from and then specify some `requires` of its own.
+
+It may not override any `requires` from its inherited artifacts, nor specify `provides` for its own `requires` or `requires` that don't exist.
+
+**Basic Syntax:**
+
+```
+Blueprints for "<ArtifactName>"
+  * "<blueprint_name>":
+    Requires { <params_expectations_must_provide> }
+    Provides { <values_this_blueprint_fixes> }
+```
+
+**Key Rules:**
+
+| Block | Contains | Purpose |
+|-------|----------|---------|
+| `Requires` | Types only | Parameters that expectations must provide values for |
+| `Provides` | Values only | Fixed values that all expectations inherit |
+
+**Multi-Artifact Blueprints:**
+
+A blueprint can implement multiple artifacts using `+`. Parameters from all artifacts are merged:
+
+```
+Blueprints for "SLO" + "DependencyRelation"
+  * "tracked_slo":
+    Requires { ... }  # Params from both artifacts
+    Provides { ... }  # Values for both artifacts
+```
+
+**Template Variables:**
+
+Use `${var}` syntax in query strings for value interpolation:
+
+| Syntax | Meaning | Example Output |
+|--------|---------|----------------|
+| `${var}` | Raw value | `production` |
+| `${var->attr}` | Key-value pair | `env:production` |
+| `${var->attr.not}` | Negated pair | `!status:true` |
+
+
