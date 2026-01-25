@@ -7,7 +7,9 @@ In order to tie together all the concepts presented here, let's walk through a c
 
 What might a user expect of these features?
 
-> Spend a couple minutes brainstorming yourself before continuing. Caffeine is just a tool to codify expectations. Taking sufficient time to discuss with stakeholders, teammates, users, etc. before even opening an IDE is critical!
+> Spend a couple minutes brainstorming yourself before continuing. Caffeine is just a tool to codify expectations. Taking sufficient time to discuss with stakeholders, teammates, users, etc. before even opening an IDE is critical! We're just the barista - we serve our customers.
+
+<br>
 
 Here are the user expectations we came up with:
 
@@ -142,7 +144,7 @@ Blueprints for "SLO"
       value: "total / valid"
     }
   * "Auth Latency"  extends [_datadog, _auth_service_common]:
-    Requires { endpoint: String, threshold_in_seconds: Float }
+    Requires { threshold_in_seconds: Float }
     Provides {
       queries: {
         latency: "p75:latency{$$environment->env$$, $$endpoint->endpoint$$}"
@@ -173,7 +175,7 @@ Blueprints for "SLO"
       value: "total / valid"
     }
   * "Auth Latency"  extends [_datadog, _auth_service_common]:
-    Requires { endpoint: String, threshold_in_seconds: Float }
+    Requires { threshold_in_seconds: Float }
     Provides {
       queries: {
         latency: "p75:latency{$$environment->env$$, $$endpoint->endpoint$$}"
@@ -207,8 +209,8 @@ Expectations for "Auth Latency"
 
 So if you recall, there are two `SLO` artifact specific `provides` we need to satisfy:
 
-* a `window_in_days` which is an `Integer` of 7, 30, or 90 (_seem odd? well, yes. These are specific to a Datadog restriction and will likely be lifted in the future.)
-* a `threshold` which is a `Float` between 0 and 100
+* a `window_in_days` which is an `Integer` of 7, 30, or 90 (_seem odd?_ well, yes. These are specific to a Datadog restriction and will likely be lifted in the future.)
+* a `threshold` which is a `Float` between 0.0 and 100.0
 
 Furthermore, each blueprint requires:
 
@@ -296,4 +298,4 @@ Expectations for "Auth Latency"
   }
 ```
 
-And with that, we just need to compile everything, apply it, and we're well on our way to more reliably operating our production systems 🎉. In the name of Caffeine, go find a good ☕️ from your local cafe to celebrate!
+And with that, we just need to compile everything, apply it, and we're well on our way to more reliably operating our production systems 🎉. In the name of Caffeine, go find a good ☕️ from your local cafe to celebrate! **You are now officially a Caffeine barista!**

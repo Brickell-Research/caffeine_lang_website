@@ -2,10 +2,10 @@ Before diving into specific concepts, let's cover the basic syntax of Caffeine.
 
 All Caffeine files end with the `.caffeine` file extension. There are two types of files, each with specific file path requirements:
 
-| File                             | Contains                                                                                                               |
-|----------------------------------|------------------------------------------------------------------------------------------------------------------------|
-| `blueprints.caffeine`            | **Blueprints** with optional type aliases and/or extendables                                                               |
-| `ORG/TEAM/SERVICE.caffeine`      | **Expectation** with optional extendables. One file per org/team/service combination. As denoted, file path is meaningful |
+| File                             | Contains                                                                                                                   |
+|----------------------------------|----------------------------------------------------------------------------------------------------------------------------|
+| `blueprints.caffeine`            | **Blueprints** with optional type aliases and/or extendables.                                                              |
+| `ORG/TEAM/SERVICE.caffeine`      | **Expectation** with optional extendables. One file per org/team/service combination. As denoted, file path is meaningful. |
 
 Comments in Caffeine are _Ruby like_ and useful for surfacing tacit information about an expectation.
 
@@ -34,8 +34,6 @@ Blueprints for "SLO"
     Requires { ... }
     Provides { ... }
 ```
-
-**Important:** In blueprints, `Requires` must come before `Provides`. The compiler enforces this ordering.
 
 There are just a few keywords in the Caffeine language. Here they are along with their significance/meaning:
 * `Blueprints for`: prefaces blueprint(s) declaration(s) for one or more artifacts

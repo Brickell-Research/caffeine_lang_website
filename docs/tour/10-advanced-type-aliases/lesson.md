@@ -1,4 +1,4 @@
-**Type Aliases** are reusable, named types (_at this time, they specifically must be refinement types - an opinion of the core team_). They let you define a constrained type once and reference it throughout your blueprints, reducing repetition and ensuring consistency.
+**Type Aliases** are reusable, named types (_at this time, they specifically must be refinement types - a decision of the core team which is open for discussion_). They let you define a constrained type once and reference it throughout your blueprints, reducing repetition and ensuring consistency.
 
 **Syntax:**
 
@@ -40,14 +40,13 @@ Blueprints for "SLO"
 - Must be at top of file (before extendables and blueprints)
 - File-scoped only (cannot reference across files)
 - Can only alias refinement types (OneOf or InclusiveRange)
-- Inlined at compile time (do not appear in JSON output)
 
 Two of the most common use cases thus far are a type describing environments and a type for a well-known set of service names.
 
 ```
 # Environments
-_env (Type): String { x | x in { prod, staging, dev } }
+_env (Type): String { x | x in { "prod", "staging", "dev" } }
 
 # Service names
-_service (Type): String { x | x in { authentication, backend, frontend, database } }
+_service (Type): String { x | x in { "authentication", "backend", "frontend", "database" } }
 ```

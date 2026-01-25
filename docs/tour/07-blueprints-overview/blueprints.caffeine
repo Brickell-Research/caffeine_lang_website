@@ -1,22 +1,11 @@
-# Type alias for environment constraint
-_env (Type): String { x | x in { prod, staging } }
-
-# Extendable for common requirements
-_common (Requires): { env: Defaulted(_env, "prod") }
-
-# Extendable for common provides
-_base_slo (Provides): { vendor: "datadog" }
-
 Blueprints for "SLO"
-  * "api_availability" extends [_base_slo, _common]:
-    Requires {
-      status: Boolean,
-      threshold: Float { x | x in ( 0.0..100.0 ) }
-    }
+  * "Simple_SLO":
+    Requires { service_name: String, excluded_service_name: String }
     Provides {
-      value: "numerator / denominator",
+      vendor: "datadog",
       queries: {
-        numerator: "sum:http.requests{${env->env}, ${status->status.not}}",
-        denominator: "sum:http.requests{${env->env}}"
-      }
+        numerator: "sum:successes{$$service->service_name$$, $$service_name->excluded_service_name:not$$}",
+        denominator: "sum:total{$$service->service_name$$}"
+      },
+      value: "numerator / denominator"
     }

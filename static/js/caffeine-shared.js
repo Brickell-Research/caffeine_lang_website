@@ -25,6 +25,12 @@ export function compile(blueprintsText, expectationsText, configPath) {
 
 export function setupCompileOutput(outputDisplay, getBlueprints, getExpectations, configPath) {
   function runCompile() {
+    // Skip compilation if editors are disabled (tour mode)
+    const outputPanel = outputDisplay.closest('.tour-output-panel');
+    if (outputPanel && outputPanel.classList.contains('editors-disabled')) {
+      return;
+    }
+
     const outputCode = outputDisplay.querySelector('code') || outputDisplay;
 
     try {

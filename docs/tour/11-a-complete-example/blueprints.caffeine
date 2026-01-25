@@ -17,7 +17,7 @@ Blueprints for "SLO"
       value: "total / valid"
     }
   * "Auth Latency"  extends [_datadog, _auth_service_common]:
-    Requires { endpoint: String, threshold_in_seconds: Float }
+    Requires { threshold_in_seconds: Float }
     Provides {
       queries: {
         latency: "p75:latency{$$environment->env$$, $$endpoint->endpoint$$}"

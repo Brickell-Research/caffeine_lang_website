@@ -1,19 +1,11 @@
-# Type alias for threshold constraint
-_threshold (Type): Float { x | x in ( 0.0..100.0 ) }
-
 Blueprints for "SLO"
-  * "api_availability":
-    Requires {
-      env: String,
-      status: Boolean,
-      threshold: _threshold,
-      window_in_days: Integer
-    }
+  * "Simple_SLO":
+    Requires { service_name: String }
     Provides {
       vendor: "datadog",
-      value: "numerator / denominator",
       queries: {
-        numerator: "sum:http.requests{${env->env}, ${status->status.not}}",
-        denominator: "sum:http.requests{${env->env}}"
-      }
+        numerator: "sum:successes{$$service->service_name$$}",
+        denominator: "sum:total{$$service->service_name$$}"
+      },
+      value: "numerator / denominator"
     }

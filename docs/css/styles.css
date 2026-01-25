@@ -1645,6 +1645,21 @@ a:hover {
   overflow: auto;
 }
 
+/* Disabled editors state */
+.tour-editors.editors-disabled,
+.tour-output-panel.editors-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.tour-editors.editors-disabled .cm-editor {
+  background: var(--editor-bg);
+}
+
+.tour-editors.editors-disabled .cm-content {
+  color: var(--text-muted);
+}
+
 /* Table of contents overlay */
 .tour-toc-overlay {
   position: fixed;

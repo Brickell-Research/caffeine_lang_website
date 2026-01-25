@@ -1,25 +1,21 @@
 # Type aliases for common constraints
-_env (Type): String { x | x in { prod, staging, dev } }
-_threshold (Type): Float { x | x in ( 0.0..100.0 ) }
-_window (Type): Integer { x | x in { 7, 30, 90 } }
+_env (Type): String { x | x in { "prod", "staging", "dev" } }
 
 # Extendable using type aliases
 _common (Requires): {
   env: Defaulted(_env, "prod"),
-  window_in_days: Defaulted(_window, 30)
 }
 
 Blueprints for "SLO"
   * "api_availability" extends [_common]:
     Requires {
       status: Boolean,
-      threshold: _threshold
     }
     Provides {
       vendor: "datadog",
       value: "numerator / denominator",
       queries: {
-        numerator: "sum:http.requests{${env->env}, ${status->status.not}}",
-        denominator: "sum:http.requests{${env->env}}"
+        numerator: "sum:http.requests{$$env->env$$, $$status->status:not$$}",
+        denominator: "sum:http.requests{$$env->env$$}"
       }
     }

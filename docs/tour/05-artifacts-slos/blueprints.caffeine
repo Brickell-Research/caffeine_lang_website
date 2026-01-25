@@ -4,8 +4,8 @@ Blueprints for "SLO"
     Provides {
       vendor: "datadog",
       queries: {
-        numerator: "sum:requests.success{service:example}.as_count()",
-        denominator: "sum:requests.total{service:example}.as_count()"
+        numerator: "sum:successes{$$service->service_name$$}",
+        denominator: "sum:total{$$service->service_name$$}"
       },
       value: "numerator / denominator"
     }

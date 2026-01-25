@@ -1,23 +1,16 @@
-# Default production settings
-_defaults (Provides): {
-  env: "production",
-  window_in_days: 30
-}
-
-# Stricter SLO settings (overrides window_in_days)
-_strict (Provides): {
-  threshold: 99.99,
-  window_in_days: 7
-}
-
 Expectations for "api_availability"
-  * "checkout_availability" extends [_defaults]:
+  * "checkout_availability":
     Provides {
+      env: "production",
       status: true,
-      threshold: 99.95
+      threshold: 99.95,
+      window_in_days: 30
     }
 
-  * "payment_availability" extends [_defaults, _strict]:
+  * "payment_availability":
     Provides {
-      status: true
+      env: "production",
+      status: true,
+      threshold: 99.0,
+      window_in_days: 30
     }

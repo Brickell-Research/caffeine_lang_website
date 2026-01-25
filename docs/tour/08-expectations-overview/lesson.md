@@ -35,3 +35,5 @@ The compiler validates expectations at compile time:
 - Expectation references must point to valid targets
 - Circular dependencies are rejected
 - Expectation names must be unique per org + team + service
+
+> Try removing the `service_name: "hello-world"` line and notice the compilation error.

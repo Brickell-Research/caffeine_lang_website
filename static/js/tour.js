@@ -10,17 +10,17 @@ import { marked } from 'https://esm.sh/marked@15';
 //   - expectations.caffeine (right editor)
 
 const lessonFolders = [
-  { id: '01-welcome', title: 'Welcome to Caffeine' },
-  { id: '02-caffeine-syntax-basics', title: 'Syntax Basics' },
-  { id: '03-type-system', title: 'The Type System' },
-  { id: '04-artifacts-overview', title: 'Everything Starts with an Artifact' },
-  { id: '05-artifacts-slos', title: 'Artifact - Service Level Objectives' },
-  { id: '06-artifacts-dependency-relations', title: '[Experimental] Artifact - Dependency Relations' },
-  { id: '07-blueprints-overview', title: 'Blueprints, The Template Layer' },
-  { id: '08-expectations-overview', title: 'Expectations: Declarative Assertions over Service Properties' },
-  { id: '09-advanced-extendables', title: '[Advanced]: Extendables' },
-  { id: '10-advanced-type-aliases', title: '[Advanced]: Type Aliases' },
-  { id: '11-a-complete-example', title: 'A Complete Example' },
+  { id: '01-welcome', title: 'Welcome to Caffeine', editorsDisabled: false },
+  { id: '02-caffeine-syntax-basics', title: 'Syntax Basics', editorsDisabled: true },
+  { id: '03-type-system', title: 'The Type System' , editorsDisabled: false },
+  { id: '04-artifacts-overview', title: 'Everything Starts with an Artifact', editorsDisabled: true },
+  { id: '05-artifacts-slos', title: 'Artifact - Service Level Objectives' , editorsDisabled: false },
+  { id: '06-artifacts-dependency-relations', title: '[Experimental] Artifact - Dependency Relations' , editorsDisabled: true },
+  { id: '07-blueprints-overview', title: 'Blueprints, The Template Layer' , editorsDisabled: false },
+  { id: '08-expectations-overview', title: 'Expectations: Declarative Assertions over Service Properties' , editorsDisabled: false },
+  { id: '09-advanced-extendables', title: '[Advanced]: Extendables' , editorsDisabled: false },
+  { id: '10-advanced-type-aliases', title: '[Advanced]: Type Aliases' , editorsDisabled: false },
+  { id: '11-a-complete-example', title: 'A Complete Example' , editorsDisabled: false },
 ];
 
 // ─── Lesson Loading ─────────────────────────────────────────────────────────
@@ -138,6 +138,7 @@ function init() {
   // Load a lesson
   async function loadLesson(index) {
     const lesson = await getLesson(index);
+    const folder = lessonFolders[index];
     currentLesson = index;
 
     localStorage.setItem('caffeine-tour-lesson', index.toString());
@@ -148,8 +149,23 @@ function init() {
     // Scroll lesson content to top
     lessonContent.scrollTop = 0;
 
-    setContent(blueprintsEditor, lesson.blueprints);
-    setContent(expectationsEditor, lesson.expectations);
+    // Handle disabled editors
+    const editorsContainer = document.querySelector('.tour-editors');
+    const outputPanel = document.querySelector('.tour-output-panel');
+
+    if (folder.editorsDisabled) {
+      editorsContainer.classList.add('editors-disabled');
+      outputPanel.classList.add('editors-disabled');
+      setContent(blueprintsEditor, '# Editors not available for this lesson');
+      setContent(expectationsEditor, '# Editors not available for this lesson');
+      outputDisplay.innerHTML = '<code class="language-hcl">// Editors not available for this lesson</code>';
+    } else {
+      editorsContainer.classList.remove('editors-disabled');
+      outputPanel.classList.remove('editors-disabled');
+      setContent(blueprintsEditor, lesson.blueprints);
+      setContent(expectationsEditor, lesson.expectations);
+      runCompile();
+    }
 
     const progress = ((index + 1) / lessonFolders.length) * 100;
     progressFill.style.width = progress + '%';
@@ -157,8 +173,6 @@ function init() {
 
     btnPrev.disabled = index === 0;
     btnNext.disabled = index === lessonFolders.length - 1;
-
-    runCompile();
 
     // Re-check scroll fades after content changes
     setTimeout(() => {

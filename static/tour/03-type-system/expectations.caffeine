@@ -1,4 +1,4 @@
-Expectations for "Typed_SLO"
+Expectations for "Simple_SLO"
   * "Payments SLO":
     Provides {
       service_name: "hello-world",

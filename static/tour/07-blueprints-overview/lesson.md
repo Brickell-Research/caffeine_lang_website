@@ -8,7 +8,7 @@ It may **not** override any `requires` from its inherited artifacts, nor specify
 Blueprints for "<ArtifactName>"
   * "<blueprint_name>":
     Requires { <params_expectations_must_provide> }
-    Provides { <values_this_blueprint_fixes> }
+    Provides { <values_this_blueprint_fulfills> }
 ```
 
 **Note:** `Requires` must come before `Provides` in blueprints. The compiler enforces this ordering.
@@ -18,7 +18,7 @@ Blueprints for "<ArtifactName>"
 | Block      | Contains    | Purpose                                              |
 |------------|-------------|------------------------------------------------------|
 | `Requires` | Types only  | Parameters that expectations must provide values for |
-| `Provides` | Values only | Fixed values that all expectations inherit           |
+| `Provides` | Values only | Fulfilled values that all expectations inherit       |
 
 **Multi-Artifact Blueprints:**
 
@@ -35,12 +35,14 @@ As stated in the `DependencyRelation` lesson, this is _the only way_ to leverage
 
 **Template Variables:**
 
-Use `${var}` syntax in query strings for value interpolation:
+Use `$$var$$` syntax in query strings for value interpolation:
 
 | Syntax             | Meaning        | Example Output   |
 |--------------------|----------------|------------------|
-| `${var}`           | Raw value      | `production`     |
-| `${var->attr}`     | Key-value pair | `env:production` |
-| `${var->attr.not}` | Negated pair   | `!status:true`   |
+| `$$var$$`          | Raw value      | `production`     |
+| `$$var->attr$$`    | Key-value pair | `env:production` |
+| `$$var->attr:not$$`| Negated pair   | `!status:true`   |
 
 This is how the compiler leverages the parameters it collects to interpolate into the queries for the final artifact output.
+
+> In the example below, notice how both `service_name` and `excluded_service_name` are leveraged within both queries and the value specified by the expectation is interpolated in the output.
