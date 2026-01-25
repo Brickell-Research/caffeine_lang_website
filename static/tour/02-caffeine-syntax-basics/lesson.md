@@ -1,11 +1,11 @@
 Before diving into specific concepts, let's cover the basic syntax of Caffeine.
 
-All Caffeine files end with the `.caffeine` file extension. There are two types files, each with specific file path requirements:
+All Caffeine files end with the `.caffeine` file extension. There are two types of files, each with specific file path requirements:
 
 | File                             | Contains                                                                                                               |
 |----------------------------------|------------------------------------------------------------------------------------------------------------------------|
-| `blueprints.caffeine`            | Blueprints with optional type aliases and/or extendables                                                               |
-| `ORG/TEAM/SERVICE.caffeine`      | Expectation with optional extendables. One file per org/team/service combination. As denoted, file path is meaningful |
+| `blueprints.caffeine`            | **Blueprints** with optional type aliases and/or extendables                                                               |
+| `ORG/TEAM/SERVICE.caffeine`      | **Expectation** with optional extendables. One file per org/team/service combination. As denoted, file path is meaningful |
 
 Comments in Caffeine are _Ruby like_ and useful for surfacing tacit information about an expectation.
 
@@ -13,7 +13,7 @@ Comments in Caffeine are _Ruby like_ and useful for surfacing tacit information 
 # Single-line comments start with a hash
 ```
 
-The literals of the language are fairly straighforward, following the cue of many other programming languages.
+The literals of the language are fairly straightforward, following the cue of many other programming languages.
 
 | Type    | Syntax                        |
 |---------|-------------------------------|
@@ -26,7 +26,7 @@ The literals of the language are fairly straighforward, following the cue of man
 
 **Indentation:**
 
-Caffeine uses indentation to denote structure. Blocks under `*` items must be indented and each name following a `*` must be unique per file. Furthermore, each blue following the `*` line must be twice indented.
+Caffeine uses indentation to denote structure. Blocks under `*` items must be indented and each name following a `*` must be unique per file. Furthermore, each block following the `*` line must be twice indented.
 
 ```
 Blueprints for "SLO"
@@ -35,7 +35,9 @@ Blueprints for "SLO"
     Provides { ... }
 ```
 
-There are just a few keywords in the Caffeine langauge. Here they are along with their signficance/meaning:
+**Important:** In blueprints, `Requires` must come before `Provides`. The compiler enforces this ordering.
+
+There are just a few keywords in the Caffeine language. Here they are along with their significance/meaning:
 * `Blueprints for`: prefaces blueprint(s) declaration(s) for one or more artifacts
 * `Expectations for`: prefaces expectation(s) declaration(s) for a specific blueprint
 * `Requires`: signifies a requirements block

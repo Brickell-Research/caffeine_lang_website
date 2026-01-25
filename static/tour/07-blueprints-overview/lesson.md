@@ -11,7 +11,9 @@ Blueprints for "<ArtifactName>"
     Provides { <values_this_blueprint_fixes> }
 ```
 
-**Key Rules:**
+**Note:** `Requires` must come before `Provides` in blueprints. The compiler enforces this ordering.
+
+**Blocks:**
 
 | Block      | Contains    | Purpose                                              |
 |------------|-------------|------------------------------------------------------|

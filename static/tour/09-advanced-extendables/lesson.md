@@ -1,4 +1,4 @@
-**Extendables** are reusable blocks that enable common `requires` or `provides` attributes to be specified once and used many times. They live near the top of files, beneath type aliases and above blueprints/expectations - this is not just a recommenation, it is asserted by the compiler. Extendables are useful for defining common patterns and deduplicating blueprint and expectation definitions.
+**Extendables** are reusable blocks that enable common `requires` or `provides` attributes to be specified once and used many times. They live near the top of files, beneath type aliases and above blueprints/expectations - this is not just a recommendation, it is asserted by the compiler. Extendables are useful for defining common patterns and deduplicating blueprint and expectation definitions.
 
 **Syntax:**
 
@@ -36,7 +36,7 @@ Blueprints for "SLO"
     Provides { value: "numerator / denominator" }
 ```
 
-Within the compiler, this then would be interpretted as:
+Within the compiler, this then would be interpreted as:
 
 ```
 Blueprints for "SLO"
@@ -58,7 +58,7 @@ Expectations for "api_availability"
     Provides { status: true }
 ```
 
-Within the compiler, this then would be interpretted as:
+Within the compiler, this then would be interpreted as:
 
 ```
 Expectations for "api_availability"

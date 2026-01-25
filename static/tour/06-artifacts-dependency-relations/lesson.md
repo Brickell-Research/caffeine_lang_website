@@ -18,7 +18,7 @@
 
 **Expectation References:**
 
-Within the `relations` map, an expectation references another expectation using a the following syntax (mirroring the file path): `ORG_DIRECTORY.TEAM_NAME.SERVICE_NAME.EXPECTATION_NAME`
+Within the `relations` map, an expectation references another expectation using the following syntax (mirroring the file path): `ORG_DIRECTORY.TEAM_NAME.SERVICE_NAME.EXPECTATION_NAME`
 
 The compiler validates references at compile time and rejects circular dependencies. Furthermore within the specification of blueprints, it must be combined with `SLO` _at this time_.
 

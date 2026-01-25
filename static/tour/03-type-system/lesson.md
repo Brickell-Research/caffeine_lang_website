@@ -1,4 +1,4 @@
-One of the core benefits of Caffeine is the assistance of the compiler afforded by user provided type annotations which limit the domain of parameter inputs.
+One of the core benefits of Caffeine is that user-provided type annotations enable the compiler to catch errors by constraining parameter inputs.
 
 Caffeine's type system consists of the following.
 
@@ -27,9 +27,9 @@ Caffeine's type system consists of the following.
 
 **Refinements:** more complex types for attaching a proposition (a.k.a. further constraints) to the type.
 
-| Type           | Description                                          | Example                                      |
-|----------------|------------------------------------------------------|----------------------------------------------|
-| OneOf          | Value must be one of a finite set                    | `String { x | x in { "a", "b", "c" } }`     |
-| InclusiveRange | Value must be within a numeric range (inclusive)     | `Float { x | x in ( 0.0..100.0 ) }`         |
+| Type           | Description                                          | Example                                       |
+|----------------|------------------------------------------------------|-----------------------------------------------|
+| OneOf          | Value must be one of a finite set                    | `String { x \| x in { "a", "b", "c" } }`      |
+| InclusiveRange | Value must be within a numeric range (inclusive)     | `Float { x \| x in ( 0.0..100.0 ) }`          |
 
 > Try changing `service_name: "hello-world"` to `service_name: 10` within the **expectation** file below to see a type error. Don't get too hung up on what Expectations or Blueprints are. We will explain in lessons to come!

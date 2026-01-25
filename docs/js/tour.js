@@ -20,6 +20,7 @@ const lessonFolders = [
   { id: '08-expectations-overview', title: 'Expectations: Declarative Assertions over Service Properties' },
   { id: '09-advanced-extendables', title: '[Advanced]: Extendables' },
   { id: '10-advanced-type-aliases', title: '[Advanced]: Type Aliases' },
+  { id: '11-a-complete-example', title: 'A Complete Example' },
 ];
 
 // ─── Lesson Loading ─────────────────────────────────────────────────────────
@@ -143,6 +144,9 @@ function init() {
 
     lessonTitle.textContent = lesson.title;
     lessonBody.innerHTML = lesson.body;
+
+    // Scroll lesson content to top
+    lessonContent.scrollTop = 0;
 
     setContent(blueprintsEditor, lesson.blueprints);
     setContent(expectationsEditor, lesson.expectations);

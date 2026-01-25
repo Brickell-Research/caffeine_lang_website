@@ -14,7 +14,7 @@ field: List(_name)
 field: Dict(_name, String)
 ```
 
-Type aliases can be used in `provides` blocks, both within an extendable or within
+Type aliases can be used in `requires` blocks, both within an extendable or within a blueprint definition:
 
 ```
 # Type Aliases
@@ -42,7 +42,7 @@ Blueprints for "SLO"
 - Can only alias refinement types (OneOf or InclusiveRange)
 - Inlined at compile time (do not appear in JSON output)
 
-Two of the most common use cases thus far is a type describing environments and types for a well known set of service names.
+Two of the most common use cases thus far are a type describing environments and a type for a well-known set of service names.
 
 ```
 # Environments
