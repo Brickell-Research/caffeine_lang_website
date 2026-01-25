@@ -1,0 +1,17 @@
+Expectations for "Availability_SLO"
+  * "Checkout_SLO":
+    Provides { service_name: "checkout", threshold: 99.9, window_in_days: 30 }
+
+  * "Payments_SLO":
+    Provides { service_name: "payments", threshold: 99.99, window_in_days: 30 }
+
+  * "Recommendations_SLO":
+    Provides { service_name: "recommendations", threshold: 99.0, window_in_days: 30 }
+
+Expectations for "hard_dependency"
+  * "checkout_to_payments":
+    Provides { from: ":Checkout_SLO", to: ":Payments_SLO" }
+
+Expectations for "soft_dependency"
+  * "checkout_to_recommendations":
+    Provides { from: ":Checkout_SLO", to: ":Recommendations_SLO" }

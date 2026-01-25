@@ -11,10 +11,15 @@ import { marked } from 'https://esm.sh/marked@15';
 
 const lessonFolders = [
   { id: '01-welcome', title: 'Welcome to Caffeine' },
-  { id: '02-blueprints', title: 'Blueprints: Reusable Templates' },
-  { id: '03-type-system', title: 'The Type System' },
-  { id: '04-interpolation', title: 'String Interpolation' },
-  { id: '05-putting-it-together', title: 'Putting It All Together' },
+  { id: '02-type-system', title: 'The Type System' },
+  { id: '03-artifacts-overview', title: 'Everything Starts with an Artifact' },
+  { id: '04-artifacts-slos', title: 'Artifacts Deep Dive: Service Level Objectives' },
+  { id: '05-artifacts-dependency-relations', title: '[Experimental] Artifacts Deep Dive: Dependency Relations' },
+  { id: '06-blueprints-overview', title: 'Blueprints, The Template Layer' },
+  { id: '07-expectations-overview', title: 'Expectations: Declarative Assertions over Service Properties' },
+  { id: '08-advanced-extendables', title: '[Advanced]: Extendable Basics' },
+  { id: '09-advanced-type-aliases', title: '[Advanced]: Type Aliases' },
+  { id: '10-productionization-cicd', title: 'Developing a Continuous Integration Process' },
 ];
 
 // ─── Lesson Loading ─────────────────────────────────────────────────────────
@@ -147,7 +152,7 @@ function init() {
     progressText.textContent = `${index + 1} / ${lessonFolders.length}`;
 
     btnPrev.disabled = index === 0;
-    btnNext.textContent = index === lessonFolders.length - 1 ? 'Back Home >' : 'Next >';
+    btnNext.disabled = index === lessonFolders.length - 1;
 
     runCompile();
 
@@ -172,9 +177,6 @@ function init() {
   btnNext.addEventListener('click', () => {
     if (currentLesson < lessonFolders.length - 1) {
       loadLesson(currentLesson + 1);
-    } else {
-      localStorage.removeItem('caffeine-tour-lesson');
-      window.location.href = '/';
     }
   });
 

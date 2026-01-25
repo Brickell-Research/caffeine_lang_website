@@ -1,8 +1,0 @@
-Expectations for "Availability_SLO"
-  * "API Gateway Availability":
-    Provides {
-      service_name: "api-gateway",
-      environment: "production",
-      threshold: 99.9,
-      window_in_days: 30
-    }

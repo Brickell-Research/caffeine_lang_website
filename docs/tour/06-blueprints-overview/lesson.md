@@ -1,0 +1,1 @@
+A **blueprint** is a common, partially specified abstraction over one or more artifacts.

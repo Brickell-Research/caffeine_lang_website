@@ -1,7 +1,0 @@
-Expectations for "Typed_SLO"
-  * "Typed Example":
-    Provides {
-      service_name: "payments",
-      threshold: 99.9,
-      window_in_days: 30
-    }

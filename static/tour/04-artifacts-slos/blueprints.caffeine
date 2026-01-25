@@ -1,0 +1,11 @@
+Blueprints for "SLO"
+  * "Simple_SLO":
+    Requires { service_name: String }
+    Provides {
+      vendor: "datadog",
+      queries: {
+        numerator: "sum:requests.success{service:example}.as_count()",
+        denominator: "sum:requests.total{service:example}.as_count()"
+      },
+      value: "numerator / denominator"
+    }

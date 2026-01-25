@@ -1530,6 +1530,30 @@ a:hover {
   margin: 0;
 }
 
+.lesson-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.85rem;
+}
+
+.lesson-body th,
+.lesson-body td {
+  border: 1px solid var(--color-border);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.lesson-body th {
+  background: var(--color-espresso);
+  color: var(--color-text-bright);
+  font-weight: 600;
+}
+
+.lesson-body tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
 /* Navigation buttons */
 .tour-nav {
   display: flex;
