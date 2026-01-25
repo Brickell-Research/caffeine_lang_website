@@ -1,4 +1,4 @@
-**Extendables** are reusable blocks that enable common `Requires` or `Provides` attributes to be specified once and used many times. They live near the top of files, beneath type aliases and above blueprints/expectations.
+**Extendables** are reusable blocks that enable common `requires` or `provides` attributes to be specified once and used many times. They live near the top of files, beneath type aliases and above blueprints/expectations - this is not just a recommenation, it is asserted by the compiler. Extendables are useful for defining common patterns and deduplicating blueprint and expectation definitions.
 
 **Syntax:**
 
@@ -22,7 +22,7 @@ _name (Kind): { field: value, ... }
 - Names must start with an underscore (`_`)
 - Names must be unique within the file
 - File-scoped only (cannot reference across files)
-- Can reference type aliases defined in the same file
+- Can reference type aliases defined in the same file (_see next section to learn more about type aliases_)
 
 **In Blueprint Files:**
 
@@ -34,6 +34,15 @@ Blueprints for "SLO"
   * "api_availability" extends [_base_slo, _common_req]:
     Requires { threshold: Float }
     Provides { value: "numerator / denominator" }
+```
+
+Within the compiler, this then would be interpretted as:
+
+```
+Blueprints for "SLO"
+  * "api_availability" extends [_base_slo, _common_req]:
+    Requires { threshold: Float, env: String, window_in_days: Integer }
+    Provides { value: "numerator / denominator", vendor: "datadog" }
 ```
 
 **In Expectation Files:**
@@ -49,6 +58,16 @@ Expectations for "api_availability"
     Provides { status: true }
 ```
 
-**Merge Order:**
+Within the compiler, this then would be interpretted as:
 
-When extending multiple extendables, later ones override earlier ones. In the example above, `_strict` overrides the `window_in_days` from `_defaults`.
+```
+Expectations for "api_availability"
+  * "critical_service" extends [_defaults, _strict]:
+    Provides { 
+      status: true,
+       env: "production",
+       window_in_days: 30,
+       threshold: 99.99,
+       window_in_days: 7
+    }
+```

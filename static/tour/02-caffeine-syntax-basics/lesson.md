@@ -1,19 +1,19 @@
 Before diving into specific concepts, let's cover the basic syntax of Caffeine.
 
-**File Types:**
+All Caffeine files end with the `.caffeine` file extension. There are two types files, each with specific file path requirements:
 
 | File                             | Contains                                                                                                               |
 |----------------------------------|------------------------------------------------------------------------------------------------------------------------|
 | `blueprints.caffeine`            | Blueprints with optional type aliases and/or extendables                                                               |
 | `ORG/TEAM/SERVICE.caffeine`      | Expectation with optional extendables. One file per org/team/service combination. As denoted, file path is meaningful |
 
-**Comments:**
+Comments in Caffeine are _Ruby like_ and useful for surfacing tacit information about an expectation.
 
 ```
 # Single-line comments start with a hash
 ```
 
-**Literals:**
+The literals of the language are fairly straighforward, following the cue of many other programming languages.
 
 | Type    | Syntax                        |
 |---------|-------------------------------|
@@ -26,7 +26,7 @@ Before diving into specific concepts, let's cover the basic syntax of Caffeine.
 
 **Indentation:**
 
-Caffeine uses indentation to denote structure. Blocks under `*` items must be indented and each name following a `*` must be unique per file:
+Caffeine uses indentation to denote structure. Blocks under `*` items must be indented and each name following a `*` must be unique per file. Furthermore, each blue following the `*` line must be twice indented.
 
 ```
 Blueprints for "SLO"
@@ -35,10 +35,11 @@ Blueprints for "SLO"
     Provides { ... }
 ```
 
-**Keywords:**
-
+There are just a few keywords in the Caffeine langauge. Here they are along with their signficance/meaning:
 * `Blueprints for`: prefaces blueprint(s) declaration(s) for one or more artifacts
 * `Expectations for`: prefaces expectation(s) declaration(s) for a specific blueprint
 * `Requires`: signifies a requirements block
 * `Provides`: signifies a provide block
 * `Type`: signifies a type alias
+
+> Continue on to learn about the Caffeine `Type System`.

@@ -1,6 +1,6 @@
-A **blueprint** is a common, partially specified abstraction over one or more artifacts. It may `provide` for `requires` from the one or more artifacts it inherits from and then specify some `requires` of its own.
+A **blueprint** is a common, partially specified abstraction over one or more artifacts. It may `provide` for the `requires` from one or more artifacts it inherits from and then specify some `requires` of its own.
 
-It may not override any `requires` from its inherited artifacts, nor specify `provides` for its own `requires` or `requires` that don't exist.
+It may **not** override any `requires` from its inherited artifacts, nor specify `provides` for its own `requires` or `requires` that don't exist.
 
 **Basic Syntax:**
 
@@ -13,10 +13,10 @@ Blueprints for "<ArtifactName>"
 
 **Key Rules:**
 
-| Block | Contains | Purpose |
-|-------|----------|---------|
-| `Requires` | Types only | Parameters that expectations must provide values for |
-| `Provides` | Values only | Fixed values that all expectations inherit |
+| Block      | Contains    | Purpose                                              |
+|------------|-------------|------------------------------------------------------|
+| `Requires` | Types only  | Parameters that expectations must provide values for |
+| `Provides` | Values only | Fixed values that all expectations inherit           |
 
 **Multi-Artifact Blueprints:**
 
@@ -29,14 +29,16 @@ Blueprints for "SLO" + "DependencyRelation"
     Provides { ... }  # Values for both artifacts
 ```
 
+As stated in the `DependencyRelation` lesson, this is _the only way_ to leverage `DependencyRelation` artifacts at this time.
+
 **Template Variables:**
 
 Use `${var}` syntax in query strings for value interpolation:
 
-| Syntax | Meaning | Example Output |
-|--------|---------|----------------|
-| `${var}` | Raw value | `production` |
-| `${var->attr}` | Key-value pair | `env:production` |
-| `${var->attr.not}` | Negated pair | `!status:true` |
+| Syntax             | Meaning        | Example Output   |
+|--------------------|----------------|------------------|
+| `${var}`           | Raw value      | `production`     |
+| `${var->attr}`     | Key-value pair | `env:production` |
+| `${var->attr.not}` | Negated pair   | `!status:true`   |
 
-
+This is how the compiler leverages the parameters it collects to interpolate into the queries for the final artifact output.
