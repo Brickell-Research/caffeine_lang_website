@@ -65,6 +65,3 @@ DependencyRelations
     type: Dict(String { x | x in { hard, soft } }, List(String))
     required
 ```
-
-
-> Hit **Next** to begin.

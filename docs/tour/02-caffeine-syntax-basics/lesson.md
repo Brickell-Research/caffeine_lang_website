@@ -5,7 +5,7 @@ Before diving into specific concepts, let's cover the basic syntax of Caffeine.
 | File                             | Contains                                                                                                               |
 |----------------------------------|------------------------------------------------------------------------------------------------------------------------|
 | `blueprints.caffeine`            | Blueprints with optional type aliases and/or extendables                                                               |
-| `ORG/TEAM/SERVICE.caffeine`      | Expectation with optional exttendables. One file per org/team/service combination. As denoted, file path is meaningful |
+| `ORG/TEAM/SERVICE.caffeine`      | Expectation with optional extendables. One file per org/team/service combination. As denoted, file path is meaningful |
 
 **Comments:**
 

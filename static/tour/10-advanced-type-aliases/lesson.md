@@ -1,7 +1,5 @@
 **Type Aliases** are reusable, named refinement types. They let you define a constrained type once and reference it throughout your blueprints, reducing repetition and ensuring consistency.
 
-
-**Extendables** are reusable specifications for a type. They can be used within `provides` both within extendables and proper blueprint declarations.
 **Syntax:**
 
 ```
