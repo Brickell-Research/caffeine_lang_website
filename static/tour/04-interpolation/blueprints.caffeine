@@ -1,0 +1,11 @@
+Blueprints for "SLO"
+  * "Interpolated_SLO":
+    Requires { service_name: String, environment: String }
+    Provides {
+      vendor: "datadog",
+      queries: {
+        numerator: "sum:requests.success{$service_name->service_name$, $environment->environment$}.as_count()",
+        denominator: "sum:requests.total{$service_name->service_name$, $environment->environment$}.as_count()"
+      },
+      value: "numerator / denominator"
+    }

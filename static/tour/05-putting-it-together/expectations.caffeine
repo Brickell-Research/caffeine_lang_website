@@ -1,0 +1,9 @@
+Expectations for "Latency_SLO"
+  * "Checkout Latency P99":
+    Provides {
+      service_name: "checkout-service",
+      environment: "production",
+      p99_threshold_seconds: 2.5,
+      threshold: 99.0,
+      window_in_days: 30
+    }

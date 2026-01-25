@@ -1,0 +1,11 @@
+Blueprints for "SLO"
+  * "Availability_SLO":
+    Requires { service_name: String, environment: String }
+    Provides {
+      vendor: "datadog",
+      queries: {
+        numerator: "sum:requests.success{service:example}.as_count()",
+        denominator: "sum:requests.total{service:example}.as_count()"
+      },
+      value: "numerator / denominator"
+    }

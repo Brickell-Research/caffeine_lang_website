@@ -1,0 +1,15 @@
+Blueprints for "SLO"
+  * "Typed_SLO":
+    Requires {
+      service_name: String,
+      threshold: Float,
+      window_in_days: Integer
+    }
+    Provides {
+      vendor: "datadog",
+      queries: {
+        numerator: "sum:requests.success{service:example}.as_count()",
+        denominator: "sum:requests.total{service:example}.as_count()"
+      },
+      value: "numerator / denominator"
+    }

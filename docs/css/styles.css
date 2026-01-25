@@ -1483,6 +1483,53 @@ a:hover {
   color: var(--color-mocha);
 }
 
+/* Markdown-generated elements in lessons */
+.lesson-body pre {
+  background: #2d2d2d;
+  padding: 0.75rem 1rem;
+  margin: 0.75rem 0;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #ccc;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+.lesson-body pre code {
+  background: none;
+  padding: 0;
+  border: none;
+  font-size: inherit;
+  color: inherit;
+}
+
+.lesson-body ul,
+.lesson-body ol {
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+}
+
+.lesson-body li {
+  margin-bottom: 0.4rem;
+  line-height: 1.6;
+}
+
+.lesson-body blockquote {
+  margin-top: 1rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--color-espresso);
+  border-left: 2px solid var(--color-mocha);
+  border-radius: 0 6px 6px 0;
+  font-size: 0.85rem;
+  color: var(--color-mocha);
+}
+
+.lesson-body blockquote p {
+  margin: 0;
+}
+
 /* Navigation buttons */
 .tour-nav {
   display: flex;
