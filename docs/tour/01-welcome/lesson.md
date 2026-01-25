@@ -10,6 +10,6 @@ Defined below are the core inputs and outputs of Caffeine:
 
 This tour will walk you through the language step by step. The editors below are **live**. Try editing them and watch the output update, auto-compiling in real time!
 
-For the impatient, jump to lesson 11 for a complete example. Use the **table of contents** button above to navigate.
+For the impatient, jump to the end (lesson 11) for a complete example. Use the **table of contents** button below to navigate.
 
 > Hit **Next** to begin.
