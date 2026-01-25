@@ -105,7 +105,7 @@ Blueprints for "SLO"
         valid: "sum:requests{status:valid, $$environment->env$$, $$endpoint->endpoint$$}",
         total: "sum:requests{$$environment->env$$, $$endpoint->endpoint$$}"
       },
-      value: "total / valid",
+      value: "valid / total",
       vendor: "datadog"
     }
   * "Auth Latency":
@@ -141,7 +141,7 @@ Blueprints for "SLO"
         valid: "sum:requests{status:valid, $$environment->env$$, $$endpoint->endpoint$$}",
         total: "sum:requests{$$environment->env$$, $$endpoint->endpoint$$}"
       },
-      value: "total / valid"
+      value: "valid / total"
     }
   * "Auth Latency"  extends [_datadog, _auth_service_common]:
     Requires { threshold_in_seconds: Float }
@@ -172,7 +172,7 @@ Blueprints for "SLO"
         valid: "sum:requests{status:valid, $$environment->env$$, $$endpoint->endpoint$$}",
         total: "sum:requests{$$environment->env$$, $$endpoint->endpoint$$}"
       },
-      value: "total / valid"
+      value: "valid / total"
     }
   * "Auth Latency"  extends [_datadog, _auth_service_common]:
     Requires { threshold_in_seconds: Float }

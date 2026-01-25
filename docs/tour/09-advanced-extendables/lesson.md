@@ -60,15 +60,14 @@ Expectations for "api_availability"
     Provides { status: true }
 ```
 
-Within the compiler, this then would be interpreted as:
+Within the compiler, this then would be interpreted as (later extendables take precedence for duplicate keys):
 
 ```
 Expectations for "api_availability"
   * "critical_service" extends [_defaults, _strict]:
-    Provides { 
+    Provides {
       status: true,
        env: "production",
-       window_in_days: 30,
        threshold: 99.99,
        window_in_days: 7
     }

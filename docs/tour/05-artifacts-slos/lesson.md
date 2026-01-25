@@ -3,7 +3,7 @@ The first artifact supported by Caffeine is an **SLO** (_service level objective
 In order to limit the scope of the tour, we will not go into the who, what, why, and how of SLOs. There are a lot of good resources online:
 * [SLOs, the Google SRE Book](https://sre.google/sre-book/service-level-objectives/)
 * [David Rensin's Less Risk Through Greater Humanity](https://www.youtube.com/watch?v=0zqBlRW_6jA)
-* [The SLO Book - must purchase, but if interested in going deep, 10/10 reccomend!](https://www.alex-hidalgo.com/the-slo-book)
+* [The SLO Book - must purchase, but if interested in going deep, 10/10 recommend!](https://www.alex-hidalgo.com/the-slo-book)
 
 All (or at least most) serious/modern observability tools today support SLOs within their platform. Furthermore, many vendors support leveraging [Terraform](https://developer.hashicorp.com/terraform) to create/maintain/modify these SLOs.
 
