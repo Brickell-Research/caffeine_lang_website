@@ -16,7 +16,7 @@ const keywords = new Set([
 ]);
 
 const types = new Set([
-  'String', 'Integer', 'Float', 'Boolean',
+  'String', 'Integer', 'Float', 'Boolean', 'URL',
   'List', 'Dict', 'Optional', 'Defaulted',
 ]);
 

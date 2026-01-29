@@ -46,6 +46,12 @@ SLO
   queries
     type: Dict(String, String)
     required
+  runbook
+    type: Optional(URL)
+    optional
+  tags
+    type: Optional(Dict(String, String))
+    optional
   threshold
     type: Float { x | x in ( 0.0..100.0 ) }
     required
