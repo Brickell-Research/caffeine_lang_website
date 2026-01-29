@@ -6,11 +6,10 @@ Caffeine's type system consists of the following.
 
 | Type    | Description                                        | Example          |
 |---------|----------------------------------------------------|------------------|
-| Boolean | True or false                                       | `true`                    |
-| Integer | Whole numbers                                       | `123`                     |
-| Float   | Decimal numbers                                     | `12.34`                   |
-| String  | Any text between double quotes                      | `"Hello World!"`          |
-| URL     | A valid URL starting with http:// or https://       | `"https://example.com"`   |
+| Boolean | True or false                                      | `true`           |
+| Integer | Whole numbers                                      | `123`            |
+| Float   | Decimal numbers                                    | `12.34`          |
+| String  | Any collection of characters between double quotes | `"Hello World!"` |
 
 **Collections:** types for grouping values.
 

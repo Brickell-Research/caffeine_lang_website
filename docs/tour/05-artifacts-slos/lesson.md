@@ -14,8 +14,6 @@ At time of writing Caffeine just supports generating Terraform for the [Datadog]
 | Attribute      | Type                                                 | Description                                   |
 |----------------|------------------------------------------------------|-----------------------------------------------|
 | queries        | `Dict(String, String)`                               | Named queries for the SLI calculation         |
-| runbook        | `Optional(URL)`                                      | An optional runbook URL surfaced via the SLO description |
-| tags           | `Optional(Dict(String, String))`                     | An optional set of tags to append to the SLO  |
 | threshold      | `Float { x \| x in (0.0 .. 100.0) }`                 | Target percentage (e.g., 99.9)                |
 | value          | `String`                                             | CQL expression combining queries              |
 | vendor         | `String { x \| x in { datadog } }`                   | Observability platform                        |
