@@ -19,13 +19,22 @@ pub fn view() -> Element(Nil) {
         html.div([attribute.class("tour-progress")], [
           html.div([attribute.class("tour-progress-bar")], [
             html.div(
-              [attribute.id("progress-fill"), attribute.class("tour-progress-fill")],
+              [
+                attribute.id("progress-fill"),
+                attribute.class("tour-progress-fill"),
+              ],
               [],
             ),
           ]),
-          html.span([attribute.id("progress-text"), attribute.class("tour-progress-text")], [
-            html.text("1 / 5"),
-          ]),
+          html.span(
+            [
+              attribute.id("progress-text"),
+              attribute.class("tour-progress-text"),
+            ],
+            [
+              html.text("1 / 5"),
+            ],
+          ),
         ]),
       ]),
       // Main body: left column (content + editors) and right column (output)
@@ -36,22 +45,34 @@ pub fn view() -> Element(Nil) {
           html.div([attribute.class("tour-lesson")], [
             html.div([attribute.class("tour-lesson-content")], [
               html.h2([attribute.id("lesson-title")], [html.text("Welcome")]),
-              html.div([attribute.id("lesson-body"), attribute.class("lesson-body")], [
-                html.p([], [html.text("Loading...")]),
-              ]),
+              html.div(
+                [attribute.id("lesson-body"), attribute.class("lesson-body")],
+                [
+                  html.p([], [html.text("Loading...")]),
+                ],
+              ),
             ]),
             // Navigation
             html.div([attribute.class("tour-nav")], [
               html.button(
-                [attribute.id("btn-prev"), attribute.class("tour-btn tour-btn-prev")],
+                [
+                  attribute.id("btn-prev"),
+                  attribute.class("tour-btn tour-btn-prev"),
+                ],
                 [html.text("< Prev")],
               ),
               html.button(
-                [attribute.id("btn-toc"), attribute.class("tour-btn tour-btn-toc")],
+                [
+                  attribute.id("btn-toc"),
+                  attribute.class("tour-btn tour-btn-toc"),
+                ],
                 [html.text("Table of Contents")],
               ),
               html.button(
-                [attribute.id("btn-next"), attribute.class("tour-btn tour-btn-next")],
+                [
+                  attribute.id("btn-next"),
+                  attribute.class("tour-btn tour-btn-next"),
+                ],
                 [html.text("Next >")],
               ),
             ]),
@@ -68,7 +89,10 @@ pub fn view() -> Element(Nil) {
                 ]),
               ]),
               html.div(
-                [attribute.id("tour-blueprints-editor"), attribute.class("editor")],
+                [
+                  attribute.id("tour-blueprints-editor"),
+                  attribute.class("editor"),
+                ],
                 [],
               ),
             ]),
@@ -78,11 +102,14 @@ pub fn view() -> Element(Nil) {
                   html.text("Expectation"),
                 ]),
                 html.span([attribute.class("editor-filename")], [
-                  html.text("my_team/my_service.caffeine"),
+                  html.text("tour/demo/service.caffeine"),
                 ]),
               ]),
               html.div(
-                [attribute.id("tour-expectations-editor"), attribute.class("editor")],
+                [
+                  attribute.id("tour-expectations-editor"),
+                  attribute.class("editor"),
+                ],
                 [],
               ),
             ]),
@@ -98,7 +125,10 @@ pub fn view() -> Element(Nil) {
           ]),
           html.div([attribute.class("output-content")], [
             html.pre(
-              [attribute.id("tour-output-display"), attribute.class("output-code")],
+              [
+                attribute.id("tour-output-display"),
+                attribute.class("output-code"),
+              ],
               [
                 html.code([attribute.class("language-hcl")], [
                   html.text("// Output will appear here"),
@@ -110,25 +140,31 @@ pub fn view() -> Element(Nil) {
       ]),
       // Table of contents overlay
       html.div(
-        [attribute.id("toc-overlay"), attribute.class("tour-toc-overlay hidden")],
+        [
+          attribute.id("toc-overlay"),
+          attribute.class("tour-toc-overlay hidden"),
+        ],
         [
           html.div([attribute.class("tour-toc")], [
             html.div([attribute.class("tour-toc-header")], [
               html.h3([], [html.text("Table of Contents")]),
               html.button(
-                [attribute.id("btn-toc-close"), attribute.class("tour-toc-close")],
+                [
+                  attribute.id("btn-toc-close"),
+                  attribute.class("tour-toc-close"),
+                ],
                 [html.text("x")],
               ),
             ]),
-            html.ul([attribute.id("toc-list"), attribute.class("tour-toc-list")], []),
+            html.ul(
+              [attribute.id("toc-list"), attribute.class("tour-toc-list")],
+              [],
+            ),
           ]),
         ],
       ),
       // Load tour JS (ES module)
-      html.script(
-        [attribute.src("/js/tour.js"), attribute.type_("module")],
-        "",
-      ),
+      html.script([attribute.src("/js/tour.js"), attribute.type_("module")], ""),
     ]),
   )
 }
