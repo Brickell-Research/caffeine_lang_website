@@ -1,4 +1,4 @@
-> For the returning user or enthusiastic passer-by who wants to see the full picture right away, jump to the end (lesson 11) for a complete example. Use the **table of contents** button below to quickly jump between lessons.
+> For the returning user or enthusiastic passer-by who wants to see the full picture right away, jump to the end (lesson 12) for a complete example. Use the **table of contents** button below to quickly jump between lessons.
 
 <br>
 

@@ -1,6 +1,6 @@
 **Extendables** are reusable blocks that enable common `requires` or `provides` attributes to be specified once and used many times. They live near the top of files, beneath type aliases and above blueprints/expectations - this is not just a recommendation, it is asserted by the compiler. Extendables are useful for defining common patterns and deduplicating blueprint and expectation definitions. 
 
-As we like to say _"caffeinate but stay dry!"_
+As we like to say [_"caffeinate but stay dry!"_](https://www.reddit.com/r/barista/comments/2gl8wu/are_any_of_you_fans_of_dry_cappuccinos_why_do/)
 
 **Syntax:**
 

@@ -21,9 +21,9 @@ Caffeine supports generating Terraform for the [Datadog](https://docs.datadoghq.
 | tags           | `Optional(Dict(String, String))`                      | Optional tags to append to the SLO            |
 | runbook        | `Optional(URL)`                                       | Optional runbook URL for the SLO description  |
 
-**CQL (Caffeine Query Language):**
+**Datadog: CQL (Caffeine Query Language)**
 
-The `evaluation` field uses CQL to define how indicators combine into an SLI. Two supported patterns:
+For Datadog, the `evaluation` field uses CQL to define how indicators combine into an SLI. Two supported patterns:
 
 | Pattern    | Syntax                                  | Use Case                              |
 |------------|-----------------------------------------|---------------------------------------|
@@ -36,6 +36,12 @@ For these expressions, more complex arithmetic is supported. A couple examples:
 * `(total - bad) / total`
 * `time_slice((event_a_latency + event_b_latency) < threshold per 5m)`
 
-_In Caffeine it is best practice_ to partially define the SLO within a blueprint. Specifically, blueprints typically define the `indicators`, the `evaluation`, and the `vendor`.
+**Honeycomb: Derived Column Expressions**
+
+For Honeycomb, the model is simpler. You provide a single indicator whose value is a boolean derived column expression (e.g., `HEATMAP(duration_ms)`). The `evaluation` field is required by the artifact schema but is not used by the Honeycomb generator — the indicator value itself _is_ the SLI.
+
+**Best Practices**
+
+_In Caffeine it is best practice_ to partially define the SLO within a blueprint. Specifically, blueprints typically define the `indicators`, the `evaluation` (for Datadog), and the `vendor`.
 
 > The example shows a basic availability SLO. On the right hand side we have the output which is valid Terraform representing the specified SLO for the Datadog vendor.

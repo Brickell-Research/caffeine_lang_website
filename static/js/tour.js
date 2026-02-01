@@ -11,6 +11,7 @@ import { marked } from 'https://esm.sh/marked@15';
 
 const lessonFolders = [
   { id: '01-welcome', title: 'Welcome to Caffeine', editorsDisabled: false },
+  { id: '02-getting-started', title: 'Getting Started', editorsDisabled: true },
   { id: '02-caffeine-syntax-basics', title: 'Syntax Basics', editorsDisabled: true },
   { id: '03-type-system', title: 'The Type System' , editorsDisabled: false },
   { id: '04-artifacts-overview', title: 'Everything Starts with an Artifact', editorsDisabled: true },

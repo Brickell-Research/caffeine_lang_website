@@ -11,64 +11,39 @@ These then, upon compilation, generate an artifact which might be `.terraform` f
 
 <br>
 
-**Artifacts Catalog**
+**Bonus:** if you chose to install the compiler locally, you can run the `caffeine artifacts` command to get an overview of currently supported artifacts. Here is what it looks like as of `v4.0.0`:
 
-To see the latest catalog of available artifacts along with their definitions, use the `artifacts` command locally with the caffeine cli.
-
-_Don't yet have the cli?_ Install via homebrew:
-
-```bash
-brew tap Brickell-Research/caffeine
-
-brew install caffeine_lang
-```
-
-And then verify:
-
-```bash
-caffeine version
-```
-
-Finally, to see the latest supported artifacts type:
-
-```bash
-caffeine artifacts
-```
-
-At time of writing you will see:
 ```bash
 Artifact Catalog
 ================
 
-SLO
-  "A Service Level Objective that monitors a metric query against a threshold over a rolling window."
+SLO: "A Service Level Objective that monitors a metric query against a threshold over a rolling window."
 
-  evaluation
+  evaluation: "How to evaluate indicators as an SLI"
     type: String
     required
-  indicators
+  indicators: "Named SLI measurement expressions"
     type: Dict(String, String)
     required
-  runbook
+  runbook: "An optional runbook URL surfaced via the SLO description"
     type: Optional(URL)
     optional
-  tags
+  tags: "An optional set of tags to append to the SLO artifact"
     type: Optional(Dict(String, String))
     optional
-  threshold
+  threshold: "Target percentage (e.g., 99.9)"
     type: Float { x | x in ( 0.0..100.0 ) }
     required
-  vendor
+  vendor: "Observability platform"
     type: String { x | x in { datadog, honeycomb } }
     required
-  window_in_days
+  window_in_days: "Rolling window for measurement"
     type: Defaulted(Integer, 30)
     default: 30
 
-DependencyRelations
-  "Declares soft and hard dependencies between services for dependency mapping."
+DependencyRelations: "Declares soft and hard dependencies between services for dependency mapping."
 
-  relations
+  relations: "Map of dependency type to list of service names"
     type: Dict(String { x | x in { hard, soft } }, List(String))
     required
 ```
