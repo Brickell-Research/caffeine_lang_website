@@ -251,3 +251,12 @@ And Happy Holidays!!! 🎄🕎❄️
 Long night of coding followed by festivities... definitely not me right now.
 
 ***
+
+## Update January 2026: Refinement Types Shipped!
+
+We did it 🎉!
+
+Both `OneOf` and `InclusiveRange` refinement types are live and have been for a while now. The design held up well; the "four L's" proved to be a solid foundation. If you want to see them in action,
+check out the [Tour](/tour) (specifically the type system lesson) or run `caffeine artifacts` locally to see them throughout the SLO artifact definition.
+
+***

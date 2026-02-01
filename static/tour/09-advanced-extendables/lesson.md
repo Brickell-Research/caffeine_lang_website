@@ -35,7 +35,7 @@ _base_slo (Provides): { vendor: "datadog" }
 Blueprints for "SLO"
   * "api_availability" extends [_base_slo, _common_req]:
     Requires { threshold: Float }
-    Provides { value: "numerator / denominator" }
+    Provides { evaluation: "numerator / denominator" }
 ```
 
 Within the compiler, this then would be interpreted as:
@@ -44,7 +44,7 @@ Within the compiler, this then would be interpreted as:
 Blueprints for "SLO"
   * "api_availability" extends [_base_slo, _common_req]:
     Requires { threshold: Float, env: String, window_in_days: Integer }
-    Provides { value: "numerator / denominator", vendor: "datadog" }
+    Provides { evaluation: "numerator / denominator", vendor: "datadog" }
 ```
 
 **In Expectation Files:**

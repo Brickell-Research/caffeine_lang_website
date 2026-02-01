@@ -3,9 +3,9 @@ Blueprints for "SLO"
     Requires { service_name: String }
     Provides {
       vendor: "datadog",
-      queries: {
+      indicators: {
         numerator: "sum:successes{$$service->service_name$$}",
         denominator: "sum:total{$$service->service_name$$}"
       },
-      value: "numerator / denominator"
+      evaluation: "numerator / denominator"
     }

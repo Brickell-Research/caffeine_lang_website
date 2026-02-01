@@ -19,15 +19,15 @@ Here are the user expectations we came up with:
 The first step here is to define the blueprints for the `SLO` artifact. The typical process is:
 
 1. figure out which type of SLO we're working with. For success rate we usually use a `Ratio` and for latency over time we use a `Time Slice`.
-2. determine the queries needed to emulate the user journeys and satisfy the SLO types. This is the `queries` attribute.
-3. for each of the queries, what attributes do we need? Per attribute, define the template variable within the query string and add the attribute to the `requires` block.
-4. define the `value` based on (1) and (2).
-5. for now we only have `datadog` as a vendor, so specify the vendor in the `provides` block.
+2. determine the indicators needed to emulate the user journeys and satisfy the SLO types. This is the `indicators` attribute.
+3. for each of the indicators, what attributes do we need? Per attribute, define the template variable within the indicator string and add the attribute to the `requires` block.
+4. define the `evaluation` based on (1) and (2).
+5. specify the vendor in the `provides` block.
 6. consider _DRYing_ up definitions with either extendables or type aliases
 
 Ok, let's walk through this.
 
-**Note:** even though we only support one vendor, it's possible that each Caffeine user's Datadog instance will be setup differently, so we won't dive too deep into query specifics.
+**Note:** it's possible that each Caffeine user's vendor instance will be setup differently, so we won't dive too deep into indicator specifics.
 
 First, let's define the structure of each blueprint. Here is what the basic outline looks like. We will have two blueprints, one for `Auth Success Rate` and one for `Auth Latency`.
 
@@ -41,14 +41,14 @@ Blueprints for "SLO"
     Provides {}
 ```
 
-We already did the groundwork for step one by choosing the SLO types, for step two we fill in the queries.
+We already did the groundwork for step one by choosing the SLO types, for step two we fill in the indicators.
 
 ```
 Blueprints for "SLO"
   * "Auth Success Rate":
     Requires {}
     Provides {
-      queries: {
+      indicators: {
         valid: "sum:requests{status:valid}",
         total: "sum:requests{}"
       }
@@ -56,15 +56,15 @@ Blueprints for "SLO"
   * "Auth Latency":
     Requires {}
     Provides {
-      queries: {
+      indicators: {
         latency: "p75:latency{}"
       }
     }
 ```
 
-Again, there is a lot of thinking and iteration to ensure your queries (SLIs) properly reflect the user experience you intend to emulate/capture. This topic is beyond the scope of the tour.
+Again, there is a lot of thinking and iteration to ensure your indicators (SLIs) properly reflect the user experience you intend to emulate/capture. This topic is beyond the scope of the tour.
 
-For step (3) we want to ensure we're (a) pointing at the right environment and (b) filtering to the correct endpoint. So, we update our query strings and requires blocks. For now we'll just type these two attributes as `String` and `String`.
+For step (3) we want to ensure we're (a) pointing at the right environment and (b) filtering to the correct endpoint. So, we update our indicator strings and requires blocks. For now we'll just type these two attributes as `String` and `String`.
 
 ```
 Blueprints for "SLO"
@@ -74,7 +74,7 @@ Blueprints for "SLO"
       endpoint: String
     }
     Provides {
-      queries: {
+      indicators: {
         valid: "sum:requests{status:valid, $$environment->env$$, $$endpoint->endpoint$$}",
         total: "sum:requests{$$environment->env$$, $$endpoint->endpoint$$}"
       }
@@ -85,13 +85,13 @@ Blueprints for "SLO"
       endpoint: String
     }
     Provides {
-      queries: {
+      indicators: {
         latency: "p75:latency{$$environment->env$$, $$endpoint->endpoint$$}"
       }
     }
 ```
 
-For step (4), we now have all our queries and know which type of SLO we're working with, so we can declare the `value` within the `provides` block. We'll also complete step (5) too since it's straightforward. For the Time Slice we actually have an extra `require` to add for the `threshold_in_seconds`.
+For step (4), we now have all our indicators and know which type of SLO we're working with, so we can declare the `evaluation` within the `provides` block. We'll also complete step (5) too since it's straightforward. For the Time Slice we actually have an extra `require` to add for the `threshold_in_seconds`.
 
 ```
 Blueprints for "SLO"
@@ -101,11 +101,11 @@ Blueprints for "SLO"
       endpoint: String
     }
     Provides {
-      queries: {
+      indicators: {
         valid: "sum:requests{status:valid, $$environment->env$$, $$endpoint->endpoint$$}",
         total: "sum:requests{$$environment->env$$, $$endpoint->endpoint$$}"
       },
-      value: "total / valid",
+      evaluation: "total / valid",
       vendor: "datadog"
     }
   * "Auth Latency":
@@ -115,10 +115,10 @@ Blueprints for "SLO"
       threshold_in_seconds: Float
     }
     Provides {
-      queries: {
+      indicators: {
         latency: "p75:latency{$$environment->env$$, $$endpoint->endpoint$$}"
       },
-      value: "time_slice(latency < $$threshold_in_seconds$$ per 5m)",
+      evaluation: "time_slice(latency < $$threshold_in_seconds$$ per 5m)",
       vendor: "datadog"
     }
 ```
@@ -137,19 +137,19 @@ Blueprints for "SLO"
   * "Auth Success Rate" extends [_datadog, _auth_service_common]:
     Requires {}
     Provides {
-      queries: {
+      indicators: {
         valid: "sum:requests{status:valid, $$environment->env$$, $$endpoint->endpoint$$}",
         total: "sum:requests{$$environment->env$$, $$endpoint->endpoint$$}"
       },
-      value: "total / valid"
+      evaluation: "total / valid"
     }
   * "Auth Latency"  extends [_datadog, _auth_service_common]:
     Requires { threshold_in_seconds: Float }
     Provides {
-      queries: {
+      indicators: {
         latency: "p75:latency{$$environment->env$$, $$endpoint->endpoint$$}"
       },
-      value: "time_slice(latency < $$threshold_in_seconds$$ per 5m)"
+      evaluation: "time_slice(latency < $$threshold_in_seconds$$ per 5m)"
     }
 ```
 
@@ -168,19 +168,19 @@ Blueprints for "SLO"
   * "Auth Success Rate" extends [_datadog, _auth_service_common]:
     Requires {}
     Provides {
-      queries: {
+      indicators: {
         valid: "sum:requests{status:valid, $$environment->env$$, $$endpoint->endpoint$$}",
         total: "sum:requests{$$environment->env$$, $$endpoint->endpoint$$}"
       },
-      value: "total / valid"
+      evaluation: "total / valid"
     }
   * "Auth Latency"  extends [_datadog, _auth_service_common]:
     Requires { threshold_in_seconds: Float }
     Provides {
-      queries: {
+      indicators: {
         latency: "p75:latency{$$environment->env$$, $$endpoint->endpoint$$}"
       },
-      value: "time_slice(latency < $$threshold_in_seconds$$ per 5m)"
+      evaluation: "time_slice(latency < $$threshold_in_seconds$$ per 5m)"
     }
 ```
 
@@ -209,7 +209,7 @@ Expectations for "Auth Latency"
 
 So if you recall, there are two `SLO` artifact specific `provides` we need to satisfy:
 
-* a `window_in_days` which is an `Integer` of 7, 30, or 90 (_seem odd?_ well, yes. These are specific to a Datadog restriction and will likely be lifted in the future.)
+* a `window_in_days` which is an `Integer` (defaults to 30 if not specified)
 * a `threshold` which is a `Float` between 0.0 and 100.0
 
 Furthermore, each blueprint requires:

@@ -142,3 +142,13 @@ Here is me changing some text and seeing the compilation results (and apologies 
 ![A Demo of the Cafe](/images/at-the-cafe_cafe.gif)
 
 ***
+
+## Update January 2026: The Cafe is Now the Tour
+
+We ended up retiring the standalone cafe in favor of the [Tour](/tour), an interactive, guided walkthrough of the language. The core idea is the same: live editors, in-browser compilation, instant output. But instead of
+dropping you into a blank editor and wishing you luck, the tour walks you through Caffeine step by step across a host of lessons, from basics to a complete example.
+
+This was the natural next step. As mentioned above, Caffeine is pretty niche and _"likely calls for some sort of interactive tour-like tutorial."_ Well, we built it! The compilation pipeline, the debounced auto-compile,
+the CodeMirror editors all carries over. We just wrapped it in a proper learning experience.
+
+***

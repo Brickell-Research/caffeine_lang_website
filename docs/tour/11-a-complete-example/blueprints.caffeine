@@ -10,17 +10,17 @@ Blueprints for "SLO"
   * "Auth Success Rate" extends [_datadog, _auth_service_common]:
     Requires {}
     Provides {
-      queries: {
+      indicators: {
         valid: "sum:requests{status:valid, $$environment->env$$, $$endpoint->endpoint$$}",
         total: "sum:requests{$$environment->env$$, $$endpoint->endpoint$$}"
       },
-      value: "total / valid"
+      evaluation: "total / valid"
     }
   * "Auth Latency"  extends [_datadog, _auth_service_common]:
     Requires { threshold_in_seconds: Float }
     Provides {
-      queries: {
+      indicators: {
         latency: "p75:latency{$$environment->env$$, $$endpoint->endpoint$$}"
       },
-      value: "time_slice(latency < $$threshold_in_seconds$$ per 5m)"
+      evaluation: "time_slice(latency < $$threshold_in_seconds$$ per 5m)"
     }

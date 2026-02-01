@@ -5,8 +5,8 @@ Blueprints for "SLO"
       env: String
     }
     Provides {
-      value: "numerator / denominator",
-      queries: {
+      evaluation: "numerator / denominator",
+      indicators: {
         numerator: "sum:http.requests{$$env->env$$, $$status->status:not$$}",
         denominator: "sum:http.requests{$$env->env$$}"
       },

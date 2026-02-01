@@ -1,4 +1,4 @@
-One of the core benefits of Caffeine is that user-provided type annotations enable the compiler to catch errors by constraining parameter inputs. Thus, baristas are empowered to _programmtically_ guide consumers towards more semantically correct inputs - a [pit of success](https://blog.codinghorror.com/falling-into-the-pit-of-success/).
+One of the core benefits of Caffeine is that user-provided type annotations enable the compiler to catch errors by constraining parameter inputs. Thus, baristas are empowered to _programmatically_ guide consumers towards more semantically correct inputs - a [pit of success](https://blog.codinghorror.com/falling-into-the-pit-of-success/).
 
 Caffeine's type system consists of the following.
 

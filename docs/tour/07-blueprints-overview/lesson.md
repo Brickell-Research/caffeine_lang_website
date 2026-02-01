@@ -35,7 +35,7 @@ As stated in the `DependencyRelation` lesson, this is _the only way_ to leverage
 
 **Template Variables:**
 
-Use `$$var$$` syntax in query strings for value interpolation:
+Use `$$var$$` syntax in indicator strings for value interpolation:
 
 | Syntax             | Meaning        | Example Output   |
 |--------------------|----------------|------------------|
@@ -43,6 +43,6 @@ Use `$$var$$` syntax in query strings for value interpolation:
 | `$$var->attr$$`    | Key-value pair | `env:production` |
 | `$$var->attr:not$$`| Negated pair   | `!status:true`   |
 
-This is how the compiler leverages the parameters it collects to interpolate into the queries for the final artifact output.
+This is how the compiler leverages the parameters it collects to interpolate into the indicators for the final artifact output.
 
-> In the example below, notice how both `service_name` and `excluded_service_name` are leveraged within both queries and the value specified by the expectation is interpolated in the output.
+> In the example below, notice how both `service_name` and `excluded_service_name` are leveraged within both indicators and the value specified by the expectation is interpolated in the output.
