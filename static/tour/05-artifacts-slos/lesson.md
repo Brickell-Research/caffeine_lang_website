@@ -14,7 +14,7 @@ Caffeine supports generating Terraform for the [Datadog](https://docs.datadoghq.
 | Attribute      | Type                                                 | Description                                   |
 |----------------|------------------------------------------------------|-----------------------------------------------|
 | indicators     | `Dict(String, String)`                               | Named SLI measurement expressions             |
-| evaluation     | `String`                                             | CQL expression combining indicators           |
+| evaluation     | `String`                                             | CQL/Derived Column expression combining indicators           |
 | threshold      | `Float { x \| x in (0.0 .. 100.0) }`                 | Target percentage (e.g., 99.9)                |
 | vendor         | `String { x \| x in { datadog, honeycomb } }`        | Observability platform                        |
 | window_in_days | `Defaulted(Integer, 30)`                              | Rolling window for measurement                |
@@ -38,7 +38,7 @@ For these expressions, more complex arithmetic is supported. A couple examples:
 
 **Honeycomb: Derived Column Expressions**
 
-For Honeycomb, the model is simpler. You provide a single indicator whose value is a boolean derived column expression (e.g., `HEATMAP(duration_ms)`). The `evaluation` field is required by the artifact schema but is not used by the Honeycomb generator — the indicator value itself _is_ the SLI.
+For Honeycomb, the model is simpler. You provide a single indicator whose value is a boolean derived column expression (e.g., `HEATMAP(duration_ms)`). The `evaluation` field is required by the artifact schema but is not used by the Honeycomb generator: the indicator value itself _is_ the SLI.
 
 **Best Practices**
 

@@ -4,8 +4,6 @@
 
 **Caffeine** is a programming language for generating reliability artifacts from service expectation definitions.
 
-**Tip:** For the best experience, install the [Caffeine IDE extension](https://marketplace.visualstudio.com/items?itemName=BrickellResearch.caffeine-ide) for VS Code.
-
 We built Caffeine to aid reliability-conscious software operators in the era of highly dynamic systems, aligning with the views of [Chad Fowler's Phoenix Architecture](https://aicoding.leaflet.pub/), [Google's evolution of SRE](https://www.usenix.org/publications/loginonline/evolution-sre-google), the systems thinking outlined by [Donella Meadows](https://en.wikipedia.org/wiki/Thinking_In_Systems:_A_Primer) and [Nancy Leveson](http://sunnyday.mit.edu/STAMP-publications.html), the ["test in prod" mindset of Charity Majors](https://increment.com/testing/i-test-in-production/), and many others.
 
 Our definition of Caffeine above is intentionally vague, affording us a wide domain beyond the initial SLO focused use case, capturing the broader vision of the language.

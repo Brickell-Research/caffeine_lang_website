@@ -10,7 +10,7 @@ Caffeine's type system consists of the following.
 | Integer | Whole numbers                                      | `123`            |
 | Float   | Decimal numbers                                    | `12.34`          |
 | String  | Any collection of characters between double quotes | `"Hello World!"` |
-| URL     | A valid String starting with http:// or https://   | `"https://example.com"` |
+| URL     | A String starting with http:// or https://         | `"https://example.com"` |
 
 **Collections:** types for grouping values.
 
