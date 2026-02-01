@@ -237,16 +237,32 @@ We applied similar idempotency patterns across the pipeline:
 * `Homebrew`: Only commit if the formula actually changed
 * `Website (The Cafe)`: Only commit if files actually changed
 
-Now our five distribution channels all update atomically on `git push origin vX.Y.Z`, and re-running is always safe.
+***
 
-### Current Distribution Channels
+## Update: Email Notification (January 2026)
+
+Leveraging our home grown notification platform (_something worthy of its own blog post_), we now send an email to all subscribers for each release, along with brief release notes!
+
+{.figure}
+![Digicus LLVM Diagram](/images/designing-our-release-process_email.png)
+
+The v4.0.0 release email from January 31, 2026
+
+
+***
+
+
+Now our six distribution channels all update atomically on `git push origin vX.Y.Z`, and re-running is always safe.
+
+## Current Distribution Channels
 
 * ✅ Caffeine compiler releases (main repo) - automated
 * ✅ Official Github Action - automatically picks up latest
 * ✅ Hex - automated
 * ✅ Homebrew - automated
-* ✅ The Cafe - automated
+* ✅ The Cafe - automated (_update January 2026 - the tour_)
+* ✅ Release Notification to Subscribers
 
-All five channels. All automated. One `git tag` and `git push` 🤘.
+All six channels. All automated. One `git tag` and `git push` 🤘.
 
 ***

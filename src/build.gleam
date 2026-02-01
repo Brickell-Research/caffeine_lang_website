@@ -3,6 +3,7 @@ import gleam/string
 import lustre/ssg
 import pages/blog
 import pages/home
+import pages/tools
 import pages/tour
 import posts/posts
 
@@ -18,6 +19,7 @@ pub fn main() {
     |> ssg.add_dynamic_route("/blog", posts_dict, fn(post) {
       blog.post_view(post)
     })
+    |> ssg.add_static_route("/tools", tools.view())
     |> ssg.add_static_route("/tour", tour.view())
     |> ssg.build
 

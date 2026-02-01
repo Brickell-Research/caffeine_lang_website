@@ -303,6 +303,68 @@ a:hover {
   color: var(--color-mocha);
 }
 
+/* Tools Page */
+.tools-page {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.tools-hero {
+  text-align: center;
+  padding: 4rem 2rem 2rem;
+}
+
+.tools-hero h1 {
+  font-size: 2.5rem;
+  color: var(--color-text-bright);
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.tools-section {
+  margin-bottom: 2.5rem;
+}
+
+.tools-section h2 {
+  font-size: 1.25rem;
+  color: var(--color-text-muted);
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.tool-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.tool-card-header h3 {
+  font-size: 1.15rem;
+  color: var(--color-text-bright);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.tool-card-header p {
+  color: var(--color-text);
+  margin-bottom: 1.25rem;
+  line-height: 1.6;
+}
+
+.tool-links {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.tool-badge {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
 /* Code Examples */
 .code-examples {
   padding: 2rem 0;
