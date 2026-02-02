@@ -37,11 +37,11 @@ As stated in the `DependencyRelations` lesson, this is _the only way_ to leverag
 
 Use `$$var$$` syntax in indicator strings for value interpolation:
 
-| Syntax             | Meaning        | Example Output   |
-|--------------------|----------------|------------------|
-| `$$var$$`          | Raw value      | `production`     |
-| `$$var->attr$$`    | Key-value pair | `env:production` |
-| `$$var->attr:not$$`| Negated pair   | `!status:true`   |
+| Syntax               | Meaning        | Example Output   |
+|----------------------|----------------|------------------|
+| `$$var$$`            | Raw value      | `production`     |
+| `$$header->var$$`    | Key-value pair | `env:production` |
+| `$$header->var:not$$`| Negated pair   | `!status:true`   |
 
 This is how the compiler leverages the parameters it collects to interpolate into the indicators for the final artifact output.
 

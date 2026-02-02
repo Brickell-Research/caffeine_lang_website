@@ -38,10 +38,10 @@ For these expressions, more complex arithmetic is supported. A couple examples:
 
 **Honeycomb: Derived Column Expressions**
 
-For Honeycomb, the model is simpler. You provide a single indicator whose value is a boolean derived column expression (e.g., `HEATMAP(duration_ms)`). The `evaluation` field is required by the artifact schema but is not used by the Honeycomb generator: the indicator value itself _is_ the SLI.
+For Honeycomb, the model is simpler. You provide a single indicator whose value is a boolean derived column expression (e.g., `HEATMAP(duration_ms)`). The `evaluation` field is almost always the name of the single indicator you specify here. 
 
 **Best Practices**
 
-_In Caffeine it is best practice_ to partially define the SLO within a blueprint. Specifically, blueprints typically define the `indicators`, the `evaluation` (for Datadog), and the `vendor`.
+_In Caffeine it is best practice_ to partially define the SLO within a blueprint. Specifically, blueprints typically define the `indicators`, the `evaluation`, and the `vendor`.
 
 > The example shows a basic availability SLO. On the right hand side we have the output which is valid Terraform representing the specified SLO for the Datadog vendor.

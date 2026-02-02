@@ -42,7 +42,7 @@ Within the compiler, this then would be interpreted as:
 
 ```
 Blueprints for "SLO"
-  * "api_availability" extends [_base_slo, _common_req]:
+  * "api_availability":
     Requires { threshold: Float, env: String, window_in_days: Integer }
     Provides { evaluation: "numerator / denominator", vendor: "datadog" }
 ```
@@ -64,7 +64,7 @@ Within the compiler, this then would be interpreted as:
 
 ```
 Expectations for "api_availability"
-  * "critical_service" extends [_defaults, _strict]:
+  * "critical_service":
     Provides { 
       status: true,
        env: "production",
