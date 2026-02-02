@@ -17,7 +17,7 @@ export function compile(blueprintsText, expectationsText, configPath) {
   );
 
   if (result.isOk()) {
-    return result[0];
+    return result[0].terraform;
   } else {
     throw new Error(result[0].msg);
   }
