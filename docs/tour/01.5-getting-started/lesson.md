@@ -3,7 +3,7 @@ While this tour is fully interactive and runs entirely in your browser, you may 
 **Install via Homebrew:**
 
 ```bash
-brew tap Brickell-Research/caffeine
+brew tap brickell-research/caffeine
 
 brew install caffeine_lang
 ```
@@ -11,7 +11,7 @@ brew install caffeine_lang
 Verify it worked:
 
 ```bash
-caffeine version
+caffeine
 ```
 
 **Tip:** For the best experience, install the [Caffeine IDE extension](https://marketplace.visualstudio.com/items?itemName=BrickellResearch.caffeine-ide) for VS Code.

@@ -34,6 +34,6 @@ The compiler validates expectations at compile time:
 - Values must match the types declared in the blueprint
 - Expectation references must point to valid targets
 - Circular dependencies are rejected
-- Expectation names must be unique per org + team + service
+- Expectation names must be unique within a file
 
 > Try removing the `service_name: "hello-world"` line and notice the compilation error.

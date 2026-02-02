@@ -25,13 +25,13 @@ Blueprints for "<ArtifactName>"
 A blueprint can implement multiple artifacts using `+`. Parameters from all artifacts are merged:
 
 ```
-Blueprints for "SLO" + "DependencyRelation"
+Blueprints for "SLO" + "DependencyRelations"
   * "tracked_slo":
     Requires { ... }  # Params from both artifacts
     Provides { ... }  # Values for both artifacts
 ```
 
-As stated in the `DependencyRelation` lesson, this is _the only way_ to leverage `DependencyRelation` artifacts at this time.
+As stated in the `DependencyRelations` lesson, this is _the only way_ to leverage `DependencyRelations` artifacts at this time.
 
 **Template Variables:**
 
