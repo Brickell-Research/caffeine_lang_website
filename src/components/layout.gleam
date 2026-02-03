@@ -1,5 +1,4 @@
 import components/banner
-import version
 import components/footer
 import components/header
 import gleam/list
@@ -7,6 +6,7 @@ import gleam/option.{type Option, None, Some}
 import lustre/attribute
 import lustre/element.{type Element}
 import lustre/element/html
+import version
 
 pub type PageMeta {
   PageMeta(title: String, description: Option(String), url: Option(String))
@@ -184,9 +184,7 @@ pub fn view_with_meta(meta: PageMeta, content: Element(Nil)) -> Element(Nil) {
       "window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()",
     ),
     // Datadog RUM
-    html.script(
-      [],
-      "(function(h,o,u,n,d) {
+    html.script([], "(function(h,o,u,n,d) {
     h=h[d]=h[d]||{q:[],onReady:function(c){h.q.push(c)}}
     d=o.createElement(u);d.async=1;d.src=n
     n=o.getElementsByTagName(u)[0];n.parentNode.insertBefore(d,n)
@@ -209,8 +207,7 @@ pub fn view_with_meta(meta: PageMeta, content: Element(Nil)) -> Element(Nil) {
       compressIntakeRequests: true,
       allowFallbackToLocalStorage: true,
     });
-  })",
-    ),
+  })"),
   ]
 
   let head_content =
