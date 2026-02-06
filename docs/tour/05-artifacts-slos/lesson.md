@@ -7,7 +7,7 @@ In order to limit the scope of the tour, we will not go into the who, what, why,
 
 All (or at least most) serious/modern observability tools today support SLOs within their platform. Furthermore, many vendors support leveraging [Terraform](https://developer.hashicorp.com/terraform) to create/maintain/modify these SLOs.
 
-Caffeine supports generating Terraform for the [Datadog](https://docs.datadoghq.com/service_management/service_level_objectives/) and [Honeycomb](https://www.honeycomb.io/blog/slo-as-code-with-terraform) vendors.
+Caffeine supports generating Terraform for the [Datadog](https://docs.datadoghq.com/service_management/service_level_objectives/), [Dynatrace](https://docs.dynatrace.com/docs/observe/service-level-objectives), and [Honeycomb](https://www.honeycomb.io/blog/slo-as-code-with-terraform) vendors.
 
 **Artifact Definition:**
 
@@ -16,7 +16,7 @@ Caffeine supports generating Terraform for the [Datadog](https://docs.datadoghq.
 | indicators     | `Dict(String, String)`                               | Named SLI measurement expressions             |
 | evaluation     | `String`                                             | CQL/Derived Column expression combining indicators           |
 | threshold      | `Float { x \| x in (0.0 .. 100.0) }`                 | Target percentage (e.g., 99.9)                |
-| vendor         | `String { x \| x in { datadog, honeycomb } }`        | Observability platform                        |
+| vendor         | `String { x \| x in { datadog, dynatrace, honeycomb } }`        | Observability platform                        |
 | window_in_days | `Defaulted(Integer, 30)`                              | Rolling window for measurement                |
 | tags           | `Optional(Dict(String, String))`                      | Optional tags to append to the SLO            |
 | runbook        | `Optional(URL)`                                       | Optional runbook URL for the SLO description  |
@@ -36,9 +36,13 @@ For these expressions, more complex arithmetic is supported. A couple examples:
 * `(total - bad) / total`
 * `time_slice((event_a_latency + event_b_latency) < threshold per 5m)`
 
+**Dynatrace: Metric Expressions**
+
+For Dynatrace, indicators are metric selector expressions (e.g., `builtin:service.requestCount.server:splitBy()`). The `evaluation` field uses CQL to combine indicators, just like Datadog.
+
 **Honeycomb: Derived Column Expressions**
 
-For Honeycomb, the model is simpler. You provide a single indicator whose value is a boolean derived column expression (e.g., `HEATMAP(duration_ms)`). The `evaluation` field is almost always the name of the single indicator you specify here. 
+For Honeycomb, the model is simpler. You provide a single indicator whose value is a boolean derived column expression (e.g., `HEATMAP(duration_ms)`). The `evaluation` field is almost always the name of the single indicator you specify here.
 
 **Best Practices**
 
