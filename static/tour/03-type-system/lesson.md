@@ -26,6 +26,14 @@ Caffeine's type system consists of the following.
 | Defaulted | A type with a default value if none is provided                         | `Defaulted(String, "cheese")` |
 | Optional  | A type where the value may be left unspecified                          | `Optional(Integer)`           |
 
+**Structured:** a type for defining structured groups of typed fields.
+
+| Type   | Description                                                  | Example                                          |
+|--------|--------------------------------------------------------------|--------------------------------------------------|
+| Record | A group of named, typed fields                               | `{ numerator: String, denominator: String }`     |
+
+Records let you define structured parameters where each field has its own type. Fields can use any type, including other records for nesting. They are especially useful for grouping related parameters like query indicators.
+
 **Refinements:** more complex types for attaching a proposition (a.k.a. further constraints) to the type.
 
 | Type           | Description                                          | Example                                       |
@@ -37,7 +45,7 @@ Caffeine's type system consists of the following.
 
 <br>
 
-**Bonus:** if you chose to install the compiler locally, you can run the `caffeine types` command to get an overview of currently supported types. Here is what it looks like as of `v4.0.0`:
+**Bonus:** if you chose to install the compiler locally, you can run the `caffeine types` command to get an overview of currently supported types. Here is what it looks like as of `v4.2.2`:
 
 ```bash
 > ✗ caffeine types
@@ -70,6 +78,12 @@ CollectionTypes: "Container types for grouping values"
   Dict: "A key-value map with typed keys and values"
     syntax: Dict(K, V)
     e.g. Dict(String, String), Dict(String, Integer)
+
+StructuredTypes: "Named fields with typed values"
+
+  Record: "A group of named, typed fields"
+    syntax: { field: T, ... }
+    e.g. { numerator: String, denominator: String }
 
 ModifierTypes: "Wrappers that change how values are handled"
 

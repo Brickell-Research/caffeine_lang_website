@@ -1,10 +1,10 @@
-**Type Aliases** are reusable, named types (_at this time, they specifically must be refinement types - a decision of the core team which is open for discussion_). They let you define a constrained type once and reference it throughout your blueprints, reducing repetition and ensuring consistency.
+**Type Aliases** are reusable, named types. They let you define a constrained type once and reference it throughout your blueprints, reducing repetition and ensuring consistency.
 
 **Syntax:**
 
 ```
 # Declaration (must be at top of file)
-_name (Type): <refinement_type>
+_name (Type): <refinement_type_or_record>
 
 # Usage
 field: _name
@@ -19,9 +19,10 @@ Type aliases can be used in `requires` blocks, both within an extendable or with
 ```
 # Type Aliases
 _env (Type): String { x | x in { prod, staging } }
+_indicators (Type): { numerator: String, denominator: String }
 
 # Extendables
-_common (Provides) { excluded_env: Optional(_env) }
+_common (Provides): { excluded_env: Optional(_env) }
 
 # Blueprints
 Blueprints for "SLO"
@@ -29,7 +30,8 @@ Blueprints for "SLO"
     Requires {
       env: Defaulted(_env, "prod"),
       backup_env: Optional(_env),
-      all_envs: List(_env)
+      all_envs: List(_env),
+      indicators: _indicators
     }
 ```
 
@@ -39,9 +41,9 @@ Blueprints for "SLO"
 - Must specify kind: `(Type)`
 - Must be at top of file (before extendables and blueprints)
 - File-scoped only (cannot reference across files)
-- Can only alias refinement types (OneOf or InclusiveRange)
+- Can alias refinement types (OneOf or InclusiveRange) or record types
 
-Two of the most common use cases thus far are a type describing environments and a type for a well-known set of service names.
+Common use cases include constraining environments, service name sets, and reusable record structures.
 
 ```
 # Environments
@@ -49,4 +51,7 @@ _env (Type): String { x | x in { "prod", "staging", "dev" } }
 
 # Service names
 _service (Type): String { x | x in { "authentication", "backend", "frontend", "database" } }
+
+# Reusable record structures
+_indicators (Type): { numerator: String, denominator: String }
 ```

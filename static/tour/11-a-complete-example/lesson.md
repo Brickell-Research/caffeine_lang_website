@@ -195,16 +195,16 @@ Note that we can call these whatever we want (and frankly the names here are pre
 
 ```
 Expectations for "Auth Success Rate"
-* "Signin Success Rate":
-  Provides {}
-* "WhoAmI Success Rate"
-  Provides {}
+  * "Signin Success Rate":
+    Provides {}
+  * "WhoAmI Success Rate":
+    Provides {}
 
 Expectations for "Auth Latency"
-* "Signin Latency"
-  Provides {}
-* "WhoAmI Latency"
-  Provides {}
+  * "Signin Latency":
+    Provides {}
+  * "WhoAmI Latency":
+    Provides {}
 ```
 
 So if you recall, there are two `SLO` artifact specific `provides` we need to satisfy:
@@ -223,41 +223,41 @@ With values according to the expectations of our users we came up with above we 
 
 ```
 Expectations for "Auth Success Rate"
-* "Signin Success Rate":
-  Provides {
-    window_in_days: 30,
-    threshold: 99.9,
-    endpoint: "sign-in",
-    env: "production"
-  }
-* "WhoAmI Success Rate":
-  Provides {
-    window_in_days: 30,
-    threshold: 99,
-    endpoint: "who-am-i",
-    env: "production"
-  }
+  * "Signin Success Rate":
+    Provides {
+      window_in_days: 30,
+      threshold: 99.9,
+      endpoint: "sign-in",
+      env: "production"
+    }
+  * "WhoAmI Success Rate":
+    Provides {
+      window_in_days: 30,
+      threshold: 99,
+      endpoint: "who-am-i",
+      env: "production"
+    }
 
 Expectations for "Auth Latency"
-* "Signin Latency":
-  Provides {
-    window_in_days: 30,
-    threshold: 99.9,
-    endpoint: "sign-in",
-    env: "production",
-    threshold_in_seconds: 1
-  }
-* "WhoAmI Latency":
-  Provides {
-    window_in_days: 30,
-    # more strict about the latency than the success rate for
-    # threshold as well (the % of 5m intervals where the latency
-    # is within the threshold_in_seconds)
-    threshold: 99.9,
-    endpoint: "who-am-i",
-    env: "production",
-    threshold_in_seconds: 0.25
-  }
+  * "Signin Latency":
+    Provides {
+      window_in_days: 30,
+      threshold: 99.9,
+      endpoint: "sign-in",
+      env: "production",
+      threshold_in_seconds: 1
+    }
+  * "WhoAmI Latency":
+    Provides {
+      window_in_days: 30,
+      # more strict about the latency than the success rate for
+      # threshold as well (the % of 5m intervals where the latency
+      # is within the threshold_in_seconds)
+      threshold: 99.9,
+      endpoint: "who-am-i",
+      env: "production",
+      threshold_in_seconds: 0.25
+    }
 ```
 
 And finally if we want, we can leverage a couple extendables to reduce duplication.
@@ -273,29 +273,29 @@ _common_basic (Provides): { window_in_days: 30 }
 
 ## ==== Expectations ====
 Expectations for "Auth Success Rate"
-* "Signin Success Rate" extends [_common_basic, _common_sign_in]:
-  Provides {
-    threshold: 99.9
-  }
-* "WhoAmI Success Rate" extends [_common_basic, _common_who_am_i]:
-  Provides {
-    threshold: 99
-  }
+  * "Signin Success Rate" extends [_common_basic, _common_sign_in]:
+    Provides {
+      threshold: 99.9
+    }
+  * "WhoAmI Success Rate" extends [_common_basic, _common_who_am_i]:
+    Provides {
+      threshold: 99
+    }
 
 Expectations for "Auth Latency"
-* "Signin Latency" extends [_common_basic, _common_sign_in]:
-  Provides {
-    threshold: 99.9,
-    threshold_in_seconds: 1
-  }
-* "WhoAmI Latency" extends [_common_basic, _common_who_am_i]:
-  Provides {
-    # more strict about the latency than the success rate for
-    # threshold as well (the % of 5m intervals where the latency
-    # is within the threshold_in_seconds)
-    threshold: 99.9,
-    threshold_in_seconds: 0.25
-  }
+  * "Signin Latency" extends [_common_basic, _common_sign_in]:
+    Provides {
+      threshold: 99.9,
+      threshold_in_seconds: 1
+    }
+  * "WhoAmI Latency" extends [_common_basic, _common_who_am_i]:
+    Provides {
+      # more strict about the latency than the success rate for
+      # threshold as well (the % of 5m intervals where the latency
+      # is within the threshold_in_seconds)
+      threshold: 99.9,
+      threshold_in_seconds: 0.25
+    }
 ```
 
 And with that, we just need to compile everything, apply it, and we're well on our way to more reliably operating our production systems 🎉. In the name of Caffeine, go find a good ☕️ from your local cafe to celebrate! **You are now officially a Caffeine barista!**

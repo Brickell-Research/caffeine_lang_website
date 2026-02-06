@@ -6,7 +6,7 @@
 
 | Attribute | Type                                                      | Description                                |
 |-----------|-----------------------------------------------------------|--------------------------------------------|
-| relations | `Dict(String { x \| x in { soft, hard } }, List(String))` | Map of dependency type to expectation refs |
+| relations | `{ hard: List(String), soft: List(String) }`               | Map of dependency type to expectation refs |
 
 **Dependency Types:**
 

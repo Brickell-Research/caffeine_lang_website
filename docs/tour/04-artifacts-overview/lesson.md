@@ -11,7 +11,7 @@ These then, upon compilation, generate an artifact which might be `.terraform` f
 
 <br>
 
-**Bonus:** if you chose to install the compiler locally, you can run the `caffeine artifacts` command to get an overview of currently supported artifacts. Here is what it looks like as of `v4.1.2`:
+**Bonus:** if you chose to install the compiler locally, you can run the `caffeine artifacts` command to get an overview of currently supported artifacts. Here is what it looks like as of `v4.2.2`:
 
 ```bash
 Artifact Catalog
@@ -44,6 +44,6 @@ SLO: "A Service Level Objective that monitors a metric query against a threshold
 DependencyRelations: "Declares soft and hard dependencies between services for dependency mapping."
 
   relations: "Map of dependency type to list of service names"
-    type: Dict(String { x | x in { hard, soft } }, List(String))
+    type: { hard: List(String), soft: List(String) }
     required
 ```
