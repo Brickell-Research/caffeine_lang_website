@@ -7,7 +7,7 @@ In order to limit the scope of the tour, we will not go into the who, what, why,
 
 All (or at least most) serious/modern observability tools today support SLOs within their platform. Furthermore, many vendors support leveraging [Terraform](https://developer.hashicorp.com/terraform) to create/maintain/modify these SLOs.
 
-Caffeine supports generating Terraform for the [Datadog](https://docs.datadoghq.com/service_management/service_level_objectives/), [Dynatrace](https://docs.dynatrace.com/docs/observe/service-level-objectives), and [Honeycomb](https://www.honeycomb.io/blog/slo-as-code-with-terraform) vendors.
+Caffeine supports generating Terraform for the [Datadog](https://docs.datadoghq.com/service_management/service_level_objectives/), [Dynatrace](https://docs.dynatrace.com/docs/observe/service-level-objectives), [Honeycomb](https://www.honeycomb.io/blog/slo-as-code-with-terraform), and [New Relic](https://docs.newrelic.com/docs/service-level-management/intro-slm/) vendors.
 
 **Artifact Definition:**
 
@@ -16,7 +16,7 @@ Caffeine supports generating Terraform for the [Datadog](https://docs.datadoghq.
 | indicators     | `Dict(String, String)`                               | Named SLI measurement expressions             |
 | evaluation     | `String`                                             | CQL/Derived Column expression combining indicators           |
 | threshold      | `Float { x \| x in (0.0 .. 100.0) }`                 | Target percentage (e.g., 99.9)                |
-| vendor         | `String { x \| x in { datadog, dynatrace, honeycomb } }`        | Observability platform                        |
+| vendor         | `String { x \| x in { datadog, dynatrace, honeycomb, newrelic } }`        | Observability platform                        |
 | window_in_days | `Defaulted(Integer, 30)`                              | Rolling window for measurement                |
 | tags           | `Optional(Dict(String, String))`                      | Optional tags to append to the SLO            |
 | runbook        | `Optional(URL)`                                       | Optional runbook URL for the SLO description  |
@@ -43,6 +43,10 @@ For Dynatrace, indicators are metric selector expressions (e.g., `builtin:servic
 **Honeycomb: Derived Column Expressions**
 
 For Honeycomb, the model is simpler. You provide a single indicator whose value is a boolean derived column expression (e.g., `HEATMAP(duration_ms)`). The `evaluation` field is almost always the name of the single indicator you specify here.
+
+**New Relic: NRQL Indicators**
+
+For New Relic, indicators are NRQL expressions — an event type with an optional `WHERE` filter (e.g., `"Transaction WHERE appName = 'payments'"`). The `evaluation` field must be `good / valid`, where each name refers to an indicator mapping to the corresponding events block in the generated Terraform resource. New Relic only supports rolling windows of 1, 7, or 28 days.
 
 **Best Practices**
 
