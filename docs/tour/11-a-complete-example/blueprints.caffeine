@@ -1,5 +1,5 @@
 ## ==== Type Aliases ====
-_env (Type): String { x | x in { "testing", "staging", "production" } }
+_env (Type): String { x | x in { "production", "staging", "testing" } }
 
 ## ==== Extendables ====
 _datadog (Provides): { vendor: "datadog" }
@@ -8,7 +8,7 @@ _auth_service_common (Requires): { env: _env, endpoint: String }
 ## ==== Blueprints ====
 Blueprints for "SLO"
   * "Auth Success Rate" extends [_datadog, _auth_service_common]:
-    Requires {}
+    Requires { }
     Provides {
       indicators: {
         valid: "sum:requests{status:valid, $$environment->env$$, $$endpoint->endpoint$$}",
@@ -16,7 +16,8 @@ Blueprints for "SLO"
       },
       evaluation: "total / valid"
     }
-  * "Auth Latency"  extends [_datadog, _auth_service_common]:
+
+  * "Auth Latency" extends [_datadog, _auth_service_common]:
     Requires { threshold_in_seconds: Float }
     Provides {
       indicators: {
