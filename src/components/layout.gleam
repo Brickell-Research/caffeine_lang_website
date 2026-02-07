@@ -6,7 +6,6 @@ import gleam/option.{type Option, None, Some}
 import lustre/attribute
 import lustre/element.{type Element}
 import lustre/element/html
-import version
 
 pub type PageMeta {
   PageMeta(title: String, description: Option(String), url: Option(String))
@@ -171,43 +170,6 @@ pub fn view_with_meta(meta: PageMeta, content: Element(Nil)) -> Element(Nil) {
       [attribute.src("https://unpkg.com/prismjs-gleam@1/gleam.js")],
       "",
     ),
-    // Privacy-friendly analytics by Plausible
-    html.script(
-      [
-        attribute.attribute("async", ""),
-        attribute.src("https://plausible.io/js/pa-vjl7vif68GwpiuXNTPtt7.js"),
-      ],
-      "",
-    ),
-    html.script(
-      [],
-      "window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()",
-    ),
-    // Datadog RUM
-    html.script([], "(function(h,o,u,n,d) {
-    h=h[d]=h[d]||{q:[],onReady:function(c){h.q.push(c)}}
-    d=o.createElement(u);d.async=1;d.src=n
-    n=o.getElementsByTagName(u)[0];n.parentNode.insertBefore(d,n)
-  })(window,document,'script','https://www.datadoghq-browser-agent.com/us1/v6/datadog-rum.js','DD_RUM')
-  window.DD_RUM.onReady(function() {
-    window.DD_RUM.init({
-      clientToken: 'pub29dda8cc665a99e590dd250a5c032b10',
-      applicationId: '95e6c5af-bff4-443c-a6bb-36b3238e0e1b',
-      site: 'datadoghq.com',
-      service: 'caffeine-lang-website',
-      env: 'production',
-      version: '" <> version.latest_version <> "',
-      sessionSampleRate: 100,
-      sessionReplaySampleRate: 20,
-      trackUserInteractions: true,
-      trackResources: true,
-      trackLongTasks: true,
-      trackBfcacheViews: true,
-      defaultPrivacyLevel: 'mask-user-input',
-      compressIntakeRequests: true,
-      allowFallbackToLocalStorage: true,
-    });
-  })"),
   ]
 
   let head_content =
