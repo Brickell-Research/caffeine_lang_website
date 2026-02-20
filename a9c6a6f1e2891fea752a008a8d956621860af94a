@@ -1,0 +1,29 @@
+src/components/layout.gleam
+  5a32123641123753 75-79,182
+honeycomb/package.json
+  5a32123641123753 1-10
+honeycomb/honeycomb.js
+  5a32123641123753 1-21
+scripts/bundle_honeycomb.sh
+  5a32123641123753 1-7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.4",
+  "base_commit_sha": "a9c6a6f1e2891fea752a008a8d956621860af94a",
+  "prompts": {
+    "5a32123641123753": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d301de6d-62a4-45ec-8f99-47a9beaa4ef5",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "robertDurst <me@robdurst.com>",
+      "messages": [],
+      "total_additions": 47,
+      "total_deletions": 2,
+      "accepted_lines": 44,
+      "overriden_lines": 0
+    }
+  }
+}
