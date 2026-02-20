@@ -72,6 +72,11 @@ pub fn view_with_meta(meta: PageMeta, content: Element(Nil)) -> Element(Nil) {
     ]),
   ]
 
+  let telemetry_tags = [
+    // Honeycomb OpenTelemetry browser instrumentation
+    html.script([attribute.src("/js/honeycomb.js")], ""),
+  ]
+
   let style_tags = [
     // Google Fonts: Inter + JetBrains Mono
     html.link([
@@ -173,7 +178,9 @@ pub fn view_with_meta(meta: PageMeta, content: Element(Nil)) -> Element(Nil) {
   ]
 
   let head_content =
-    list.flatten([base_tags, description_tags, url_tags, style_tags])
+    list.flatten([
+      base_tags, telemetry_tags, description_tags, url_tags, style_tags,
+    ])
 
   html.html([attribute.attribute("lang", "en")], [
     html.head([], head_content),

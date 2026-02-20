@@ -7,5 +7,9 @@ erl_crash.dump
 /.lustre
 /dist
 
+# Node modules
+honeycomb/node_modules
+editor/node_modules
+
 # OS X
 .DS_Store
