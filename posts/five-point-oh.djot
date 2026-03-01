@@ -124,8 +124,10 @@ Notice that `_success_rate_blueprint` omits the `Requiring` block entirely — i
 Syntactically, some things stay the same and some change:
 
 1. type aliases will continue to exist and be limited to blueprint files
+
 2. extendables will continue to be scoped per file, but will now be limited to `Requiring` blocks only; today's `Providing` extendables (e.g.
    `_defaults (Providing): { vendor: "datadog" }`) are being dropped since blueprints no longer have a `Provides` block
+
 3. to leverage extendables, we will continue to support the `extends` syntax
 
 ## Expectation Types
@@ -136,6 +138,7 @@ Internally, today's Caffeine already distinguishes between two SLO primitives (`
 these to first-class, user-facing expectation types:
 
 1. *success_rate* (currently `GoodOverTotal` within CQL)
+
 2. *time_slice* (currently `TimeSlice` within CQL)
 
 We specify the evaluation of these within the blueprint definitions via the inline type and formula syntax (e.g. `success_rate(good / total)`), and then
