@@ -1,0 +1,36 @@
+posts/five-point-oh.djot
+  138479757fa7b2f2 7,9-11,13,24,32,46,58-60,66,68,71,73,86,91-93,95-97,99,102-104,108,123,127,130-131,133-136,139-140,143-155,157-169,171-172,177,179-180,182-183,186-194,200-211,213-220,225-227,231,234,237,239-242,244,250-251,254,256,264-266,268,270-272,274-277
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.7",
+  "base_commit_sha": "1b00218177d8797cc08be6ed8bda5395a68b18cb",
+  "prompts": {
+    "138479757fa7b2f2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0f4f22b6-ebea-43ca-b852-5374b5403294",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "robertDurst <me@robdurst.com>",
+      "messages": [],
+      "total_additions": 501,
+      "total_deletions": 369,
+      "accepted_lines": 125,
+      "overriden_lines": 29
+    },
+    "636f7b921e4334ce": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2bda8afc-ffff-47be-9da0-f0529fc56df5",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "robertDurst <me@robdurst.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 2,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    }
+  }
+}
