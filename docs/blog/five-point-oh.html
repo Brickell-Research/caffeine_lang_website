@@ -19,28 +19,27 @@ homogenizing the three tier hierarchy (artifacts -&gt; blueprints -&gt; expectat
 abstraction layer for SLO based expectations, (a) they only ever really made sense for SLO expectations, and (b) if you zoom out, it&#39;s clear they almost always
 were only scoped to defining the measurement part of the SLO artifact. Thus, while the transition from abstraction layer to a more well-scoped templated
 measurement definition might seem reductive, it&#39;s actually consistent with how these were used in practice.</p><p>Further changes include: organizing blueprint files per vendor (e.g. <code>blueprints/datadog.caffeine</code>, <code>blueprints/honeycomb.caffeine</code>) to make vendor scope
-explicit, replacing the <code>Provides</code> block with a <code>signals</code> block that names the queries the blueprint uses, <code>Requiring</code> in place of <code>Requires</code> (aligning with
-the form extendables already use), and a new <code>evaluated as</code> clause that declares the expectation type inline. The <code>evaluated as</code> string (e.g.
-<code>&quot;success_rate (good / total)&quot;</code>) tells the compiler both the expectation type and how the signal names map to the evaluation formula: <code>good</code> and <code>total</code>
-here correspond to the entries in the <code>signals</code> block (as before).</p><pre><code data-lang="caffeine">_success_rate_blueprint evaluated as &quot;success_rate (good / total)&quot; extends [_common] with:
+explicit, replacing the <code>Provides</code> block with a <code>signals</code> block that names the queries the blueprint uses, and <code>Requiring</code> in place of <code>Requires</code> (aligning with
+the form extendables already use). Each blueprint also declares its expectation type and evaluation formula inline on the declaration line — for example,
+<code>success_rate(good / total)</code> tells the compiler the expectation type is <code>success_rate</code> and that <code>good</code> and <code>total</code> correspond to the entries in the
+<code>signals</code> block. Because this is real syntax rather than a string, the compiler and LSP can parse, validate, and offer completions for the formula.</p><pre><code data-lang="caffeine">_success_rate_blueprint success_rate(good / total) extends [_common] with:
   signals: [
     good: &quot;some_query&quot;,
     total: &quot;some_other_query&quot;
-  ],
-  Requiring: {}
+  ]
 
-_time_slice_blueprint evaluated as &quot;time_slice (query per 5m)&quot; with:
+_time_slice_blueprint time_slice(query per 5m) with:
   signals: [
     query: &quot;some_query&quot;
   ],
   Requiring: { otherFoo: String }
-</code></pre><p>Syntactically, some things stay the same and some change:</p><p>1. type aliases will continue to exist and be limited to blueprint files
+</code></pre><p>Notice that <code>_success_rate_blueprint</code> omits the <code>Requiring</code> block entirely — if a blueprint has no required parameters, the block can be left out.</p><p>Syntactically, some things stay the same and some change:</p><p>1. type aliases will continue to exist and be limited to blueprint files
 2. extendables will continue to be scoped per file, but will now be limited to <code>Requiring</code> blocks only; today&#39;s <code>Providing</code> extendables (e.g.
 <code>_defaults (Providing): { vendor: &quot;datadog&quot; }</code>) are being dropped since blueprints no longer have a <code>Provides</code> block
 3. to leverage extendables, we will continue to support the <code>extends</code> syntax</p><h2 id="Expectation-Types">Expectation Types</h2><p>Before diving into the new syntax, it&#39;s worth understanding how expectation types work. They&#39;re foundational to making composition meaningful.</p><p>Internally, today&#39;s Caffeine already distinguishes between two SLO primitives (<code>GoodOverTotal</code> and <code>TimeSlice</code> in the CQL resolver). In <code>v5.0.0</code>, we promote
 these to first-class, user-facing expectation types:</p><p>1. <strong>success_rate</strong> (currently <code>GoodOverTotal</code> within CQL)
-2. <strong>time_slice</strong> (currently <code>TimeSlice</code> within CQL)</p><p>We specify the evaluation of these within the blueprint definitions via the new <code>evaluated as</code> syntax, and then we further signify which type in the
-expectation&#39;s inline guarantee statement. <strong>success_rate</strong> is fairly straightforward: we treat each threshold as an uptime percentage and thus enforce
+2. <strong>time_slice</strong> (currently <code>TimeSlice</code> within CQL)</p><p>We specify the evaluation of these within the blueprint definitions via the inline type and formula syntax (e.g. <code>success_rate(good / total)</code>), and then
+further indicate which type via the expectation&#39;s inline guarantee statement. <strong>success_rate</strong> is fairly straightforward: we treat each threshold as an uptime percentage and thus enforce
 <code>&lt;=</code> between the percentages (as we did before). For example, this would fail at compile time:</p><pre><code data-lang="caffeine">&quot;Payment Processing&quot;:
   Assumes:
     hard dependency on &quot;Database is up&quot;
@@ -88,19 +87,24 @@ To see why this matters, compare the old and new syntax for the same expectation
     env: &quot;production&quot;
 </code></pre><p>The guarantee, assumptions, and measurement are now explicit in the syntax rather than buried as opaque fields. The <code>with:</code> block only supplies values for
 the blueprint&#39;s <code>Requiring</code> fields — the <code>signals</code> defined in the blueprint are inherited as-is and are not the expectation&#39;s concern.</p><p>You&#39;ll also notice a new window syntax — <code>over 10d window</code>, <code>below 100ms</code> — replacing the raw numeric fields like <code>window_in_days: 30</code> and
-<code>threshold: 99.95</code>. Today&#39;s CQL interval parser only supports seconds, minutes, and hours (<code>s</code>, <code>m</code>, <code>h</code>); <code>v5.0.0</code> extends this to days (<code>d</code>) and introduces
-the inline threshold and latency syntax shown above.</p><p>Due to the nature of the complex distributed systems we model, there are varying levels of optionality within these definitions. The bare minimum is just a
+<code>threshold: 99.95</code>. Today&#39;s CQL interval parser only supports seconds, minutes, and hours (<code>s</code>, <code>m</code>, <code>h</code>); <code>v5.0.0</code> extends this to days (<code>d</code>), adds
+milliseconds (<code>ms</code>) for latency thresholds, and introduces the inline threshold and latency syntax shown above. For clarity, the full set
+of supported units is: <code>ms</code> (milliseconds), <code>s</code> (seconds), <code>m</code> (minutes), <code>h</code> (hours), and <code>d</code> (days).</p><p>Due to the nature of the complex distributed systems we model, there are varying levels of optionality within these definitions. The bare minimum is just a
 guarantee.</p><pre><code data-lang="caffeine">&quot;Database is up&quot;:
   Guarantees 99.9% over 10d window
 </code></pre><p>While this may seem meaningless, this represents something like an SLA for a dependency that you want to include within your system but you don&#39;t have any
 way to measure it, nor does it rely on anything (to the best of your knowledge — it&#39;s a black box). Since there&#39;s no <code>as measured by</code> clause, no Terraform
-SLO is generated — this is a design-time-only guarantee used for compile-time relationship validation.</p><p>From there, we might specify how to measure the expectation.</p><pre><code data-lang="caffeine">&quot;Third party service is fast enough&quot;:
+SLO is generated — this is a design-time-only guarantee used for compile-time relationship validation. The compiler infers the expectation type from
+context: if the guarantee includes a <code>below</code> latency clause it is treated as <code>time_slice</code>, otherwise it defaults to <code>success_rate</code>. This means a bare
+guarantee like the one above is always <code>success_rate</code> and can only participate in dependency chains with other <code>success_rate</code> expectations.</p><p>From there, we might specify how to measure the expectation.</p><pre><code data-lang="caffeine">&quot;Third party service is fast enough&quot;:
   Guarantees 99.9% below 100ms over 10d window as measured by _time_slice_blueprint with:
     otherFoo: &quot;some_value&quot;
 </code></pre><p>Here we&#39;re measuring based on the <code>_time_slice_blueprint</code> blueprint which requires a parameter called <code>otherFoo</code>.</p><p>And finally, we can state assumptions. Assumptions are either <code>hard</code> or <code>soft</code> (like before). The key constraint: an expectation cannot guarantee more than its
 hard dependencies allow. The compiler computes the composite availability from the product of all hard dependency thresholds — the standard formula
 from <a href="https://queue.acm.org/detail.cfm?id=3096459">The Calculus of Service Availability</a> — and fails if the expectation&#39;s own guarantee exceeds it.
-This assumes independent failures; correlated failures (e.g. shared infrastructure) can only make the real ceiling lower, so the check is conservative.</p><pre><code data-lang="caffeine">&quot;Authentication Succeeds as Expected&quot;:
+This assumes independent failures; correlated failures (e.g. shared infrastructure) can only make the real ceiling lower, so the check is conservative.
+Note that <code>soft</code> dependencies are not validated at compile time — they appear in the generated dependency diagram but do not affect threshold checks.
+This is intentional: a soft dependency means the service can degrade gracefully without it, so there is no mathematical constraint to enforce.</p><pre><code data-lang="caffeine">&quot;Authentication Succeeds as Expected&quot;:
   Assumes:
     hard dependency on &quot;Database is up&quot;
     soft dependency on &quot;Internal Queueing System Succeeds as Expected&quot;

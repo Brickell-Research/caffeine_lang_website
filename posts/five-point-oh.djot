@@ -100,25 +100,26 @@ were only scoped to defining the measurement part of the SLO artifact. Thus, whi
 measurement definition might seem reductive, it's actually consistent with how these were used in practice.
 
 Further changes include: organizing blueprint files per vendor (e.g. `blueprints/datadog.caffeine`, `blueprints/honeycomb.caffeine`) to make vendor scope
-explicit, replacing the `Provides` block with a `signals` block that names the queries the blueprint uses, `Requiring` in place of `Requires` (aligning with
-the form extendables already use), and a new `evaluated as` clause that declares the expectation type inline. The `evaluated as` string (e.g.
-`"success_rate (good / total)"`) tells the compiler both the expectation type and how the signal names map to the evaluation formula: `good` and `total`
-here correspond to the entries in the `signals` block (as before).
+explicit, replacing the `Provides` block with a `signals` block that names the queries the blueprint uses, and `Requiring` in place of `Requires` (aligning with
+the form extendables already use). Each blueprint also declares its expectation type and evaluation formula inline on the declaration line — for example,
+`success_rate(good / total)` tells the compiler the expectation type is `success_rate` and that `good` and `total` correspond to the entries in the
+`signals` block. Because this is real syntax rather than a string, the compiler and LSP can parse, validate, and offer completions for the formula.
 
 ```caffeine
-_success_rate_blueprint evaluated as "success_rate (good / total)" extends [_common] with:
+_success_rate_blueprint success_rate(good / total) extends [_common] with:
   signals: [
     good: "some_query",
     total: "some_other_query"
-  ],
-  Requiring: {}
+  ]
 
-_time_slice_blueprint evaluated as "time_slice (query per 5m)" with:
+_time_slice_blueprint time_slice(query per 5m) with:
   signals: [
     query: "some_query"
   ],
   Requiring: { otherFoo: String }
 ```
+
+Notice that `_success_rate_blueprint` omits the `Requiring` block entirely — if a blueprint has no required parameters, the block can be left out.
 
 Syntactically, some things stay the same and some change:
 
@@ -137,8 +138,8 @@ these to first-class, user-facing expectation types:
 1. *success_rate* (currently `GoodOverTotal` within CQL)
 2. *time_slice* (currently `TimeSlice` within CQL)
 
-We specify the evaluation of these within the blueprint definitions via the new `evaluated as` syntax, and then we further signify which type in the
-expectation's inline guarantee statement. *success_rate* is fairly straightforward: we treat each threshold as an uptime percentage and thus enforce
+We specify the evaluation of these within the blueprint definitions via the inline type and formula syntax (e.g. `success_rate(good / total)`), and then
+further indicate which type via the expectation's inline guarantee statement. *success_rate* is fairly straightforward: we treat each threshold as an uptime percentage and thus enforce
 `<=` between the percentages (as we did before). For example, this would fail at compile time:
 
 ```caffeine
@@ -211,8 +212,9 @@ The guarantee, assumptions, and measurement are now explicit in the syntax rathe
 the blueprint's `Requiring` fields — the `signals` defined in the blueprint are inherited as-is and are not the expectation's concern.
 
 You'll also notice a new window syntax — `over 10d window`, `below 100ms` — replacing the raw numeric fields like `window_in_days: 30` and
-`threshold: 99.95`. Today's CQL interval parser only supports seconds, minutes, and hours (`s`, `m`, `h`); `v5.0.0` extends this to days (`d`) and introduces
-the inline threshold and latency syntax shown above.
+`threshold: 99.95`. Today's CQL interval parser only supports seconds, minutes, and hours (`s`, `m`, `h`); `v5.0.0` extends this to days (`d`), adds
+milliseconds (`ms`) for latency thresholds, and introduces the inline threshold and latency syntax shown above. For clarity, the full set
+of supported units is: `ms` (milliseconds), `s` (seconds), `m` (minutes), `h` (hours), and `d` (days).
 
 Due to the nature of the complex distributed systems we model, there are varying levels of optionality within these definitions. The bare minimum is just a
 guarantee.
@@ -224,7 +226,9 @@ guarantee.
 
 While this may seem meaningless, this represents something like an SLA for a dependency that you want to include within your system but you don't have any
 way to measure it, nor does it rely on anything (to the best of your knowledge — it's a black box). Since there's no `as measured by` clause, no Terraform
-SLO is generated — this is a design-time-only guarantee used for compile-time relationship validation.
+SLO is generated — this is a design-time-only guarantee used for compile-time relationship validation. The compiler infers the expectation type from
+context: if the guarantee includes a `below` latency clause it is treated as `time_slice`, otherwise it defaults to `success_rate`. This means a bare
+guarantee like the one above is always `success_rate` and can only participate in dependency chains with other `success_rate` expectations.
 
 From there, we might specify how to measure the expectation.
 
@@ -240,6 +244,8 @@ And finally, we can state assumptions. Assumptions are either `hard` or `soft` (
 hard dependencies allow. The compiler computes the composite availability from the product of all hard dependency thresholds — the standard formula
 from [The Calculus of Service Availability](https://queue.acm.org/detail.cfm?id=3096459) — and fails if the expectation's own guarantee exceeds it.
 This assumes independent failures; correlated failures (e.g. shared infrastructure) can only make the real ceiling lower, so the check is conservative.
+Note that `soft` dependencies are not validated at compile time — they appear in the generated dependency diagram but do not affect threshold checks.
+This is intentional: a soft dependency means the service can degrade gracefully without it, so there is no mathematical constraint to enforce.
 
 ```caffeine
 "Authentication Succeeds as Expected":
