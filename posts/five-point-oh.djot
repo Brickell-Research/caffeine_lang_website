@@ -1,0 +1,278 @@
+---
+title = "Caffeine 5.0.0: Assume/Guarantee Contracts Formalized"
+date = "2026-03-01"
+updated = "2026-03-01"
+summary = "Introducing a more explicit take on assume/guarantee."
+author = "Rob Durst"
+tags = ["Formal Methods", "SRE"]
+---
+
+*I'm building [Caffeine](https://github.com/Brickell-Research/caffeine_lang), a compiler written in Gleam that compiles service expectations to reliability artifacts.
+This post documents the motivation and design behind v5.0.0's move to explicit assume/guarantee contracts.*
+
+***
+
+# How We Got Here
+
+Caffeine (`v3.0.0` through `v4.6.0`) set out to improve the SLO development process: conforming to best practices automatically, reducing decisions through
+typed inputs, enabling GitOps, and coupling documentation to code. 
+
+*We accomplished all of that!*
+
+Then in `v3.0.4` we introduced `DependencyRelation`, the ability to say expectation `E1` has a hard or soft dependency on `E2`. This unlocked two things:
+
+1. automatic generation of a Mermaid dependency diagram maintained alongside code
+
+{.figure}
+![Compiler architecture of caffeine](/images/five-point-oh_mermaid_diagram.png)
+
+Exceptionally simple Mermaid dependency diagram with two expectations
+
+2. compile-time enforcement of thresholds based on relationships: if you guarantee `99.5%` uptime but hard-depend on something that only guarantees `99%`,
+   the compiler catches it
+
+{.figure}
+![Compiler architecture of caffeine](/images/five-point-oh_compilation_error.png)
+
+Compilation error when we assert the website `99.99%` depends on web host `99.95%`
+
+This was empowering. But as we iterated, it became clear that while this feature surfaced tacit information, it was theoretically incomplete. How can we make
+this relationship idea better? 
+
+It turns out we'd accidentally landed upon a well-researched area within formal methods: _assume/guarantee contracts_!
+
+{.figure}
+![Compiler architecture of caffeine](/images/five-point-oh_rely_guarantee_paper.png)
+
+Jones, C.B. (1983). "Tentative Steps Toward a Development Method for Interfering Programs." ACM Transactions on Programming Languages and Systems, 5(4), 596–619. https://doi.org/10.1145/69575.69577
+
+A key quote from the paper: _"This paper shows certain problems can be tackled by a development method that is a fairly natural extension of that described in [18].
+The basic idea is to add to a specification a precise statement of its interference: a "rely-condition" defines assumptions that can be made in program development;
+a "guarantee-condition" places requirements on the interference a would-be implementation can generate."_
+
+Fascinating! And yet not surprising. I don't believe anyone would argue most systemic guarantees are based on a set of implicit or explicit assumptions.
+
+***
+
+# Caffeine v5.0.0: Assume/Guarantee Contracts
+
+In [formal methods](https://en.wikipedia.org/wiki/Formal_verification), an assume/guarantee contract specifies a component's behavior in two parts:
+the _assumptions_ it makes about its environment and the _guarantees_ it provides given those assumptions hold. If a component's assumptions are violated, its
+guarantees are void. The idea traces back to Misra and Chandy (1981) and was formalized by [Abadi and Lamport (1993)](https://link.springer.com/chapter/10.1007/3-540-56922-7_6).
+This compositional reasoning lets you verify systems piece-by-piece rather than all at once.
+
+It turns out these ideas map cleanly onto what we were already doing. Specifying service expectations that manifest as SLOs is basically synonymous with _guarantees_.
+And the dependency relations we'd been building out? Those were surfacing _assumptions_, or the preconditions that must hold for a guarantee to be meaningful.
+
+Once we'd realized this connection, the direction became clear. Instead of Caffeine becoming a tool with a grab bag of different artifacts, what makes the most sense
+is an assume/guarantee framework designed with the everyday developer in mind. Existing SLO tools like [OpenSLO](https://openslo.com/) and
+[Sloth](https://github.com/slok/sloth) let you define SLOs declaratively, but they treat each SLO in isolation: none of them validate that your
+SLOs are _mathematically consistent with each other_ across dependency boundaries.
+
+Specifically, this framework performs two system checks:
+
+1. at _compile time_ (or *design time*), it enforces all assume/guarantee relationships, ensuring they are at least mathematically possible
+
+2. at _runtime_ (or *operation time*), the generated SLOs signal in real-time whether the system continues operating in production as designed
+
+To accomplish this, we need a set of fairly widely scoped changes:
+
+1. dropping the idea of artifacts
+
+2. making the assume/guarantee nature explicit and still consumable within the syntax
+
+3. introducing expectation types to keep things composable
+
+4. changing the semantics of blueprint from general abstraction layer to templated measurement definitions
+
+## Artifacts Be Gone
+
+The original idea for artifacts was to generalize over the idea of _things_ that someone responsible for the production operation for a system might need to
+do their job. As stated above, we started with `SLOs`, then introduced `DependencyRelations`. Since the inception of Caffeine, many months ago, we have yet to
+come up with _really_ any other interesting artifact. Thus, in order to trade off some flexibility for simplicity, we're dropping the idea of artifacts and
+homogenizing the three tier hierarchy (artifacts -> blueprints -> expectations) from the standpoint of the user.
+
+## Redefining Blueprints
+
+With the above change to artifacts, it's less surprising to then change the semantics of blueprints as well. While blueprints did a wonderful job as the
+abstraction layer for SLO based expectations, (a) they only ever really made sense for SLO expectations, and (b) if you zoom out, it's clear they almost always
+were only scoped to defining the measurement part of the SLO artifact. Thus, while the transition from abstraction layer to a more well-scoped templated
+measurement definition might seem reductive, it's actually consistent with how these were used in practice.
+
+Further changes include: organizing blueprint files per vendor (e.g. `blueprints/datadog.caffeine`, `blueprints/honeycomb.caffeine`) to make vendor scope
+explicit, replacing the `Provides` block with a `signals` block that names the queries the blueprint uses, `Requiring` in place of `Requires` (aligning with
+the form extendables already use), and a new `evaluated as` clause that declares the expectation type inline. The `evaluated as` string (e.g.
+`"success_rate (good / total)"`) tells the compiler both the expectation type and how the signal names map to the evaluation formula: `good` and `total`
+here correspond to the entries in the `signals` block (as before).
+
+```caffeine
+_success_rate_blueprint evaluated as "success_rate (good / total)" extends [_common] with:
+  signals: [
+    good: "some_query",
+    total: "some_other_query"
+  ],
+  Requiring: {}
+
+_time_slice_blueprint evaluated as "time_slice (query per 5m)" with:
+  signals: [
+    query: "some_query"
+  ],
+  Requiring: { otherFoo: String }
+```
+
+Syntactically, some things stay the same and some change:
+
+1. type aliases will continue to exist and be limited to blueprint files
+2. extendables will continue to be scoped per file, but will now be limited to `Requiring` blocks only; today's `Providing` extendables (e.g.
+   `_defaults (Providing): { vendor: "datadog" }`) are being dropped since blueprints no longer have a `Provides` block
+3. to leverage extendables, we will continue to support the `extends` syntax
+
+## Expectation Types
+
+Before diving into the new syntax, it's worth understanding how expectation types work. They're foundational to making composition meaningful.
+
+Internally, today's Caffeine already distinguishes between two SLO primitives (`GoodOverTotal` and `TimeSlice` in the CQL resolver). In `v5.0.0`, we promote
+these to first-class, user-facing expectation types:
+
+1. *success_rate* (currently `GoodOverTotal` within CQL)
+2. *time_slice* (currently `TimeSlice` within CQL)
+
+We specify the evaluation of these within the blueprint definitions via the new `evaluated as` syntax, and then we further signify which type in the
+expectation's inline guarantee statement. *success_rate* is fairly straightforward: we treat each threshold as an uptime percentage and thus enforce
+`<=` between the percentages (as we did before). For example, this would fail at compile time:
+
+```caffeine
+"Payment Processing":
+  Assumes:
+    hard dependency on "Database is up"
+  Guarantees 99.99% over 10d window as measured by _success_rate_blueprint with:
+    env: "production"
+    baz: 0.5
+
+"Database is up":
+  Guarantees 99.9% over 10d window
+```
+
+Here, "Payment Processing" guarantees `99.99%` but has a hard dependency on "Database is up" which only guarantees `99.9%` — the composite availability
+of the hard dependencies (the product of their thresholds, assuming independent failures) is lower than what the dependent claims to guarantee.
+
+The *time_slice* type is more interesting. For this we (a) ensure the units are comparable and then (b) we normalize the units to enable comparison. For
+example:
+
+```caffeine
+"API is fast":
+  Assumes:
+    hard dependency on "Database is fast enough"
+  Guarantees 99.5% below 50ms over 10d window as measured by _time_slice_blueprint with:
+    otherFoo: "some_value"
+
+"Database is fast enough":
+  Guarantees 99.9% below 0.200s over 10d window
+```
+
+This would also fail. The dependency's latency threshold (`0.2s` or rather a normalized `200ms`) is worse than the dependent's (`50ms`), meaning the assumption is unsatisfiable
+under a synchronous call model. In practice, caching, async patterns, or circuit breakers can decouple a service's latency from its dependencies, but
+the compiler treats a hard dependency declaration as a worst-case synchronous contract, which is a deliberately conservative check (and furthermore
+if it _does not_ make sense, folks can label the dependency as `soft`).
+
+Formalizing expectation types is what makes composition meaningful — you can only compose expectations of the same type because the comparison semantics
+differ (threshold <= for `success_rate`, latency normalization for `time_slice`). Structurally, this forms a typed DAG with monotonicity constraints:
+expectation types are the partitions, dependency relations are the edges, and the compiler enforces that guarantees decrease monotonically along hard
+dependency chains. If you squint, expectation types act as the objects in a small category where dependency relations are the arrows. Composition is then
+only valid when the types align.
+
+## Assume/Guarantee Syntax
+
+With expectation types established, let's look at how the syntax brings everything together. On the expectations side, the `Provides` block is gone entirely.
+To see why this matters, compare the old and new syntax for the same expectation:
+
+```caffeine
+# v4.x — Expectations for "api_availability"
+* "checkout_availability":
+  Provides {
+    env: "production",
+    threshold: 99.95,
+    window_in_days: 30,
+    relations: {
+      hard: ["Database is up"],
+      soft: []
+    }
+  }
+
+# v5.0.0
+"checkout_availability":
+  Assumes:
+    hard dependency on "Database is up"
+  Guarantees 99.95% over 30d window as measured by _api_availability_blueprint with:
+    env: "production"
+```
+
+The guarantee, assumptions, and measurement are now explicit in the syntax rather than buried as opaque fields. The `with:` block only supplies values for
+the blueprint's `Requiring` fields — the `signals` defined in the blueprint are inherited as-is and are not the expectation's concern.
+
+You'll also notice a new window syntax — `over 10d window`, `below 100ms` — replacing the raw numeric fields like `window_in_days: 30` and
+`threshold: 99.95`. Today's CQL interval parser only supports seconds, minutes, and hours (`s`, `m`, `h`); `v5.0.0` extends this to days (`d`) and introduces
+the inline threshold and latency syntax shown above.
+
+Due to the nature of the complex distributed systems we model, there are varying levels of optionality within these definitions. The bare minimum is just a
+guarantee.
+
+```caffeine
+"Database is up":
+  Guarantees 99.9% over 10d window
+```
+
+While this may seem meaningless, this represents something like an SLA for a dependency that you want to include within your system but you don't have any
+way to measure it, nor does it rely on anything (to the best of your knowledge — it's a black box). Since there's no `as measured by` clause, no Terraform
+SLO is generated — this is a design-time-only guarantee used for compile-time relationship validation.
+
+From there, we might specify how to measure the expectation.
+
+```caffeine
+"Third party service is fast enough":
+  Guarantees 99.9% below 100ms over 10d window as measured by _time_slice_blueprint with:
+    otherFoo: "some_value"
+```
+
+Here we're measuring based on the `_time_slice_blueprint` blueprint which requires a parameter called `otherFoo`.
+
+And finally, we can state assumptions. Assumptions are either `hard` or `soft` (like before). The key constraint: an expectation cannot guarantee more than its
+hard dependencies allow. The compiler computes the composite availability from the product of all hard dependency thresholds — the standard formula
+from [The Calculus of Service Availability](https://queue.acm.org/detail.cfm?id=3096459) — and fails if the expectation's own guarantee exceeds it.
+This assumes independent failures; correlated failures (e.g. shared infrastructure) can only make the real ceiling lower, so the check is conservative.
+
+```caffeine
+"Authentication Succeeds as Expected":
+  Assumes:
+    hard dependency on "Database is up"
+    soft dependency on "Internal Queueing System Succeeds as Expected"
+  Guarantees 99.5% over 10d window as measured by _success_rate_blueprint with:
+    env: "production"
+    baz: 0.5
+```
+
+The following is technically valid:
+
+```caffeine
+"Authentication Succeeds as Expected":
+  Assumes:
+    hard dependency on "Database is up"
+    soft dependency on "Internal Queueing System Succeeds as Expected"
+  Guarantees 99.5% over 10d window
+```
+
+However, it's a bit odd to have something with known dependencies but unmeasurable. This is still somewhat useful as it enables us to assert that the system design is sound
+at design time, just not at operation time.
+
+***
+
+# What's Next
+
+`v5.0.0` is a significant rethink. The changes span the entire compilation pipeline: new tokens and grammar in the frontend, a restructured IR in the linker,
+expanded validation in semantic analysis, and updated code generation. The LSP needs to learn the new syntax too — diagnostics, completion, hover, and
+semantic tokens all need updating. And finally, we'll need to update all our documentation, including the language tour!
+
+If you're interested in following along or contributing, the project is open source at
+[github.com/Brickell-Research/caffeine_lang](https://github.com/Brickell-Research/caffeine_lang).
+
+***

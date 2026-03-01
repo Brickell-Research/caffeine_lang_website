@@ -1,0 +1,346 @@
+<!doctype html>
+<html><body><!-- lustre:map --><html lang="en"><head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Caffeine 5.0.0: Assume/Guarantee Contracts Formalized | Caffeine</title><link href="/images/temp_caffeine_icon.png" rel="icon" type="image/png"><meta content="Caffeine 5.0.0: Assume/Guarantee Contracts Formalized | Caffeine" property="og:title"><meta content="website" property="og:type"><meta content="Caffeine" property="og:site_name"><meta content="summary" name="twitter:card"><script src="/js/honeycomb.js"></script><meta content="Introducing a more explicit take on assume/guarantee." name="description"><meta content="Introducing a more explicit take on assume/guarantee." property="og:description"><meta content="https://caffeine-lang.org/blog/five-point-oh" property="og:url"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"><link href="/css/styles.css" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js"></script><script src="https://unpkg.com/prismjs-gleam@1/gleam.js"></script></head><body><header class="site-header"><nav class="nav"><a class="logo" href="/"><img alt="Caffeine" class="logo-img" src="/images/temp_caffeine_icon.png">Caffeine</a><ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/tour">Tour</a></li><li><a href="/tools">Tools</a></li><li><a href="/blog">Blog</a></li></ul></nav></header><main class="main-content"><article class="blog-post"><header class="post-header"><h1>Caffeine 5.0.0: Assume/Guarantee Contracts Formalized</h1><p class="post-date">2026-03-01 · by Rob Durst</p></header><div class="post-content"><div class="toc"></div><p><strong>I&#39;m building <a href="https://github.com/Brickell-Research/caffeine_lang">Caffeine</a>, a compiler written in Gleam that compiles service expectations to reliability artifacts.
+This post documents the motivation and design behind v5.0.0&#39;s move to explicit assume/guarantee contracts.</strong></p><hr><h1 id="How-We-Got-Here">How We Got Here</h1><p>Caffeine (<code>v3.0.0</code> through <code>v4.6.0</code>) set out to improve the SLO development process: conforming to best practices automatically, reducing decisions through
+typed inputs, enabling GitOps, and coupling documentation to code. </p><p><strong>We accomplished all of that!</strong></p><p>Then in <code>v3.0.4</code> we introduced <code>DependencyRelation</code>, the ability to say expectation <code>E1</code> has a hard or soft dependency on <code>E2</code>. This unlocked two things:</p><p>1. automatic generation of a Mermaid dependency diagram maintained alongside code</p><p class="figure"><img alt="Compiler architecture of caffeine" src="/images/five-point-oh_mermaid_diagram.png"></p><p>Exceptionally simple Mermaid dependency diagram with two expectations</p><p>2. compile-time enforcement of thresholds based on relationships: if you guarantee <code>99.5%</code> uptime but hard-depend on something that only guarantees <code>99%</code>,
+the compiler catches it</p><p class="figure"><img alt="Compiler architecture of caffeine" src="/images/five-point-oh_compilation_error.png"></p><p>Compilation error when we assert the website <code>99.99%</code> depends on web host <code>99.95%</code></p><p>This was empowering. But as we iterated, it became clear that while this feature surfaced tacit information, it was theoretically incomplete. How can we make
+this relationship idea better? </p><p>It turns out we&#39;d accidentally landed upon a well-researched area within formal methods: <em>assume/guarantee contracts</em>!</p><p class="figure"><img alt="Compiler architecture of caffeine" src="/images/five-point-oh_rely_guarantee_paper.png"></p><p>Jones, C.B. (1983). &quot;Tentative Steps Toward a Development Method for Interfering Programs.&quot; ACM Transactions on Programming Languages and Systems, 5(4), 596–619. https://doi.org/10.1145/69575.69577</p><p>A key quote from the paper: <em>&quot;This paper shows certain problems can be tackled by a development method that is a fairly natural extension of that described in [18].
+The basic idea is to add to a specification a precise statement of its interference: a &quot;rely-condition&quot; defines assumptions that can be made in program development;
+a &quot;guarantee-condition&quot; places requirements on the interference a would-be implementation can generate.&quot;</em></p><p>Fascinating! And yet not surprising. I don&#39;t believe anyone would argue most systemic guarantees are based on a set of implicit or explicit assumptions.</p><hr><h1 id="Caffeine-v5.0.0:-Assume/Guarantee-Contracts">Caffeine v5.0.0: Assume/Guarantee Contracts</h1><p>In <a href="https://en.wikipedia.org/wiki/Formal_verification">formal methods</a>, an assume/guarantee contract specifies a component&#39;s behavior in two parts:
+the <em>assumptions</em> it makes about its environment and the <em>guarantees</em> it provides given those assumptions hold. If a component&#39;s assumptions are violated, its
+guarantees are void. The idea traces back to Misra and Chandy (1981) and was formalized by <a href="https://link.springer.com/chapter/10.1007/3-540-56922-7_6">Abadi and Lamport (1993)</a>.
+This compositional reasoning lets you verify systems piece-by-piece rather than all at once.</p><p>It turns out these ideas map cleanly onto what we were already doing. Specifying service expectations that manifest as SLOs is basically synonymous with <em>guarantees</em>.
+And the dependency relations we&#39;d been building out? Those were surfacing <em>assumptions</em>, or the preconditions that must hold for a guarantee to be meaningful.</p><p>Once we&#39;d realized this connection, the direction became clear. Instead of Caffeine becoming a tool with a grab bag of different artifacts, what makes the most sense
+is an assume/guarantee framework designed with the everyday developer in mind. Existing SLO tools like <a href="https://openslo.com/">OpenSLO</a> and
+<a href="https://github.com/slok/sloth">Sloth</a> let you define SLOs declaratively, but they treat each SLO in isolation: none of them validate that your
+SLOs are <em>mathematically consistent with each other</em> across dependency boundaries.</p><p>Specifically, this framework performs two system checks:</p><p>1. at <em>compile time</em> (or <strong>design time</strong>), it enforces all assume/guarantee relationships, ensuring they are at least mathematically possible</p><p>2. at <em>runtime</em> (or <strong>operation time</strong>), the generated SLOs signal in real-time whether the system continues operating in production as designed</p><p>To accomplish this, we need a set of fairly widely scoped changes:</p><p>1. dropping the idea of artifacts</p><p>2. making the assume/guarantee nature explicit and still consumable within the syntax</p><p>3. introducing expectation types to keep things composable</p><p>4. changing the semantics of blueprint from general abstraction layer to templated measurement definitions</p><h2 id="Artifacts-Be-Gone">Artifacts Be Gone</h2><p>The original idea for artifacts was to generalize over the idea of <em>things</em> that someone responsible for the production operation for a system might need to
+do their job. As stated above, we started with <code>SLOs</code>, then introduced <code>DependencyRelations</code>. Since the inception of Caffeine, many months ago, we have yet to
+come up with <em>really</em> any other interesting artifact. Thus, in order to trade off some flexibility for simplicity, we&#39;re dropping the idea of artifacts and
+homogenizing the three tier hierarchy (artifacts -&gt; blueprints -&gt; expectations) from the standpoint of the user.</p><h2 id="Redefining-Blueprints">Redefining Blueprints</h2><p>With the above change to artifacts, it&#39;s less surprising to then change the semantics of blueprints as well. While blueprints did a wonderful job as the
+abstraction layer for SLO based expectations, (a) they only ever really made sense for SLO expectations, and (b) if you zoom out, it&#39;s clear they almost always
+were only scoped to defining the measurement part of the SLO artifact. Thus, while the transition from abstraction layer to a more well-scoped templated
+measurement definition might seem reductive, it&#39;s actually consistent with how these were used in practice.</p><p>Further changes include: organizing blueprint files per vendor (e.g. <code>blueprints/datadog.caffeine</code>, <code>blueprints/honeycomb.caffeine</code>) to make vendor scope
+explicit, replacing the <code>Provides</code> block with a <code>signals</code> block that names the queries the blueprint uses, <code>Requiring</code> in place of <code>Requires</code> (aligning with
+the form extendables already use), and a new <code>evaluated as</code> clause that declares the expectation type inline. The <code>evaluated as</code> string (e.g.
+<code>&quot;success_rate (good / total)&quot;</code>) tells the compiler both the expectation type and how the signal names map to the evaluation formula: <code>good</code> and <code>total</code>
+here correspond to the entries in the <code>signals</code> block (as before).</p><pre><code data-lang="caffeine">_success_rate_blueprint evaluated as &quot;success_rate (good / total)&quot; extends [_common] with:
+  signals: [
+    good: &quot;some_query&quot;,
+    total: &quot;some_other_query&quot;
+  ],
+  Requiring: {}
+
+_time_slice_blueprint evaluated as &quot;time_slice (query per 5m)&quot; with:
+  signals: [
+    query: &quot;some_query&quot;
+  ],
+  Requiring: { otherFoo: String }
+</code></pre><p>Syntactically, some things stay the same and some change:</p><p>1. type aliases will continue to exist and be limited to blueprint files
+2. extendables will continue to be scoped per file, but will now be limited to <code>Requiring</code> blocks only; today&#39;s <code>Providing</code> extendables (e.g.
+<code>_defaults (Providing): { vendor: &quot;datadog&quot; }</code>) are being dropped since blueprints no longer have a <code>Provides</code> block
+3. to leverage extendables, we will continue to support the <code>extends</code> syntax</p><h2 id="Expectation-Types">Expectation Types</h2><p>Before diving into the new syntax, it&#39;s worth understanding how expectation types work. They&#39;re foundational to making composition meaningful.</p><p>Internally, today&#39;s Caffeine already distinguishes between two SLO primitives (<code>GoodOverTotal</code> and <code>TimeSlice</code> in the CQL resolver). In <code>v5.0.0</code>, we promote
+these to first-class, user-facing expectation types:</p><p>1. <strong>success_rate</strong> (currently <code>GoodOverTotal</code> within CQL)
+2. <strong>time_slice</strong> (currently <code>TimeSlice</code> within CQL)</p><p>We specify the evaluation of these within the blueprint definitions via the new <code>evaluated as</code> syntax, and then we further signify which type in the
+expectation&#39;s inline guarantee statement. <strong>success_rate</strong> is fairly straightforward: we treat each threshold as an uptime percentage and thus enforce
+<code>&lt;=</code> between the percentages (as we did before). For example, this would fail at compile time:</p><pre><code data-lang="caffeine">&quot;Payment Processing&quot;:
+  Assumes:
+    hard dependency on &quot;Database is up&quot;
+  Guarantees 99.99% over 10d window as measured by _success_rate_blueprint with:
+    env: &quot;production&quot;
+    baz: 0.5
+
+&quot;Database is up&quot;:
+  Guarantees 99.9% over 10d window
+</code></pre><p>Here, &quot;Payment Processing&quot; guarantees <code>99.99%</code> but has a hard dependency on &quot;Database is up&quot; which only guarantees <code>99.9%</code> — the composite availability
+of the hard dependencies (the product of their thresholds, assuming independent failures) is lower than what the dependent claims to guarantee.</p><p>The <strong>time_slice</strong> type is more interesting. For this we (a) ensure the units are comparable and then (b) we normalize the units to enable comparison. For
+example:</p><pre><code data-lang="caffeine">&quot;API is fast&quot;:
+  Assumes:
+    hard dependency on &quot;Database is fast enough&quot;
+  Guarantees 99.5% below 50ms over 10d window as measured by _time_slice_blueprint with:
+    otherFoo: &quot;some_value&quot;
+
+&quot;Database is fast enough&quot;:
+  Guarantees 99.9% below 0.200s over 10d window
+</code></pre><p>This would also fail. The dependency&#39;s latency threshold (<code>0.2s</code> or rather a normalized <code>200ms</code>) is worse than the dependent&#39;s (<code>50ms</code>), meaning the assumption is unsatisfiable
+under a synchronous call model. In practice, caching, async patterns, or circuit breakers can decouple a service&#39;s latency from its dependencies, but
+the compiler treats a hard dependency declaration as a worst-case synchronous contract, which is a deliberately conservative check (and furthermore
+if it <em>does not</em> make sense, folks can label the dependency as <code>soft</code>).</p><p>Formalizing expectation types is what makes composition meaningful — you can only compose expectations of the same type because the comparison semantics
+differ (threshold &lt;= for <code>success_rate</code>, latency normalization for <code>time_slice</code>). Structurally, this forms a typed DAG with monotonicity constraints:
+expectation types are the partitions, dependency relations are the edges, and the compiler enforces that guarantees decrease monotonically along hard
+dependency chains. If you squint, expectation types act as the objects in a small category where dependency relations are the arrows. Composition is then
+only valid when the types align.</p><h2 id="Assume/Guarantee-Syntax">Assume/Guarantee Syntax</h2><p>With expectation types established, let&#39;s look at how the syntax brings everything together. On the expectations side, the <code>Provides</code> block is gone entirely.
+To see why this matters, compare the old and new syntax for the same expectation:</p><pre><code data-lang="caffeine"># v4.x — Expectations for &quot;api_availability&quot;
+* &quot;checkout_availability&quot;:
+  Provides {
+    env: &quot;production&quot;,
+    threshold: 99.95,
+    window_in_days: 30,
+    relations: {
+      hard: [&quot;Database is up&quot;],
+      soft: []
+    }
+  }
+
+# v5.0.0
+&quot;checkout_availability&quot;:
+  Assumes:
+    hard dependency on &quot;Database is up&quot;
+  Guarantees 99.95% over 30d window as measured by _api_availability_blueprint with:
+    env: &quot;production&quot;
+</code></pre><p>The guarantee, assumptions, and measurement are now explicit in the syntax rather than buried as opaque fields. The <code>with:</code> block only supplies values for
+the blueprint&#39;s <code>Requiring</code> fields — the <code>signals</code> defined in the blueprint are inherited as-is and are not the expectation&#39;s concern.</p><p>You&#39;ll also notice a new window syntax — <code>over 10d window</code>, <code>below 100ms</code> — replacing the raw numeric fields like <code>window_in_days: 30</code> and
+<code>threshold: 99.95</code>. Today&#39;s CQL interval parser only supports seconds, minutes, and hours (<code>s</code>, <code>m</code>, <code>h</code>); <code>v5.0.0</code> extends this to days (<code>d</code>) and introduces
+the inline threshold and latency syntax shown above.</p><p>Due to the nature of the complex distributed systems we model, there are varying levels of optionality within these definitions. The bare minimum is just a
+guarantee.</p><pre><code data-lang="caffeine">&quot;Database is up&quot;:
+  Guarantees 99.9% over 10d window
+</code></pre><p>While this may seem meaningless, this represents something like an SLA for a dependency that you want to include within your system but you don&#39;t have any
+way to measure it, nor does it rely on anything (to the best of your knowledge — it&#39;s a black box). Since there&#39;s no <code>as measured by</code> clause, no Terraform
+SLO is generated — this is a design-time-only guarantee used for compile-time relationship validation.</p><p>From there, we might specify how to measure the expectation.</p><pre><code data-lang="caffeine">&quot;Third party service is fast enough&quot;:
+  Guarantees 99.9% below 100ms over 10d window as measured by _time_slice_blueprint with:
+    otherFoo: &quot;some_value&quot;
+</code></pre><p>Here we&#39;re measuring based on the <code>_time_slice_blueprint</code> blueprint which requires a parameter called <code>otherFoo</code>.</p><p>And finally, we can state assumptions. Assumptions are either <code>hard</code> or <code>soft</code> (like before). The key constraint: an expectation cannot guarantee more than its
+hard dependencies allow. The compiler computes the composite availability from the product of all hard dependency thresholds — the standard formula
+from <a href="https://queue.acm.org/detail.cfm?id=3096459">The Calculus of Service Availability</a> — and fails if the expectation&#39;s own guarantee exceeds it.
+This assumes independent failures; correlated failures (e.g. shared infrastructure) can only make the real ceiling lower, so the check is conservative.</p><pre><code data-lang="caffeine">&quot;Authentication Succeeds as Expected&quot;:
+  Assumes:
+    hard dependency on &quot;Database is up&quot;
+    soft dependency on &quot;Internal Queueing System Succeeds as Expected&quot;
+  Guarantees 99.5% over 10d window as measured by _success_rate_blueprint with:
+    env: &quot;production&quot;
+    baz: 0.5
+</code></pre><p>The following is technically valid:</p><pre><code data-lang="caffeine">&quot;Authentication Succeeds as Expected&quot;:
+  Assumes:
+    hard dependency on &quot;Database is up&quot;
+    soft dependency on &quot;Internal Queueing System Succeeds as Expected&quot;
+  Guarantees 99.5% over 10d window
+</code></pre><p>However, it&#39;s a bit odd to have something with known dependencies but unmeasurable. This is still somewhat useful as it enables us to assert that the system design is sound
+at design time, just not at operation time.</p><hr><h1 id="What&#39;s-Next">What&#39;s Next</h1><p><code>v5.0.0</code> is a significant rethink. The changes span the entire compilation pipeline: new tokens and grammar in the frontend, a restructured IR in the linker,
+expanded validation in semantic analysis, and updated code generation. The LSP needs to learn the new syntax too — diagnostics, completion, hover, and
+semantic tokens all need updating. And finally, we&#39;ll need to update all our documentation, including the language tour!</p><p>If you&#39;re interested in following along or contributing, the project is open source at
+<a href="https://github.com/Brickell-Research/caffeine_lang">github.com/Brickell-Research/caffeine_lang</a>.</p><hr></div></article></main><footer class="site-footer"><div class="footer-content"><div class="subscribe-section"><p class="subscribe-title">Stay updated on Caffeine</p><form class="subscribe-form" id="subscribe-form"><input class="subscribe-input" id="subscribe-email" name="email" placeholder="your@email.com" required type="email"><input autocomplete="off" name="website" style="position: absolute; left: -9999px;" tabindex="-1" type="text"><button class="subscribe-button" type="submit">Subscribe</button><div class="cf-turnstile" data-execution="execute" data-sitekey="0x4AAAAAACNHy9TzUWzOgn_A" data-size="compact" data-theme="dark" id="turnstile-widget"></div></form><p class="subscribe-message" id="subscribe-message"></p></div><p>Built with <a href="https://gleam.run" target="_blank">Gleam</a> and <a href="https://github.com/lustre-labs/ssg" target="_blank">Lustre SSG</a></p><p>© 2025 <a href="https://brickellresearch.org/" target="_blank">Brickell Research</a></p></div></footer><script>
+        // Convert data-lang to language-* class for Prism
+        document.querySelectorAll('code[data-lang]').forEach(function(code) {
+          var lang = code.getAttribute('data-lang').toLowerCase();
+          // Map common language names
+          if (lang === 'dockerfile') lang = 'docker';
+          if (lang === 'js') lang = 'javascript';
+          code.classList.add('language-' + lang);
+          if (code.parentElement.tagName === 'PRE') {
+            code.parentElement.classList.add('language-' + lang);
+          }
+        });
+        if (typeof Prism !== 'undefined') { Prism.highlightAll(); }
+        // Generate Table of Contents
+        document.querySelectorAll('.post-content .toc').forEach(function(tocContainer) {
+          var headers = document.querySelectorAll('.post-content h1[id], .post-content h2[id], .post-content h3[id], .post-content h4[id]');
+
+          if (headers.length === 0) return;
+
+          // Function to convert number to Roman numeral
+          function toRoman(num) {
+            var romans = [
+              ['X', 10], ['IX', 9], ['V', 5], ['IV', 4], ['I', 1]
+            ];
+            var result = '';
+            for (var i = 0; i < romans.length; i++) {
+              while (num >= romans[i][1]) {
+                result += romans[i][0];
+                num -= romans[i][1];
+              }
+            }
+            return result;
+          }
+
+          // Function to convert number to letter (1=a, 2=b, etc.)
+          function toLetter(num) {
+            return String.fromCharCode(96 + num); // 97 is 'a'
+          }
+
+          var tocTitle = document.createElement('div');
+          tocTitle.className = 'toc-title';
+          tocTitle.textContent = 'Table of Contents';
+
+          var tocList = document.createElement('ul');
+          var currentH1 = null;
+          var currentH2 = null;
+          var currentH3 = null;
+          var h1Count = 0;
+          var h2Count = 0;
+          var h3Count = 0;
+
+          headers.forEach(function(header) {
+            var level = header.tagName.toLowerCase();
+            var text = header.textContent.replace('#', '').trim();
+            var link = document.createElement('a');
+            link.href = '#' + header.id;
+
+            if (level === 'h1') {
+              h1Count++;
+              h2Count = 0;
+              h3Count = 0;
+              link.textContent = toRoman(h1Count) + '. ' + text;
+            } else if (level === 'h2') {
+              h2Count++;
+              h3Count = 0;
+              link.textContent = toLetter(h2Count) + '. ' + text;
+            } else if (level === 'h3') {
+              h3Count++;
+              link.textContent = h3Count + '. ' + text;
+            } else {
+              link.textContent = text;
+            }
+
+            var li = document.createElement('li');
+            li.appendChild(link);
+
+            if (level === 'h1') {
+              tocList.appendChild(li);
+              currentH1 = li;
+              currentH2 = null;
+              currentH3 = null;
+            } else if (level === 'h2' && currentH1) {
+              if (!currentH1.querySelector('ul')) {
+                var ul = document.createElement('ul');
+                currentH1.appendChild(ul);
+              }
+              currentH1.querySelector('ul').appendChild(li);
+              currentH2 = li;
+              currentH3 = null;
+            } else if (level === 'h2') {
+              tocList.appendChild(li);
+              currentH2 = li;
+              currentH3 = null;
+            } else if (level === 'h3' && currentH2) {
+              if (!currentH2.querySelector('ul')) {
+                var ul = document.createElement('ul');
+                currentH2.appendChild(ul);
+              }
+              currentH2.querySelector('ul').appendChild(li);
+              currentH3 = li;
+            } else if (level === 'h4' && currentH3) {
+              if (!currentH3.querySelector('ul')) {
+                var ul = document.createElement('ul');
+                currentH3.appendChild(ul);
+              }
+              currentH3.querySelector('ul').appendChild(li);
+            }
+          });
+
+          tocContainer.appendChild(tocTitle);
+          tocContainer.appendChild(tocList);
+        });
+
+        // Add anchor links to headers
+        document.querySelectorAll('.post-content h1[id], .post-content h2[id], .post-content h3[id], .post-content h4[id]').forEach(function(header) {
+          var anchor = document.createElement('span');
+          anchor.className = 'header-anchor';
+          anchor.innerHTML = '#';
+          anchor.setAttribute('aria-label', 'Copy link to ' + header.textContent);
+          header.insertBefore(anchor, header.firstChild);
+
+          // Make entire header clickable to copy URL
+          header.style.cursor = 'pointer';
+          header.addEventListener('click', function(e) {
+            var url = window.location.origin + window.location.pathname + '#' + header.id;
+
+            // Update URL bar
+            window.history.pushState(null, '', '#' + header.id);
+
+            // Copy to clipboard
+            navigator.clipboard.writeText(url).then(function() {
+              // Show feedback
+              var originalText = anchor.innerHTML;
+              anchor.innerHTML = '✓';
+              setTimeout(function() {
+                anchor.innerHTML = originalText;
+              }, 1000);
+            }).catch(function(err) {
+              console.error('Failed to copy:', err);
+            });
+          });
+        });
+
+        // Subscribe form handler with execute-on-demand Turnstile
+        var subscribeForm = document.getElementById('subscribe-form');
+        if (subscribeForm) {
+          subscribeForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            var email = document.getElementById('subscribe-email').value;
+            var website = subscribeForm.querySelector('input[name="website"]').value;
+            var message = document.getElementById('subscribe-message');
+            var button = subscribeForm.querySelector('button');
+
+            // Show verifying state
+            button.disabled = true;
+            button.textContent = 'Verifying...';
+            message.textContent = '';
+            message.className = 'subscribe-message';
+
+            // Load Turnstile script on-demand if not yet loaded
+            function loadTurnstile(cb) {
+              if (typeof turnstile !== 'undefined') return cb();
+              var s = document.createElement('script');
+              s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad';
+              window.onTurnstileLoad = function() { cb(); };
+              s.onerror = function() {
+                message.textContent = 'Verification failed to load. Please try again.';
+                message.className = 'subscribe-message error';
+                button.disabled = false;
+                button.textContent = 'Subscribe';
+              };
+              document.head.appendChild(s);
+            }
+
+            loadTurnstile(function() {
+            // Get fresh token by executing Turnstile
+            turnstile.execute('#turnstile-widget', {
+              callback: function(token) {
+                button.textContent = 'Subscribing...';
+
+                fetch('https://notifications.brickellresearch.org/subscribe', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    email: email,
+                    website: website,
+                    'cf-turnstile-response': token
+                  })
+                })
+                .then(function(response) {
+                  return response.json().then(function(data) {
+                    return { ok: response.ok, data: data };
+                  });
+                })
+                .then(function(result) {
+                  if (result.ok) {
+                    message.textContent = result.data.message || 'Check your email to confirm!';
+                    message.className = 'subscribe-message success';
+                    subscribeForm.reset();
+                  } else {
+                    message.textContent = result.data.error || 'Something went wrong';
+                    message.className = 'subscribe-message error';
+                  }
+                })
+                .catch(function(err) {
+                  message.textContent = 'Network error. Please try again.';
+                  message.className = 'subscribe-message error';
+                })
+                .finally(function() {
+                  button.textContent = 'Subscribe';
+                  button.disabled = false;
+                  // Reset for next submission
+                  turnstile.reset('#turnstile-widget');
+                });
+              },
+              'error-callback': function() {
+                message.textContent = 'Verification failed. Please try again.';
+                message.className = 'subscribe-message error';
+                button.textContent = 'Subscribe';
+                button.disabled = false;
+                turnstile.reset('#turnstile-widget');
+              }
+            });
+            });
+          });
+        }
+      </script></body></html></body></html>

@@ -1,4 +1,3 @@
-import components/banner
 import components/footer
 import components/header
 import gleam/list
@@ -185,7 +184,6 @@ pub fn view_with_meta(meta: PageMeta, content: Element(Nil)) -> Element(Nil) {
   html.html([attribute.attribute("lang", "en")], [
     html.head([], head_content),
     html.body([], [
-      banner.view(),
       header.view(),
       html.main([attribute.class("main-content")], [content]),
       footer.view(),
