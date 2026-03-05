@@ -1,0 +1,125 @@
+---
+title = "Caffeine Version Manager"
+date = "2026-03-05"
+summary = "Introducing CVM, a version manager for Caffeine inspired by rvm, for easily installing, updating, and switching between Caffeine versions."
+author = "Rob Durst"
+tags = ["DevOps", "Homebrew"]
+---
+
+*I'm building [Caffeine](https://github.com/Brickell-Research/caffeine_lang), a compiler written in Gleam that compiles service expectations to reliability artifacts.
+This post documents how our new version manager works to aid in easier installation and maintenance of a local Caffeine installation.*
+
+***
+
+
+# Introducing Caffeine Version Manager (CVM)
+
+## Obligatory Preface
+
+First things first, using `cvm` is not needed! It's totally reasonable to just use the `caffeine_lang` brew setup. It looks a bit like this:
+
+*Initial Install*
+
+```bash
+brew tap brickell-research/caffeine
+
+brew install caffeine_lang
+```
+
+And to check it worked:
+
+```
+➜ (rob)  caffeine -v
+caffeine 4.6.2 (Brickell Research)
+```
+
+*Updating*
+
+Normal brew update.
+
+```
+brew update
+
+brew upgrade caffeine_lang
+```
+
+_We have no plans to discontinue support for this. It will continue to be updated on every release as part of our [unified release process](https://caffeine-lang.run/blog/designing-our-release-process)._
+
+## Ok, so Why CVM?
+
+Following my talk at [Gleam Gathering](https://gleamgathering.com/), I wondered how well Caffeine would actually scale for larger source files. So, I worked with Claude and set up a performance test/benchmarking [repo here](https://github.com/Brickell-Research/perf).
+
+It turns out there is a real scaling limit. *Enter tail call optimization limitations in most JavaScript VM implementations...* That's a post for another day. The important part here is I wanted to be able to test two different versions of Caffeine
+easily, side-by-side (in this case, one that was compiled with `deno` and one that was compiled with `bun`).
+
+Thus, as a Rubyist, I thought "ah! We need our own [rvm](https://rvm.io/)!"
+
+## CVM
+
+So, we now have `cvm` [repo here](https://github.com/Brickell-Research/caffeine_vm). Just like the _normal language install_, we automate GitHub releases on tag pushes and also push to our Homebrew tap. A typical `cvm` process looks like this.
+
+*Initial Install*
+
+Install.
+
+```
+brew tap brickell-research/caffeine
+
+brew install cvm
+```
+
+Setup.
+
+
+Add this to your path.
+
+```
+export PATH="$HOME/.cvm/current:$PATH"
+```
+
+Install latest.
+
+```
+cvm install latest
+```
+
+Ensure it worked.
+
+```
+➜ (rob)  caffeine -v
+caffeine 4.6.2 (Brickell Research)
+```
+
+*Update and Switch to a Different Version*
+
+First, see what is available.
+
+```
+cvm list-remote
+```
+
+Then install and use one of the options.
+
+```
+cvm install 4.5.1
+
+cvm use 4.5.1
+```
+
+And finally, if you're lost or curious, see all the help options.
+
+```
+cvm help
+```
+
+That's it! Pretty similar to other programming language version manager tools.
+
+***
+
+# Conclusion
+
+So should I change my process to use `cvm` now? Maybe? Probably not though. The existing brew install process for the language proper works, has worked for a long time, and as I said, will continue to be a supported first class citizen.
+Furthermore, in writing this post, it became clear there are a lot more steps to using `cvm`... so at this time, we don't even plan to make this the well-documented recommended approach anyway. Just a fun one for anyone else who may find
+themselves using multiple versions of Caffeine locally!
+
+***
