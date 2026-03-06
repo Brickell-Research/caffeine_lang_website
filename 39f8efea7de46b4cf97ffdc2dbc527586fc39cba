@@ -1,0 +1,51 @@
+posts/the-tailless-deno.djot
+  62a25d6da94e636b 22,138,152,157,294,322-338,342-360
+  58dd0249f3c81332 155,268
+  428ab23d0753d50f 2,5,7,9-21,23-35,37-49,51-54,56-65,67-70,72,74-82,85-124,126-137,139-150,153-154,156,160-161,163-166,169,171-220,222-233,235-240,242-267,269-274,276-282,284-286,288,290-293,298,300-302,305-306,308,315,317-319,321,339,341,361,364,366,368,370-379,381-385,387
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.8",
+  "base_commit_sha": "39f8efea7de46b4cf97ffdc2dbc527586fc39cba",
+  "prompts": {
+    "428ab23d0753d50f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ff265e32-f940-4f57-aff9-6fbb22980a15",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "robertDurst <me@robdurst.com>",
+      "messages": [],
+      "total_additions": 478,
+      "total_deletions": 105,
+      "accepted_lines": 293,
+      "overriden_lines": 40
+    },
+    "58dd0249f3c81332": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6cc2a498-835c-449d-8b4b-b2352f7a541f",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "robertDurst <me@robdurst.com>",
+      "messages": [],
+      "total_additions": 5,
+      "total_deletions": 5,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    },
+    "62a25d6da94e636b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2cfeeeee-2692-4e3a-b0ba-dc81feef1d2c",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "robertDurst <me@robdurst.com>",
+      "messages": [],
+      "total_additions": 77,
+      "total_deletions": 58,
+      "accepted_lines": 41,
+      "overriden_lines": 2
+    }
+  }
+}
