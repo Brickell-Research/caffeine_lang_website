@@ -50,7 +50,7 @@ pub fn view_with_meta(meta: PageMeta, content: Element(Nil)) -> Element(Nil) {
     html.link([
       attribute.rel("icon"),
       attribute.type_("image/png"),
-      attribute.href("/images/temp_caffeine_icon.png"),
+      attribute.href("/images/favicon.png"),
     ]),
     // OpenGraph meta tags
     html.meta([
