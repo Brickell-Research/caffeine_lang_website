@@ -1,0 +1,23 @@
+src/components/layout.gleam
+  62a25d6da94e636b 53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.8",
+  "base_commit_sha": "ca12137560dac2add6ff28e28e5d201fb8b89463",
+  "prompts": {
+    "62a25d6da94e636b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2cfeeeee-2692-4e3a-b0ba-dc81feef1d2c",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "robertDurst <me@robdurst.com>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
