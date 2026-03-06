@@ -2,19 +2,19 @@
 title = "The Tailless Deno"
 date = "2026-03-05"
 updated = "2026-03-05"
-summary = "How a stack overflow led us from Deno to Bun, and what we learned about tail call optimization along the way."
+summary = "How a stack overflow led me from Deno to Bun, and what I learned about tail call optimization along the way."
 author = "Rob Durst"
 tags = ["Gleam", "Performance", "Javascript", "Deno", "Bun"]
 ---
 
 *I'm building [Caffeine](https://github.com/Brickell-Research/caffeine_lang), a compiler written in Gleam that compiles service expectations to reliability
-artifacts. This post documents our migration from Deno to Bun and the tail call optimization rabbit hole that led us there.*
+artifacts. This post documents the migration from Deno to Bun and the tail call optimization rabbit hole that led there.*
 
 ***
 
-# We Build with Deno
+# Built with Deno
 
-In my talk at [Gleam Gathering](https://gleamgathering.com/), I have a slide where I discuss how we packaged up Caffeine:
+In my talk at [Gleam Gathering](https://gleamgathering.com/), I have a slide where I discuss how I packaged up Caffeine:
 
 {.figure}
 ![Packaging Caffeine slide from Gleam Gathering](/images/load-test-caffeine_packaging_caffeine_slide.png)
@@ -25,7 +25,7 @@ Slide 26 from my Gleam Gathering talk, "Packaging Caffeine"
 so I ended up compiling to Javascript and then leveraging [Deno](https://deno.com/) to package it with a JS runtime.
 [Some more details on this from their website](https://deno.com/blog/deno-compile-executable-programs).
 
-One of the _downsides_ of this build setup is the size. Somewhat embarrasingly, I looked at the zipped/tarballed binaries and thought
+One of the _downsides_ of this build setup is the size. Somewhat embarrassingly, I looked at the zipped/tarballed binaries and thought
 "eh 40mb not too bad right?":
 
 {.figure}
@@ -46,9 +46,9 @@ Installed
 
 Ooof `121mb`. Not small. While relatively speaking that isn't the _most offensively sized language toolchain_, the actual
 Caffeine compiler, CLI, and LSP together are only a small portion of the ~121mb. The rest is the Deno runtime
-we're bundling along for the ride.
+bundled along for the ride.
 
-Well, for what it's worth this is a developer tool which will likely be limited to running on developer laptops (_which are typically fairly beefy_)
+Well, for what it's worth this is a developer tool running on developer laptops
 or within CICD pipelines. So the `121mb` isn't a barrier to entry per se.
 
 The more interesting question is speed and scale: within typical use cases, how fast will Caffeine compile and at what point does compilation become
@@ -58,7 +58,7 @@ a noticeable bottleneck?
 
 # Setting Up Benchmarks
 
-To begin answering these questions, we set up [perf](https://github.com/Brickell-Research/perf):
+To begin answering these questions, I set up [perf](https://github.com/Brickell-Research/perf):
 _various benchmarks and corpuses and such for caffeine._
 
 The basic idea:
@@ -67,14 +67,12 @@ The basic idea:
 
 2. Script the benchmarking of these corpuses using [hyperfine](https://github.com/sharkdp/hyperfine)
 
-3. Setup CICD such that we continuously run these benchmarks in a controlled fashion
+3. Setup CICD to continuously run these benchmarks in a controlled fashion
 
-Ideally this process would be fairly deterministic. We want to control: (a) hardware (_running within Github Actions_), (b) corpus
+Ideally this process would be fairly deterministic. I wanted to control: (a) hardware (_running within Github Actions_), (b) corpus
 (_consistent between runs_), (c) warm-up (_need to understand the JS runtime_), and (d) build (_should use actual Caffeine releases_).
 
-However, before going down the determinism rabbit hole (_been down there before, in 2019 I did an internship with the
-[Stellar Development Foundation](https://stellar.org/) where I spent a bunch of time improving the determinism score in attempt to do some fuzz
-testing with [AFL](https://afl-1.readthedocs.io/)_), let's just get this all setup first.
+However, before going down the determinism rabbit hole, let's just get this setup first.
 
 To bootstrap, I heavily leaned on Claude. I had it put together a corpus generator, wire up hyperfine, and build a script to compare against a baseline.
 For starters, I decided on the following corpus sizes:
@@ -116,7 +114,7 @@ import * as $float from "../../../gleam_stdlib/gleam/float.mjs";
 ```
 
 Not ideal (_and this is before any actual benchmarking_). The stack trace tells the whole story if you squint:
-`tokenize_loop → emit_token → emit_token_n → tokenize_loop → emit_token → ...`. We had an infinite-looking chain of mutual
+`tokenize_loop → emit_token → emit_token_n → tokenize_loop → emit_token → ...`. An infinite-looking chain of mutual
 recursion that ate through the entire call stack.
 
 ***
@@ -144,7 +142,7 @@ The recursive call to `sum_loop` is the _very last thing_ that happens. There's 
 call. Gleam compiles to both Erlang and Javascript. On Erlang's BEAM VM, tail calls are [optimized natively](https://learnyousomeerlang.com/recursion) as the BEAM was designed for this.
 But on Javascript, it depends on the engine.
 
-*V8 does not currently ship proper tail calls. It previously had an implementation behind the `--harmony-tailcalls` flag around 2016 but disabled it and removed the flag due to developer tooling concerns.*
+V8 does not currently ship proper tail calls. It previously had an implementation behind the `--harmony-tailcalls` flag around 2016 but disabled it and removed the flag due to developer tooling concerns.
 
 A note on terminology: the [ES6 spec](https://262.ecma-international.org/6.0/#sec-tail-position-calls) mandates _proper tail calls_ (PTC)
 for strict-mode code, which is a language guarantee that tail-position calls will reuse the caller's stack frame. Since ECMAScript modules
@@ -159,9 +157,9 @@ Deno uses V8 and so Deno has neither PTC nor TCO for arbitrary tail calls.
 
 ## What Gleam Does About It
 
-The smart folks on the Gleam core team have partially solved this on the JS target with a compile-time loopification transform.
-When the JS backend detects a function that directly tail-calls _itself_, it compiles it to a `while(true)` loop instead of
-actual recursion, reassigning the arguments rather than making a new call. With this we get constant stack space. Problem solved!
+Gleam's JS backend partially solves this with a compile-time loopification transform.
+When it detects a function that directly tail-calls _itself_, it compiles it to a `while(true)` loop instead of
+actual recursion, reassigning the arguments rather than making a new call. Constant stack space. Problem solved!
 
 Except not always...
 
@@ -213,12 +211,13 @@ perspective, the last thing it does is call `result_try(...)`. And from `result_
 Every iteration adds multiple stack frames (`parse_items_loop`, `result_try`, and the callback closure) so recursion depth
 grows by several frames per step. With 5,000 expectations, that's enough to exhaust V8's call stack.
 
-Same pattern, different function. `use <- bool.guard(when: condition, return: Error(...))` wraps the recursive call in a thunk
-passed to `bool_guard`. The indirection hides the tail call from the compiler, an identical problem to `result.try`.
+Consider also Gleam's bool guards. Same pattern, different function. With `use <- bool.guard(when: condition, return: Error(...))`, the body after `use` becomes the
+`otherwise` continuation, a closure. If your recursive call lives in that continuation, Gleam's JS loopification won't see it as a
+direct self tail call. Same problem as `result.try`.
 
 ## Mutual Recursion
 
-This one is different. Our tokenizer had a chain across three separate functions:
+This one is different. The tokenizer had a chain across three separate functions:
 
 ```
 tokenize_loop → emit_token → emit_token_n → tokenize_loop
@@ -234,7 +233,7 @@ This is a [known open issue](https://github.com/gleam-lang/gleam/issues/3830).
 
 # The Unwrapping
 
-So we unwrapped everything. We replaced higher-order functions with direct `case` expressions so the recursive call lands in tail position of
+So I unwrapped everything. Replaced higher-order functions with direct `case` expressions so the recursive call lands in tail position of
 the function itself.
 
 For `result.try`:
@@ -262,7 +261,7 @@ function parse_items_loop(state, acc) {
       acc = [item, ...acc];
       state = state2;
     } else {
-      return new Error(result.error);
+      return result;
     }
   }
 }
@@ -270,14 +269,11 @@ function parse_items_loop(state, acc) {
 
 For `bool.guard`, same idea: replace the thunk with a plain `case` so the recursive call is direct.
 
-For the mutual recursion in the tokenizer, we inlined `emit_token` and `emit_token_n` directly into `tokenize_loop`,
+For the mutual recursion in the tokenizer, I inlined `emit_token` and `emit_token_n` directly into `tokenize_loop`,
 collapsing the three-function chain into a single self-recursive function. One function calling itself. Optimizable.
 This is a real architectural tradeoff: one large function is harder to read and test than three focused ones. But on V8, it was that or crash.
 
-All three cases are the same fundamental issue: *an intermediary sits between the recursive call and the function that needs to loop*.
-Unwrapping removes the intermediary so the recursive call is a direct self-tail-call.
-
-This worked! The compiler stopped crashing. But we were fighting the engine *and more importantly, fighting the language*.
+The compiler stopped crashing. But I was fighting the engine *and writing against the grain of the language*.
 
 ***
 
@@ -293,9 +289,8 @@ strict mode for _all_ tail-position calls, not just self-calls but any call in t
 every call in that chain is in tail position of its caller. JavaScriptCore sees that and eliminates the frames. V8 just stacks them up
 until it overflows.
 
-*ASIDE*: we're not anti-Deno! It's a great runtime with a strong security model and excellent tooling. But for our specific case
-(_a deeply recursive compiler written in a functional language_), V8's lack of PTC was a fundamental constraint.
-So we switched to [Bun](https://bun.sh/).
+Nothing against Deno here. But for a deeply recursive compiler written in a functional language, V8's lack of PTC was a dealbreaker.
+So I switched to [Bun](https://bun.sh/).
 
 ## Bun Migration
 
@@ -307,22 +302,21 @@ The migration was small:
 
 3. Change the build command
 
-The compiled Gleam output is pure ESM that runs on any modern JS runtime (Node, Deno, Bun) without changes. We then undid all the manual unwrapping, restored `result.try`,
-`bool.guard`, and the natural mutual recursion in the tokenizer. The code is cleaner. It is idiomatic Gleam again. And it's faster!
+The compiled Gleam output is pure ESM that runs on any modern JS runtime (Node, Deno, Bun) without changes. I then undid all the manual unwrapping, restored `result.try`,
+`bool.guard`, and the natural mutual recursion in the tokenizer. The code is cleaner and idiomatic Gleam again.
 
 ## The Numbers
 
 Here's `v4.5.1` (_Deno, with all the manual TCO workarounds_) vs `v4.6.0` (_Bun, with natural recursive style restored_).
-A caveat upfront: this isn't a pure apples-to-apples runtime comparison. The code changed too. v4.5.1 had the manual TCO
-workarounds while v4.6.0 restored natural recursive style. The speedup reflects the combined effect of switching runtimes
-_and_ writing cleaner code. We haven't isolated how much comes from JavaScriptCore's raw speed vs. native TCO vs. the code
-changes themselves.
+A caveat: this isn't an apples-to-apples runtime comparison. The code changed too (v4.5.1 had manual TCO workarounds,
+v4.6.0 restored natural recursive style). These numbers reflect the combined effect of switching runtimes _and_ changing code.
+To isolate the PTC effect you'd need to build the same commit for both runtimes, which I haven't done.
 
 *Complexity Benchmarks*
 
 ```
 ┌──────────────────────────┬────────────────┬──────────────┬─────────┐
-│ Corpus                   │ Deno (v4.5.1)  │ Bun (v4.6.0) │ Speedup │
+│ Corpus                   │ Deno (v4.5.1)  │ Bun (v4.6.0) │  Ratio  │
 ├──────────────────────────┼────────────────┼──────────────┼─────────┤
 │ small (2 bp, 4 exp)      │       71.9 ms  │     60.7 ms  │   1.18x │
 ├──────────────────────────┼────────────────┼──────────────┼─────────┤
@@ -342,7 +336,7 @@ changes themselves.
 
 ```
 ┌──────────────┬────────────────┬──────────────┬─────────┐
-│ Expectations │ Deno (v4.5.1)  │ Bun (v4.6.0) │ Speedup │
+│ Expectations │ Deno (v4.5.1)  │ Bun (v4.6.0) │  Ratio  │
 ├──────────────┼────────────────┼──────────────┼─────────┤
 │ 10           │      212.9 ms  │    146.5 ms  │   1.45x │
 ├──────────────┼────────────────┼──────────────┼─────────┤
@@ -360,9 +354,8 @@ changes themselves.
 └──────────────┴────────────────┴──────────────┴─────────┘
 ```
 
-Anywhere from *1.2x to 2x faster* depending on corpus size. The speedup grows with corpus size, which is consistent
-with PTC benefiting deeper recursion, though isolating the PTC effect from the other changes would require running
-identical code on both runtimes.
+Anywhere from *1.2x to 2x faster* depending on corpus size. The ratio grows with corpus size, which is consistent
+with PTC benefiting deeper recursion. But again, this is a confounded benchmark, not a controlled experiment.
 
 *Binary Size*
 
@@ -381,7 +374,6 @@ Down from `121mb` to `62mb`. Nearly half. Bun's runtime is also significantly sm
 
 # Conclusion
 
-While we came to define a benchmark, we immediately hit a stack overflow, and following the TCO rabbit hole ended up switching runtimes. What a ride!
-
-Now with the benchmarking pipeline in place, we're set up to track performance as Caffeine evolves. Next up is getting these
-benchmarks running deterministically in GitHub Actions so we can catch regressions before they ship!
+If you're compiling a functional language to JavaScript and targeting V8, recursion patterns. Gleam's loopification handles direct self-calls, but anything routed through
+callbacks or mutual recursion will consume the stack on any engine that doesn't implement PTC. Right now, only JavaScriptCore does, so if you're using a tool to compile
+to a binary, _Bun is the way_.
