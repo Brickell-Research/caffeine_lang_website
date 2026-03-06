@@ -56,17 +56,22 @@ stack frame entirely, it just jumps back to the top of the function. This is cal
 }
 </code></pre><p>The recursive call to <code>sum_loop</code> is the <em>very last thing</em> that happens. There&#39;s no work left after it returns. That&#39;s what makes it a tail
 call. Gleam compiles to both Erlang and Javascript. On Erlang&#39;s BEAM VM, tail calls are <a href="https://learnyousomeerlang.com/recursion">optimized natively</a> as the BEAM was designed for this.
-But on Javascript, it depends on the engine.</p><p><strong>V8 doesn&#39;t implement tail call optimization. And there&#39;s no indication it ever will.</strong></p><p>V8 had it behind the <code>--harmony-tailcalls</code> flag around 2016, then removed it. The team <a href="https://github.com/tc39/proposal-ptc-syntax">cited debugging concerns</a>
+But on Javascript, it depends on the engine.</p><p>*V8 does not currently ship proper tail calls. It previously had an implementation behind the <code>--harmony-tailcalls</code> flag around 2016 but disabled it and removed the flag due to developer tooling concerns.*</p><p>A note on terminology: the <a href="https://262.ecma-international.org/6.0/#sec-tail-position-calls">ES6 spec</a> mandates <em>proper tail calls</em> (PTC)
+for strict-mode code, which is a language guarantee that tail-position calls will reuse the caller&#39;s stack frame. Since ECMAScript modules
+are evaluated in strict mode, Gleam&#39;s ESM output is the right context for PTC. This is distinct from <em>tail call optimization</em> (TCO),
+which is a discretionary compiler optimization. What Gleam&#39;s JS backend does (the <code>while(true)</code> loop) is TCO. What the spec requires is PTC.</p><p>The V8 team <a href="https://github.com/tc39/proposal-ptc-syntax">cited debugging concerns</a>
 (tail-called frames disappear from stack traces) and chose developer experience over spec compliance. SpiderMonkey
-(<em>Firefox</em>) never shipped it in production either. Even though the <a href="https://262.ecma-international.org/6.0/#sec-tail-position-calls">ES6 spec</a>
-mandates proper tail calls, V8 and SpiderMonkey simply ignore that part of the spec.</p><p>Deno uses V8 and so Deno doesn&#39;t have TCO.</p><h2 id="What-Gleam-Does-About-It">What Gleam Does About It</h2><p>The smart folks on the Gleam core team have partially solved this with a loop transformation. When the Gleam JS backend detects a function that
-calls itself in the tail position, it compiles it to a <code>while(true)</code> loop instead of actual recursion, reassigning the arguments
-rather than making a new call. With this we get constant stack space. Problem solved!</p><p>Except not always...</p><h2 id="How-It-Breaks">How It Breaks</h2><p>Gleam&#39;s <code>use</code> syntax is sugar for passing a callback. This:</p><pre><code data-lang="gleam">use #(item, state) &lt;- result.try(parse_something(state))
+(<em>Firefox</em>) has never shipped PTC either (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=723959">the tracking bug</a> remains open).</p><p>Deno uses V8 and so Deno has neither PTC nor TCO for arbitrary tail calls.</p><h2 id="What-Gleam-Does-About-It">What Gleam Does About It</h2><p>The smart folks on the Gleam core team have partially solved this on the JS target with a compile-time loopification transform.
+When the JS backend detects a function that directly tail-calls <em>itself</em>, it compiles it to a <code>while(true)</code> loop instead of
+actual recursion, reassigning the arguments rather than making a new call. With this we get constant stack space. Problem solved!</p><p>Except not always...</p><h2 id="How-It-Breaks">How It Breaks</h2><p>The loopification only handles direct self tail-calls. Any recursion routed through another function (via a callback, thunk, or
+intermediate call) won&#39;t be recognized by the transform. Gleam&#39;s <code>use</code> syntax makes this easy to hit. <code>use</code> is sugar for
+passing a callback:</p><pre><code data-lang="gleam">use #(item, state) &lt;- result.try(parse_something(state))
 parse_items_loop(state, [item, ..acc])
 </code></pre><p>Desugars to:</p><pre><code data-lang="gleam">result.try(parse_something(state), fn(#(item, state)) {
   parse_items_loop(state, [item, ..acc])
 })
-</code></pre><p>Which compiles to something like this (<em>simplified from the actual compiler output</em>):</p><pre><code data-lang="javascript">function parse_items_loop(state, acc) {
+</code></pre><p>Which compiles to something like this (<em>simplified; Gleam&#39;s actual JS runtime uses different representations for Result and
+List, but the call structure is faithful</em>):</p><pre><code data-lang="javascript">function parse_items_loop(state, acc) {
   return result_try(
     parse_something(state),
     (tuple) =&gt; {
@@ -84,8 +89,8 @@ function result_try(result, callback) {
 }
 </code></pre><p>The recursive <code>parse_items_loop</code> call is in tail position <em>of the closure</em>, but not of <code>parse_items_loop</code> itself. From <code>parse_items_loop</code>&#39;s
 perspective, the last thing it does is call <code>result_try(...)</code>. And from <code>result_try</code>&#39;s perspective, the last thing it does is call
-<code>callback(...)</code>. Neither of those is a self-call, so neither gets optimized into a loop.</p><p>Every iteration adds three stack frames: <code>parse_items_loop</code>, <code>result_try</code>, and the callback closure. With 5,000 expectations, that&#39;s 15,000+ frames.
-V8&#39;s stack holds roughly 10,000-15,000 frames.</p><p>Same pattern, different function. <code>use &lt;- bool.guard(when: condition, return: Error(...))</code> wraps the recursive call in a thunk
+<code>callback(...)</code>. Neither of those is a self-call, so neither gets optimized into a loop.</p><p>Every iteration adds multiple stack frames (<code>parse_items_loop</code>, <code>result_try</code>, and the callback closure) so recursion depth
+grows by several frames per step. With 5,000 expectations, that&#39;s enough to exhaust V8&#39;s call stack.</p><p>Same pattern, different function. <code>use &lt;- bool.guard(when: condition, return: Error(...))</code> wraps the recursive call in a thunk
 passed to <code>bool_guard</code>. The indirection hides the tail call from the compiler, an identical problem to <code>result.try</code>.</p><h2 id="Mutual-Recursion">Mutual Recursion</h2><p>This one is different. Our tokenizer had a chain across three separate functions:</p><pre><code data-lang="text">tokenize_loop → emit_token → emit_token_n → tokenize_loop
 </code></pre><p><code>tokenize_loop</code> matches a character, calls <code>emit_token</code> to record it, which calls <code>emit_token_n</code> to advance the position,
 which calls back to <code>tokenize_loop</code> to process the next character. The final call <em>is</em> in tail position of <code>emit_token_n</code>,
@@ -117,14 +122,14 @@ case parse_something(state) {
 collapsing the three-function chain into a single self-recursive function. One function calling itself. Optimizable.
 This is a real architectural tradeoff: one large function is harder to read and test than three focused ones. But on V8, it was that or crash.</p><p>All three cases are the same fundamental issue: <strong>an intermediary sits between the recursive call and the function that needs to loop</strong>.
 Unwrapping removes the intermediary so the recursive call is a direct self-tail-call.</p><p>This worked! The compiler stopped crashing. But we were fighting the engine <strong>and more importantly, fighting the language</strong>.</p><hr><h1 id="Enter-the-Fine-Folks-Working-on-Safari">Enter the Fine Folks Working on Safari</h1><p><a href="https://developer.apple.com/documentation/javascriptcore">JavaScriptCore</a>, the engine behind Safari and <strong>Bun</strong>, is the only major
-JS engine that implements proper tail calls per the ES6 spec, and has since 2016. They solved the debugging problem with
-<a href="https://webkit.org/blog/6240/ecmascript-6-proper-tail-calls-in-webkit/">ShadowChicken</a>, a shadow stack that reconstructs
-eliminated frames in the inspector.</p><p>The key difference: V8 doesn&#39;t optimize <em>any</em> tail-position calls. JavaScriptCore optimizes <em>all</em> of them, not just
-self-calls but any call in tail position of any function. So that <code>result_try</code> → <code>callback</code> → <code>parse_items_loop</code> chain...
+JS engine that implements proper tail calls per the ES6 spec, and has since 2016. They addressed the debugging concern with
+<a href="https://webkit.org/blog/6240/ecmascript-6-proper-tail-calls-in-webkit/">ShadowChicken</a>, a shadow stack that lets Web Inspector
+reconstruct and display tail-deleted frames during debugging.</p><p>The key difference: V8 does not ship PTC, so tail-position calls still consume stack. JavaScriptCore implements PTC in
+strict mode for <em>all</em> tail-position calls, not just self-calls but any call in tail position of any function. So that <code>result_try</code> → <code>callback</code> → <code>parse_items_loop</code> chain...
 every call in that chain is in tail position of its caller. JavaScriptCore sees that and eliminates the frames. V8 just stacks them up
 until it overflows.</p><p><strong>ASIDE</strong>: we&#39;re not anti-Deno! It&#39;s a great runtime with a strong security model and excellent tooling. But for our specific case
-(<em>a deeply recursive compiler written in a functional language</em>), V8&#39;s lack of TCO was a fundamental constraint.
-So we switched to <a href="https://bun.sh/">Bun</a>.</p><h2 id="Bun-Migration">Bun Migration</h2><p>The migration was small:</p><p>1. Remove <code>npm:</code> import prefixes from a handful of TypeScript files (<em>the LSP server</em>)</p><p>2. Swap <code>Deno.args</code> for <code>process.argv.slice(2)</code></p><p>3. Change the build command</p><p>The compiled Gleam output is pure ESM that runs on any runtime without changes. We then undid all the manual unwrapping, restored <code>result.try</code>,
+(<em>a deeply recursive compiler written in a functional language</em>), V8&#39;s lack of PTC was a fundamental constraint.
+So we switched to <a href="https://bun.sh/">Bun</a>.</p><h2 id="Bun-Migration">Bun Migration</h2><p>The migration was small:</p><p>1. Remove <code>npm:</code> import prefixes from a handful of TypeScript files (<em>the LSP server</em>)</p><p>2. Swap <code>Deno.args</code> for <code>process.argv.slice(2)</code></p><p>3. Change the build command</p><p>The compiled Gleam output is pure ESM that runs on any modern JS runtime (Node, Deno, Bun) without changes. We then undid all the manual unwrapping, restored <code>result.try</code>,
 <code>bool.guard</code>, and the natural mutual recursion in the tokenizer. The code is cleaner. It is idiomatic Gleam again. And it&#39;s faster!</p><h2 id="The-Numbers">The Numbers</h2><p>Here&#39;s <code>v4.5.1</code> (<em>Deno, with all the manual TCO workarounds</em>) vs <code>v4.6.0</code> (<em>Bun, with natural recursive style restored</em>).
 A caveat upfront: this isn&#39;t a pure apples-to-apples runtime comparison. The code changed too. v4.5.1 had the manual TCO
 workarounds while v4.6.0 restored natural recursive style. The speedup reflects the combined effect of switching runtimes
@@ -161,8 +166,9 @@ changes themselves.</p><p><strong>Complexity Benchmarks</strong></p><pre><code d
 ├──────────────┼────────────────┼──────────────┼─────────┤
 │ 5,000        │        26.0 s  │      13.6 s  │   1.92x │
 └──────────────┴────────────────┴──────────────┴─────────┘
-</code></pre><p>Anywhere from <strong>1.2x to 2x faster</strong> depending on corpus size. The speedup grows as the corpus gets larger, which makes
-sense because more expectations means deeper recursion and is where native TCO really shines.</p><p><strong>Binary Size</strong></p><pre><code data-lang="bash">➜ brew info caffeine_lang
+</code></pre><p>Anywhere from <strong>1.2x to 2x faster</strong> depending on corpus size. The speedup grows with corpus size, which is consistent
+with PTC benefiting deeper recursion, though isolating the PTC effect from the other changes would require running
+identical code on both runtimes.</p><p><strong>Binary Size</strong></p><pre><code data-lang="bash">➜ brew info caffeine_lang
 ==&gt; brickell-research/caffeine/caffeine_lang: stable 4.6.0
 Caffeine programming language
 https://caffeine-lang.run

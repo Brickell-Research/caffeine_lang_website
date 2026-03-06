@@ -144,26 +144,32 @@ The recursive call to `sum_loop` is the _very last thing_ that happens. There's 
 call. Gleam compiles to both Erlang and Javascript. On Erlang's BEAM VM, tail calls are [optimized natively](https://learnyousomeerlang.com/recursion) as the BEAM was designed for this.
 But on Javascript, it depends on the engine.
 
-*V8 doesn't implement tail call optimization. And there's no indication it ever will.*
+*V8 does not currently ship proper tail calls. It previously had an implementation behind the `--harmony-tailcalls` flag around 2016 but disabled it and removed the flag due to developer tooling concerns.*
 
-V8 had it behind the `--harmony-tailcalls` flag around 2016, then removed it. The team [cited debugging concerns](https://github.com/tc39/proposal-ptc-syntax)
+A note on terminology: the [ES6 spec](https://262.ecma-international.org/6.0/#sec-tail-position-calls) mandates _proper tail calls_ (PTC)
+for strict-mode code, which is a language guarantee that tail-position calls will reuse the caller's stack frame. Since ECMAScript modules
+are evaluated in strict mode, Gleam's ESM output is the right context for PTC. This is distinct from _tail call optimization_ (TCO),
+which is a discretionary compiler optimization. What Gleam's JS backend does (the `while(true)` loop) is TCO. What the spec requires is PTC.
+
+The V8 team [cited debugging concerns](https://github.com/tc39/proposal-ptc-syntax)
 (tail-called frames disappear from stack traces) and chose developer experience over spec compliance. SpiderMonkey
-(_Firefox_) never shipped it in production either. Even though the [ES6 spec](https://262.ecma-international.org/6.0/#sec-tail-position-calls)
-mandates proper tail calls, V8 and SpiderMonkey simply ignore that part of the spec.
+(_Firefox_) has never shipped PTC either ([the tracking bug](https://bugzilla.mozilla.org/show_bug.cgi?id=723959) remains open).
 
-Deno uses V8 and so Deno doesn't have TCO.
+Deno uses V8 and so Deno has neither PTC nor TCO for arbitrary tail calls.
 
 ## What Gleam Does About It
 
-The smart folks on the Gleam core team have partially solved this with a loop transformation. When the Gleam JS backend detects a function that
-calls itself in the tail position, it compiles it to a `while(true)` loop instead of actual recursion, reassigning the arguments
-rather than making a new call. With this we get constant stack space. Problem solved!
+The smart folks on the Gleam core team have partially solved this on the JS target with a compile-time loopification transform.
+When the JS backend detects a function that directly tail-calls _itself_, it compiles it to a `while(true)` loop instead of
+actual recursion, reassigning the arguments rather than making a new call. With this we get constant stack space. Problem solved!
 
 Except not always...
 
 ## How It Breaks
 
-Gleam's `use` syntax is sugar for passing a callback. This:
+The loopification only handles direct self tail-calls. Any recursion routed through another function (via a callback, thunk, or
+intermediate call) won't be recognized by the transform. Gleam's `use` syntax makes this easy to hit. `use` is sugar for
+passing a callback:
 
 ```gleam
 use #(item, state) <- result.try(parse_something(state))
@@ -178,7 +184,8 @@ result.try(parse_something(state), fn(#(item, state)) {
 })
 ```
 
-Which compiles to something like this (_simplified from the actual compiler output_):
+Which compiles to something like this (_simplified; Gleam's actual JS runtime uses different representations for Result and
+List, but the call structure is faithful_):
 
 ```javascript
 function parse_items_loop(state, acc) {
@@ -203,8 +210,8 @@ The recursive `parse_items_loop` call is in tail position _of the closure_, but 
 perspective, the last thing it does is call `result_try(...)`. And from `result_try`'s perspective, the last thing it does is call
 `callback(...)`. Neither of those is a self-call, so neither gets optimized into a loop.
 
-Every iteration adds three stack frames: `parse_items_loop`, `result_try`, and the callback closure. With 5,000 expectations, that's 15,000+ frames.
-V8's stack holds roughly 10,000-15,000 frames.
+Every iteration adds multiple stack frames (`parse_items_loop`, `result_try`, and the callback closure) so recursion depth
+grows by several frames per step. With 5,000 expectations, that's enough to exhaust V8's call stack.
 
 Same pattern, different function. `use <- bool.guard(when: condition, return: Error(...))` wraps the recursive call in a thunk
 passed to `bool_guard`. The indirection hides the tail call from the compiler, an identical problem to `result.try`.
@@ -277,17 +284,17 @@ This worked! The compiler stopped crashing. But we were fighting the engine *and
 # Enter the Fine Folks Working on Safari
 
 [JavaScriptCore](https://developer.apple.com/documentation/javascriptcore), the engine behind Safari and *Bun*, is the only major
-JS engine that implements proper tail calls per the ES6 spec, and has since 2016. They solved the debugging problem with
-[ShadowChicken](https://webkit.org/blog/6240/ecmascript-6-proper-tail-calls-in-webkit/), a shadow stack that reconstructs
-eliminated frames in the inspector.
+JS engine that implements proper tail calls per the ES6 spec, and has since 2016. They addressed the debugging concern with
+[ShadowChicken](https://webkit.org/blog/6240/ecmascript-6-proper-tail-calls-in-webkit/), a shadow stack that lets Web Inspector
+reconstruct and display tail-deleted frames during debugging.
 
-The key difference: V8 doesn't optimize _any_ tail-position calls. JavaScriptCore optimizes _all_ of them, not just
-self-calls but any call in tail position of any function. So that `result_try` → `callback` → `parse_items_loop` chain...
+The key difference: V8 does not ship PTC, so tail-position calls still consume stack. JavaScriptCore implements PTC in
+strict mode for _all_ tail-position calls, not just self-calls but any call in tail position of any function. So that `result_try` → `callback` → `parse_items_loop` chain...
 every call in that chain is in tail position of its caller. JavaScriptCore sees that and eliminates the frames. V8 just stacks them up
 until it overflows.
 
 *ASIDE*: we're not anti-Deno! It's a great runtime with a strong security model and excellent tooling. But for our specific case
-(_a deeply recursive compiler written in a functional language_), V8's lack of TCO was a fundamental constraint.
+(_a deeply recursive compiler written in a functional language_), V8's lack of PTC was a fundamental constraint.
 So we switched to [Bun](https://bun.sh/).
 
 ## Bun Migration
@@ -300,7 +307,7 @@ The migration was small:
 
 3. Change the build command
 
-The compiled Gleam output is pure ESM that runs on any runtime without changes. We then undid all the manual unwrapping, restored `result.try`,
+The compiled Gleam output is pure ESM that runs on any modern JS runtime (Node, Deno, Bun) without changes. We then undid all the manual unwrapping, restored `result.try`,
 `bool.guard`, and the natural mutual recursion in the tokenizer. The code is cleaner. It is idiomatic Gleam again. And it's faster!
 
 ## The Numbers
@@ -353,8 +360,9 @@ changes themselves.
 └──────────────┴────────────────┴──────────────┴─────────┘
 ```
 
-Anywhere from *1.2x to 2x faster* depending on corpus size. The speedup grows as the corpus gets larger, which makes
-sense because more expectations means deeper recursion and is where native TCO really shines.
+Anywhere from *1.2x to 2x faster* depending on corpus size. The speedup grows with corpus size, which is consistent
+with PTC benefiting deeper recursion, though isolating the PTC effect from the other changes would require running
+identical code on both runtimes.
 
 *Binary Size*
 
