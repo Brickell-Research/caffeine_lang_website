@@ -1,6 +1,6 @@
 ---
 title = "Caffeine Version Manager"
-date = "2026-03-35"
+date = "2026-03-03"
 summary = "Introducing CVM, a version manager for Caffeine inspired by rvm, for easily installing, updating, and switching between Caffeine versions."
 author = "Rob Durst"
 tags = ["DevOps", "Homebrew"]
