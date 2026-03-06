@@ -148,8 +148,8 @@ But on Javascript, it depends on the engine.
 
 V8 had it behind the `--harmony-tailcalls` flag around 2016, then removed it. The team [cited debugging concerns](https://github.com/tc39/proposal-ptc-syntax)
 (tail-called frames disappear from stack traces) and chose developer experience over spec compliance. SpiderMonkey
-(_Firefox_) never implemented it either. Thus, even though the [ES6 spec](https://262.ecma-international.org/6.0/#sec-tail-position-calls)
-mandates proper tail calls, but V8 and SpiderMonkey simply ignore that part of the spec.
+(_Firefox_) never shipped it in production either. Even though the [ES6 spec](https://262.ecma-international.org/6.0/#sec-tail-position-calls)
+mandates proper tail calls, V8 and SpiderMonkey simply ignore that part of the spec.
 
 Deno uses V8 and so Deno doesn't have TCO.
 
@@ -173,8 +173,7 @@ parse_items_loop(state, [item, ..acc])
 Desugars to:
 
 ```gleam
-result.try(parse_something(state), fn(tuple) {
-  let #(item, state) = tuple
+result.try(parse_something(state), fn(#(item, state)) {
   parse_items_loop(state, [item, ..acc])
 })
 ```
@@ -204,7 +203,7 @@ The recursive `parse_items_loop` call is in tail position _of the closure_, but 
 perspective, the last thing it does is call `result_try(...)`. And from `result_try`'s perspective, the last thing it does is call
 `callback(...)`. Neither of those is a self-call, so neither gets optimized into a loop.
 
-Every iteration adds two stack frames: one for `parse_items_loop` and one for `result_try`. With 5,000 expectations, that's 10,000+ frames.
+Every iteration adds three stack frames: `parse_items_loop`, `result_try`, and the callback closure. With 5,000 expectations, that's 15,000+ frames.
 V8's stack holds roughly 10,000-15,000 frames.
 
 Same pattern, different function. `use <- bool.guard(when: condition, return: Error(...))` wraps the recursive call in a thunk
@@ -255,9 +254,9 @@ function parse_items_loop(state, acc) {
       let [item, state2] = result.value;
       acc = [item, ...acc];
       state = state2;
-      // falls through to next iteration — no stack growth
+    } else {
+      return new Error(result.error);
     }
-    return new Error(result.error);
   }
 }
 ```
@@ -266,6 +265,7 @@ For `bool.guard`, same idea: replace the thunk with a plain `case` so the recurs
 
 For the mutual recursion in the tokenizer, we inlined `emit_token` and `emit_token_n` directly into `tokenize_loop`,
 collapsing the three-function chain into a single self-recursive function. One function calling itself. Optimizable.
+This is a real architectural tradeoff: one large function is harder to read and test than three focused ones. But on V8, it was that or crash.
 
 All three cases are the same fundamental issue: *an intermediary sits between the recursive call and the function that needs to loop*.
 Unwrapping removes the intermediary so the recursive call is a direct self-tail-call.
@@ -294,7 +294,7 @@ So we switched to [Bun](https://bun.sh/).
 
 The migration was small:
 
-1. Remove `npm:` import prefixes from a handful of TypeScript files
+1. Remove `npm:` import prefixes from a handful of TypeScript files (_the LSP server_)
 
 2. Swap `Deno.args` for `process.argv.slice(2)`
 
@@ -305,7 +305,11 @@ The compiled Gleam output is pure ESM that runs on any runtime without changes. 
 
 ## The Numbers
 
-Here's `v4.5.1` (_Deno, with all the manual TCO workarounds_) vs `v4.6.0` (_Bun, with natural recursive style restored_):
+Here's `v4.5.1` (_Deno, with all the manual TCO workarounds_) vs `v4.6.0` (_Bun, with natural recursive style restored_).
+A caveat upfront: this isn't a pure apples-to-apples runtime comparison. The code changed too. v4.5.1 had the manual TCO
+workarounds while v4.6.0 restored natural recursive style. The speedup reflects the combined effect of switching runtimes
+_and_ writing cleaner code. We haven't isolated how much comes from JavaScriptCore's raw speed vs. native TCO vs. the code
+changes themselves.
 
 *Complexity Benchmarks*
 
@@ -349,12 +353,8 @@ Here's `v4.5.1` (_Deno, with all the manual TCO workarounds_) vs `v4.6.0` (_Bun,
 └──────────────┴────────────────┴──────────────┴─────────┘
 ```
 
-Here you can see the Bun (plus proper recursive design) version is anywhere from *1.2x to 2x faster* depending on corpus size. The speedup grows as the corpus gets larger, which makes
+Anywhere from *1.2x to 2x faster* depending on corpus size. The speedup grows as the corpus gets larger, which makes
 sense because more expectations means deeper recursion and is where native TCO really shines.
-
-*ASIDE*: a caveat this isn't a pure apples-to-apples runtime comparison. v4.5.1 had the manual TCO workarounds in the code while
-v4.6.0 restored natural recursive style. The speedup reflects the combined effect of switching runtimes _and_ writing
-cleaner code. We haven't isolated how much comes from JavaScriptCore's raw speed vs. native TCO vs. the code changes themselves.
 
 *Binary Size*
 

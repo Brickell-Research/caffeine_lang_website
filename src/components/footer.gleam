@@ -74,7 +74,7 @@ pub fn view() -> Element(Nil) {
         ),
       ]),
       html.p([], [
-        html.text("© 2025 "),
+        html.text("© 2026 "),
         html.a(
           [
             attribute.href("https://brickellresearch.org/"),
