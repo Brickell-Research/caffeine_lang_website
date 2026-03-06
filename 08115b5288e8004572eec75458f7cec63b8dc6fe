@@ -1,0 +1,23 @@
+posts/the-tailless-deno.djot
+  62a25d6da94e636b 147,149-154,156,158,162-163,170-172,187-188,213-214,287-289,291-292,297,310,363-365
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.8",
+  "base_commit_sha": "08115b5288e8004572eec75458f7cec63b8dc6fe",
+  "prompts": {
+    "62a25d6da94e636b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2cfeeeee-2692-4e3a-b0ba-dc81feef1d2c",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "robertDurst <me@robdurst.com>",
+      "messages": [],
+      "total_additions": 35,
+      "total_deletions": 27,
+      "accepted_lines": 28,
+      "overriden_lines": 0
+    }
+  }
+}
