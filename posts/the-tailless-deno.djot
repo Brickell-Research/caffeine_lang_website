@@ -25,8 +25,6 @@ Slide 26 from my Gleam Gathering talk, "Packaging Caffeine"
 so I ended up compiling to Javascript and then leveraging [Deno](https://deno.com/) to package it with a JS runtime.
 [Some more details on this from their website](https://deno.com/blog/deno-compile-executable-programs).
 
-## It's Large
-
 One of the _downsides_ of this build setup is the size. Somewhat embarrasingly, I looked at the zipped/tarballed binaries and thought
 "eh 40mb not too bad right?":
 
@@ -49,8 +47,6 @@ Installed
 Ooof `121mb`. Not small. While relatively speaking that isn't the _most offensively sized language toolchain_, the actual
 Caffeine compiler, CLI, and LSP together are only a small portion of the ~121mb. The rest is the Deno runtime
 we're bundling along for the ride.
-
-## Does It Actually Matter?
 
 Well, for what it's worth this is a developer tool which will likely be limited to running on developer laptops (_which are typically fairly beefy_)
 or within CICD pipelines. So the `121mb` isn't a barrier to entry per se.
@@ -103,8 +99,6 @@ For starters, I decided on the following corpus sizes:
 
 Plus a set of single-blueprint scaling tests from 10 to 5,000 expectations to isolate how compilation time grows with expectation count.
 
-## And Then It Blew Up
-
 Upon generation of these files, I wanted to format them: `caffeine format .`
 
 ```bash
@@ -130,8 +124,6 @@ recursion that ate through the entire call stack.
 # Tail Call Optimization
 
 Ok, so what's actually going on here?
-
-## The Short Version
 
 Within the functional programming paradigm, it's quite common for functions to call themselves recursively as the last step if some earlier base
 case isn't met. When a recursive call is the _very last thing_ a function does (_the "tail position"_), a smart runtime can avoid pushing a new
@@ -169,7 +161,7 @@ rather than making a new call. With this we get constant stack space. Problem so
 
 Except not always...
 
-## How `result.try` Breaks It
+## How It Breaks
 
 Gleam's `use` syntax is sugar for passing a callback. This:
 
@@ -187,7 +179,7 @@ result.try(parse_something(state), fn(tuple) {
 })
 ```
 
-Which compiles to roughly this JS:
+Which compiles to something like this (_simplified from the actual compiler output_):
 
 ```javascript
 function parse_items_loop(state, acc) {
@@ -215,12 +207,10 @@ perspective, the last thing it does is call `result_try(...)`. And from `result_
 Every iteration adds two stack frames: one for `parse_items_loop` and one for `result_try`. With 5,000 expectations, that's 10,000+ frames.
 V8's stack holds roughly 10,000-15,000 frames.
 
-## Same Story for `bool.guard`
-
 Same pattern, different function. `use <- bool.guard(when: condition, return: Error(...))` wraps the recursive call in a thunk
 passed to `bool_guard`. The indirection hides the tail call from the compiler, an identical problem to `result.try`.
 
-## And Mutual Recursion
+## Mutual Recursion
 
 This one is different. Our tokenizer had a chain across three separate functions:
 
@@ -255,7 +245,7 @@ case parse_something(state) {
 }
 ```
 
-The compiled JS goes from nested closures to:
+The compiled JS goes from nested closures to something like (_again, simplified_):
 
 ```javascript
 function parse_items_loop(state, acc) {
@@ -300,7 +290,7 @@ until it overflows.
 (_a deeply recursive compiler written in a functional language_), V8's lack of TCO was a fundamental constraint.
 So we switched to [Bun](https://bun.sh/).
 
-## Bun Migration 
+## Bun Migration
 
 The migration was small:
 
@@ -313,11 +303,11 @@ The migration was small:
 The compiled Gleam output is pure ESM that runs on any runtime without changes. We then undid all the manual unwrapping, restored `result.try`,
 `bool.guard`, and the natural mutual recursion in the tokenizer. The code is cleaner. It is idiomatic Gleam again. And it's faster!
 
-### Benchmarking
+## The Numbers
 
 Here's `v4.5.1` (_Deno, with all the manual TCO workarounds_) vs `v4.6.0` (_Bun, with natural recursive style restored_):
 
-#### Complexity Benchmarks
+*Complexity Benchmarks*
 
 ```
 ┌──────────────────────────┬────────────────┬──────────────┬─────────┐
@@ -337,7 +327,7 @@ Here's `v4.5.1` (_Deno, with all the manual TCO workarounds_) vs `v4.6.0` (_Bun,
 └──────────────────────────┴────────────────┴──────────────┴─────────┘
 ```
 
-#### Scaling Benchmarks (single blueprint)
+*Scaling Benchmarks (single blueprint)*
 
 ```
 ┌──────────────┬────────────────┬──────────────┬─────────┐
@@ -366,7 +356,7 @@ sense because more expectations means deeper recursion and is where native TCO r
 v4.6.0 restored natural recursive style. The speedup reflects the combined effect of switching runtimes _and_ writing
 cleaner code. We haven't isolated how much comes from JavaScriptCore's raw speed vs. native TCO vs. the code changes themselves.
 
-#### Binary Size
+*Binary Size*
 
 ```bash
 ➜ brew info caffeine_lang

@@ -2,7 +2,7 @@
 <html><body><!-- lustre:map --><html lang="en"><head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>The Tailless Deno | Caffeine</title><link href="/images/temp_caffeine_icon.png" rel="icon" type="image/png"><meta content="The Tailless Deno | Caffeine" property="og:title"><meta content="website" property="og:type"><meta content="Caffeine" property="og:site_name"><meta content="summary" name="twitter:card"><script src="/js/honeycomb.js"></script><meta content="How a stack overflow led us from Deno to Bun, and what we learned about tail call optimization along the way." name="description"><meta content="How a stack overflow led us from Deno to Bun, and what we learned about tail call optimization along the way." property="og:description"><meta content="https://caffeine-lang.org/blog/the-tailless-deno" property="og:url"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"><link href="/css/styles.css" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js"></script><script src="https://unpkg.com/prismjs-gleam@1/gleam.js"></script></head><body><header class="site-header"><nav class="nav"><a class="logo" href="/"><img alt="Caffeine" class="logo-img" src="/images/temp_caffeine_icon.png">Caffeine</a><ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/tour">Tour</a></li><li><a href="/tools">Tools</a></li><li><a href="/blog">Blog</a></li></ul></nav></header><main class="main-content"><article class="blog-post"><header class="post-header"><h1>The Tailless Deno</h1><p class="post-date">2026-03-05 · by Rob Durst</p></header><div class="post-content"><div class="toc"></div><p><strong>I&#39;m building <a href="https://github.com/Brickell-Research/caffeine_lang">Caffeine</a>, a compiler written in Gleam that compiles service expectations to reliability
 artifacts. This post documents our migration from Deno to Bun and the tail call optimization rabbit hole that led us there.</strong></p><hr><h1 id="We-Build-with-Deno">We Build with Deno</h1><p>In my talk at <a href="https://gleamgathering.com/">Gleam Gathering</a>, I have a slide where I discuss how we packaged up Caffeine:</p><p class="figure"><img alt="Packaging Caffeine slide from Gleam Gathering" src="/images/load-test-caffeine_packaging_caffeine_slide.png"></p><p>Slide 26 from my Gleam Gathering talk, &quot;Packaging Caffeine&quot;</p><p><a href="/blog/packaging-caffeine">Most of the details can be found in this blog post</a> if you&#39;re curious. TLDR is I couldn&#39;t quite get the <em>nix</em> setup to work
 so I ended up compiling to Javascript and then leveraging <a href="https://deno.com/">Deno</a> to package it with a JS runtime.
-<a href="https://deno.com/blog/deno-compile-executable-programs">Some more details on this from their website</a>.</p><h2 id="It&#39;s-Large">It&#39;s Large</h2><p>One of the <em>downsides</em> of this build setup is the size. Somewhat embarrasingly, I looked at the zipped/tarballed binaries and thought
+<a href="https://deno.com/blog/deno-compile-executable-programs">Some more details on this from their website</a>.</p><p>One of the <em>downsides</em> of this build setup is the size. Somewhat embarrasingly, I looked at the zipped/tarballed binaries and thought
 &quot;eh 40mb not too bad right?&quot;:</p><p class="figure"><img alt="Release sizes on GitHub" src="/images/load-test-caffeine_caffeine_release_sizes.png"></p><p>Recent <code>4.5.0</code> release of Caffeine on Github</p><p>However, that&#39;s compressed. Here is the reality:</p><pre><code data-lang="bash">➜ brew info caffeine_lang
 ==&gt; brickell-research/caffeine/caffeine_lang: stable 4.5.1
 Caffeine programming language
@@ -11,7 +11,7 @@ Installed
 /opt/homebrew/Cellar/caffeine_lang/4.5.1 (4 files, 121MB) *
 </code></pre><p>Ooof <code>121mb</code>. Not small. While relatively speaking that isn&#39;t the <em>most offensively sized language toolchain</em>, the actual
 Caffeine compiler, CLI, and LSP together are only a small portion of the ~121mb. The rest is the Deno runtime
-we&#39;re bundling along for the ride.</p><h2 id="Does-It-Actually-Matter">Does It Actually Matter?</h2><p>Well, for what it&#39;s worth this is a developer tool which will likely be limited to running on developer laptops (<em>which are typically fairly beefy</em>)
+we&#39;re bundling along for the ride.</p><p>Well, for what it&#39;s worth this is a developer tool which will likely be limited to running on developer laptops (<em>which are typically fairly beefy</em>)
 or within CICD pipelines. So the <code>121mb</code> isn&#39;t a barrier to entry per se.</p><p>The more interesting question is speed and scale: within typical use cases, how fast will Caffeine compile and at what point does compilation become
 a noticeable bottleneck?</p><hr><h1 id="Setting-Up-Benchmarks">Setting Up Benchmarks</h1><p>To begin answering these questions, we set up <a href="https://github.com/Brickell-Research/perf">perf</a>:
 <em>various benchmarks and corpuses and such for caffeine.</em></p><p>The basic idea:</p><p>1. Generate a bunch of corpuses of Caffeine blueprints and expectations of varying sizes</p><p>2. Script the benchmarking of these corpuses using <a href="https://github.com/sharkdp/hyperfine">hyperfine</a></p><p>3. Setup CICD such that we continuously run these benchmarks in a controlled fashion</p><p>Ideally this process would be fairly deterministic. We want to control: (a) hardware (<em>running within Github Actions</em>), (b) corpus
@@ -33,7 +33,7 @@ For starters, I decided on the following corpus sizes:</p><pre><code data-lang="
 ├────────────────┼────────────┼──────────────┤
 │ absurd         │ 50         │ 25,000       │
 └────────────────┴────────────┴──────────────┘
-</code></pre><p>Plus a set of single-blueprint scaling tests from 10 to 5,000 expectations to isolate how compilation time grows with expectation count.</p><h2 id="And-Then-It-Blew-Up">And Then It Blew Up</h2><p>Upon generation of these files, I wanted to format them: <code>caffeine format .</code></p><pre><code data-lang="bash">➜  perf git:(main) ✗ caffeine format .
+</code></pre><p>Plus a set of single-blueprint scaling tests from 10 to 5,000 expectations to isolate how compilation time grows with expectation count.</p><p>Upon generation of these files, I wanted to format them: <code>caffeine format .</code></p><pre><code data-lang="bash">➜  perf git:(main) ✗ caffeine format .
 error: Uncaught (in promise) RangeError: Maximum call stack size exceeded
 import * as $float from &quot;../../../gleam_stdlib/gleam/float.mjs&quot;;
 ^
@@ -46,7 +46,7 @@ import * as $float from &quot;../../../gleam_stdlib/gleam/float.mjs&quot;;
     ...
 </code></pre><p>Not ideal (<em>and this is before any actual benchmarking</em>). The stack trace tells the whole story if you squint:
 <code>tokenize_loop → emit_token → emit_token_n → tokenize_loop → emit_token → ...</code>. We had an infinite-looking chain of mutual
-recursion that ate through the entire call stack.</p><hr><h1 id="Tail-Call-Optimization">Tail Call Optimization</h1><p>Ok, so what&#39;s actually going on here?</p><h2 id="The-Short-Version">The Short Version</h2><p>Within the functional programming paradigm, it&#39;s quite common for functions to call themselves recursively as the last step if some earlier base
+recursion that ate through the entire call stack.</p><hr><h1 id="Tail-Call-Optimization">Tail Call Optimization</h1><p>Ok, so what&#39;s actually going on here?</p><p>Within the functional programming paradigm, it&#39;s quite common for functions to call themselves recursively as the last step if some earlier base
 case isn&#39;t met. When a recursive call is the <em>very last thing</em> a function does (<em>the &quot;tail position&quot;</em>), a smart runtime can avoid pushing a new
 stack frame entirely, it just jumps back to the top of the function. This is called <a href="https://en.wikipedia.org/wiki/Tail_call"><strong>tail call optimization</strong></a> (TCO).</p><p>Consider a tail-recursive loop in Gleam:</p><pre><code data-lang="gleam">fn sum_loop(list: List(Int), acc: Int) -&gt; Int {
   case list {
@@ -61,13 +61,13 @@ But on Javascript, it depends on the engine.</p><p><strong>V8 doesn&#39;t implem
 (<em>Firefox</em>) never implemented it either. Thus, even though the <a href="https://262.ecma-international.org/6.0/#sec-tail-position-calls">ES6 spec</a>
 mandates proper tail calls, but V8 and SpiderMonkey simply ignore that part of the spec.</p><p>Deno uses V8 and so Deno doesn&#39;t have TCO.</p><h2 id="What-Gleam-Does-About-It">What Gleam Does About It</h2><p>The smart folks on the Gleam core team have partially solved this with a loop transformation. When the Gleam JS backend detects a function that
 calls itself in the tail position, it compiles it to a <code>while(true)</code> loop instead of actual recursion, reassigning the arguments
-rather than making a new call. With this we get constant stack space. Problem solved!</p><p>Except not always...</p><h2 id="How-result.try-Breaks-It">How <code>result.try</code> Breaks It</h2><p>Gleam&#39;s <code>use</code> syntax is sugar for passing a callback. This:</p><pre><code data-lang="gleam">use #(item, state) &lt;- result.try(parse_something(state))
+rather than making a new call. With this we get constant stack space. Problem solved!</p><p>Except not always...</p><h2 id="How-It-Breaks">How It Breaks</h2><p>Gleam&#39;s <code>use</code> syntax is sugar for passing a callback. This:</p><pre><code data-lang="gleam">use #(item, state) &lt;- result.try(parse_something(state))
 parse_items_loop(state, [item, ..acc])
 </code></pre><p>Desugars to:</p><pre><code data-lang="gleam">result.try(parse_something(state), fn(tuple) {
   let #(item, state) = tuple
   parse_items_loop(state, [item, ..acc])
 })
-</code></pre><p>Which compiles to roughly this JS:</p><pre><code data-lang="javascript">function parse_items_loop(state, acc) {
+</code></pre><p>Which compiles to something like this (<em>simplified from the actual compiler output</em>):</p><pre><code data-lang="javascript">function parse_items_loop(state, acc) {
   return result_try(
     parse_something(state),
     (tuple) =&gt; {
@@ -86,8 +86,8 @@ function result_try(result, callback) {
 </code></pre><p>The recursive <code>parse_items_loop</code> call is in tail position <em>of the closure</em>, but not of <code>parse_items_loop</code> itself. From <code>parse_items_loop</code>&#39;s
 perspective, the last thing it does is call <code>result_try(...)</code>. And from <code>result_try</code>&#39;s perspective, the last thing it does is call
 <code>callback(...)</code>. Neither of those is a self-call, so neither gets optimized into a loop.</p><p>Every iteration adds two stack frames: one for <code>parse_items_loop</code> and one for <code>result_try</code>. With 5,000 expectations, that&#39;s 10,000+ frames.
-V8&#39;s stack holds roughly 10,000-15,000 frames.</p><h2 id="Same-Story-for-bool.guard">Same Story for <code>bool.guard</code></h2><p>Same pattern, different function. <code>use &lt;- bool.guard(when: condition, return: Error(...))</code> wraps the recursive call in a thunk
-passed to <code>bool_guard</code>. The indirection hides the tail call from the compiler, an identical problem to <code>result.try</code>.</p><h2 id="And-Mutual-Recursion">And Mutual Recursion</h2><p>This one is different. Our tokenizer had a chain across three separate functions:</p><pre><code data-lang="text">tokenize_loop → emit_token → emit_token_n → tokenize_loop
+V8&#39;s stack holds roughly 10,000-15,000 frames.</p><p>Same pattern, different function. <code>use &lt;- bool.guard(when: condition, return: Error(...))</code> wraps the recursive call in a thunk
+passed to <code>bool_guard</code>. The indirection hides the tail call from the compiler, an identical problem to <code>result.try</code>.</p><h2 id="Mutual-Recursion">Mutual Recursion</h2><p>This one is different. Our tokenizer had a chain across three separate functions:</p><pre><code data-lang="text">tokenize_loop → emit_token → emit_token_n → tokenize_loop
 </code></pre><p><code>tokenize_loop</code> matches a character, calls <code>emit_token</code> to record it, which calls <code>emit_token_n</code> to advance the position,
 which calls back to <code>tokenize_loop</code> to process the next character. The final call <em>is</em> in tail position of <code>emit_token_n</code>,
 and <code>emit_token_n</code> <em>is</em> in tail position of <code>emit_token</code>, and so on up the chain. But Gleam&#39;s JS backend only optimizes
@@ -102,7 +102,7 @@ case parse_something(state) {
   Ok(#(item, state)) -&gt; parse_items_loop(state, [item, ..acc])
   Error(e) -&gt; Error(e)
 }
-</code></pre><p>The compiled JS goes from nested closures to:</p><pre><code data-lang="javascript">function parse_items_loop(state, acc) {
+</code></pre><p>The compiled JS goes from nested closures to something like (<em>again, simplified</em>):</p><pre><code data-lang="javascript">function parse_items_loop(state, acc) {
   while (true) {
     const result = parse_something(state);
     if (result.isOk()) {
@@ -124,8 +124,8 @@ self-calls but any call in tail position of any function. So that <code>result_t
 every call in that chain is in tail position of its caller. JavaScriptCore sees that and eliminates the frames. V8 just stacks them up
 until it overflows.</p><p><strong>ASIDE</strong>: we&#39;re not anti-Deno! It&#39;s a great runtime with a strong security model and excellent tooling. But for our specific case
 (<em>a deeply recursive compiler written in a functional language</em>), V8&#39;s lack of TCO was a fundamental constraint.
-So we switched to <a href="https://bun.sh/">Bun</a>.</p><h2 id="Bun-Migration">Bun Migration </h2><p>The migration was small:</p><p>1. Remove <code>npm:</code> import prefixes from a handful of TypeScript files</p><p>2. Swap <code>Deno.args</code> for <code>process.argv.slice(2)</code></p><p>3. Change the build command</p><p>The compiled Gleam output is pure ESM that runs on any runtime without changes. We then undid all the manual unwrapping, restored <code>result.try</code>,
-<code>bool.guard</code>, and the natural mutual recursion in the tokenizer. The code is cleaner. It is idiomatic Gleam again. And it&#39;s faster!</p><h3 id="Benchmarking">Benchmarking</h3><p>Here&#39;s <code>v4.5.1</code> (<em>Deno, with all the manual TCO workarounds</em>) vs <code>v4.6.0</code> (<em>Bun, with natural recursive style restored</em>):</p><h4 id="Complexity-Benchmarks">Complexity Benchmarks</h4><pre><code data-lang="text">┌──────────────────────────┬────────────────┬──────────────┬─────────┐
+So we switched to <a href="https://bun.sh/">Bun</a>.</p><h2 id="Bun-Migration">Bun Migration</h2><p>The migration was small:</p><p>1. Remove <code>npm:</code> import prefixes from a handful of TypeScript files</p><p>2. Swap <code>Deno.args</code> for <code>process.argv.slice(2)</code></p><p>3. Change the build command</p><p>The compiled Gleam output is pure ESM that runs on any runtime without changes. We then undid all the manual unwrapping, restored <code>result.try</code>,
+<code>bool.guard</code>, and the natural mutual recursion in the tokenizer. The code is cleaner. It is idiomatic Gleam again. And it&#39;s faster!</p><h2 id="The-Numbers">The Numbers</h2><p>Here&#39;s <code>v4.5.1</code> (<em>Deno, with all the manual TCO workarounds</em>) vs <code>v4.6.0</code> (<em>Bun, with natural recursive style restored</em>):</p><p><strong>Complexity Benchmarks</strong></p><pre><code data-lang="text">┌──────────────────────────┬────────────────┬──────────────┬─────────┐
 │ Corpus                   │ Deno (v4.5.1)  │ Bun (v4.6.0) │ Speedup │
 ├──────────────────────────┼────────────────┼──────────────┼─────────┤
 │ small (2 bp, 4 exp)      │       71.9 ms  │     60.7 ms  │   1.18x │
@@ -140,7 +140,7 @@ So we switched to <a href="https://bun.sh/">Bun</a>.</p><h2 id="Bun-Migration">B
 ├──────────────────────────┼────────────────┼──────────────┼─────────┤
 │ absurd (50 bp, ~25K exp) │        26.3 s  │      13.5 s  │   1.95x │
 └──────────────────────────┴────────────────┴──────────────┴─────────┘
-</code></pre><h4 id="Scaling-Benchmarks-(single-blueprint)">Scaling Benchmarks (single blueprint)</h4><pre><code data-lang="text">┌──────────────┬────────────────┬──────────────┬─────────┐
+</code></pre><p><strong>Scaling Benchmarks (single blueprint)</strong></p><pre><code data-lang="text">┌──────────────┬────────────────┬──────────────┬─────────┐
 │ Expectations │ Deno (v4.5.1)  │ Bun (v4.6.0) │ Speedup │
 ├──────────────┼────────────────┼──────────────┼─────────┤
 │ 10           │      212.9 ms  │    146.5 ms  │   1.45x │
@@ -160,7 +160,7 @@ So we switched to <a href="https://bun.sh/">Bun</a>.</p><h2 id="Bun-Migration">B
 </code></pre><p>Here you can see the Bun (plus proper recursive design) version is anywhere from <strong>1.2x to 2x faster</strong> depending on corpus size. The speedup grows as the corpus gets larger, which makes
 sense because more expectations means deeper recursion and is where native TCO really shines.</p><p><strong>ASIDE</strong>: a caveat this isn&#39;t a pure apples-to-apples runtime comparison. v4.5.1 had the manual TCO workarounds in the code while
 v4.6.0 restored natural recursive style. The speedup reflects the combined effect of switching runtimes <em>and</em> writing
-cleaner code. We haven&#39;t isolated how much comes from JavaScriptCore&#39;s raw speed vs. native TCO vs. the code changes themselves.</p><h4 id="Binary-Size">Binary Size</h4><pre><code data-lang="bash">➜ brew info caffeine_lang
+cleaner code. We haven&#39;t isolated how much comes from JavaScriptCore&#39;s raw speed vs. native TCO vs. the code changes themselves.</p><p><strong>Binary Size</strong></p><pre><code data-lang="bash">➜ brew info caffeine_lang
 ==&gt; brickell-research/caffeine/caffeine_lang: stable 4.6.0
 Caffeine programming language
 https://caffeine-lang.run
