@@ -1,0 +1,389 @@
+---
+title = "The Tailless Deno"
+date = "2026-03-05"
+updated = "2026-03-05"
+summary = "How a stack overflow led us from Deno to Bun, and what we learned about tail call optimization along the way."
+author = "Rob Durst"
+tags = ["Gleam", "Performance", "Javascript", "Deno", "Bun"]
+---
+
+*I'm building [Caffeine](https://github.com/Brickell-Research/caffeine_lang), a compiler written in Gleam that compiles service expectations to reliability
+artifacts. This post documents our migration from Deno to Bun and the tail call optimization rabbit hole that led us there.*
+
+***
+
+# We Build with Deno
+
+In my talk at [Gleam Gathering](https://gleamgathering.com/), I have a slide where I discuss how we packaged up Caffeine:
+
+{.figure}
+![Packaging Caffeine slide from Gleam Gathering](/images/load-test-caffeine_packaging_caffeine_slide.png)
+
+Slide 26 from my Gleam Gathering talk, "Packaging Caffeine"
+
+[Most of the details can be found in this blog post](/blog/packaging-caffeine) if you're curious. TLDR is I couldn't quite get the _nix_ setup to work
+so I ended up compiling to Javascript and then leveraging [Deno](https://deno.com/) to package it with a JS runtime.
+[Some more details on this from their website](https://deno.com/blog/deno-compile-executable-programs).
+
+## It's Large
+
+One of the _downsides_ of this build setup is the size. Somewhat embarrasingly, I looked at the zipped/tarballed binaries and thought
+"eh 40mb not too bad right?":
+
+{.figure}
+![Release sizes on GitHub](/images/load-test-caffeine_caffeine_release_sizes.png)
+
+Recent `4.5.0` release of Caffeine on Github
+
+However, that's compressed. Here is the reality:
+
+```bash
+➜ brew info caffeine_lang
+==> brickell-research/caffeine/caffeine_lang: stable 4.5.1
+Caffeine programming language
+https://caffeine-lang.run
+Installed
+/opt/homebrew/Cellar/caffeine_lang/4.5.1 (4 files, 121MB) *
+```
+
+Ooof `121mb`. Not small. While relatively speaking that isn't the _most offensively sized language toolchain_, the actual
+Caffeine compiler, CLI, and LSP together are only a small portion of the ~121mb. The rest is the Deno runtime
+we're bundling along for the ride.
+
+## Does It Actually Matter?
+
+Well, for what it's worth this is a developer tool which will likely be limited to running on developer laptops (_which are typically fairly beefy_)
+or within CICD pipelines. So the `121mb` isn't a barrier to entry per se.
+
+The more interesting question is speed and scale: within typical use cases, how fast will Caffeine compile and at what point does compilation become
+a noticeable bottleneck?
+
+***
+
+# Setting Up Benchmarks
+
+To begin answering these questions, we set up [perf](https://github.com/Brickell-Research/perf):
+_various benchmarks and corpuses and such for caffeine._
+
+The basic idea:
+
+1. Generate a bunch of corpuses of Caffeine blueprints and expectations of varying sizes
+
+2. Script the benchmarking of these corpuses using [hyperfine](https://github.com/sharkdp/hyperfine)
+
+3. Setup CICD such that we continuously run these benchmarks in a controlled fashion
+
+Ideally this process would be fairly deterministic. We want to control: (a) hardware (_running within Github Actions_), (b) corpus
+(_consistent between runs_), (c) warm-up (_need to understand the JS runtime_), and (d) build (_should use actual Caffeine releases_).
+
+However, before going down the determinism rabbit hole (_been down there before, in 2019 I did an internship with the
+[Stellar Development Foundation](https://stellar.org/) where I spent a bunch of time improving the determinism score in attempt to do some fuzz
+testing with [AFL](https://afl-1.readthedocs.io/)_), let's just get this all setup first.
+
+To bootstrap, I heavily leaned on Claude. I had it put together a corpus generator, wire up hyperfine, and build a script to compare against a baseline.
+For starters, I decided on the following corpus sizes:
+
+```
+┌────────────────┬────────────┬──────────────┐
+│     Scale      │ Blueprints │ Expectations │
+├────────────────┼────────────┼──────────────┤
+│ small          │ 2          │ 4            │
+├────────────────┼────────────┼──────────────┤
+│ medium         │ 5          │ 24           │
+├────────────────┼────────────┼──────────────┤
+│ large          │ 20         │ 120          │
+├────────────────┼────────────┼──────────────┤
+│ huge           │ 50         │ 600          │
+├────────────────┼────────────┼──────────────┤
+│ insane         │ 50         │ 6,000        │
+├────────────────┼────────────┼──────────────┤
+│ absurd         │ 50         │ 25,000       │
+└────────────────┴────────────┴──────────────┘
+```
+
+Plus a set of single-blueprint scaling tests from 10 to 5,000 expectations to isolate how compilation time grows with expectation count.
+
+## And Then It Blew Up
+
+Upon generation of these files, I wanted to format them: `caffeine format .`
+
+```bash
+➜  perf git:(main) ✗ caffeine format .
+error: Uncaught (in promise) RangeError: Maximum call stack size exceeded
+import * as $float from "../../../gleam_stdlib/gleam/float.mjs";
+^
+    at tokenize_loop (file:///var/folders/.../tokenizer.mjs:1:1)
+    at emit_token_n (file:///var/folders/.../tokenizer.mjs:1:1)
+    at emit_token (file:///var/folders/.../tokenizer.mjs:1:1)
+    at tokenize_loop (file:///var/folders/.../tokenizer.mjs:1:1)
+    at emit_token_n (file:///var/folders/.../tokenizer.mjs:1:1)
+    at emit_token (file:///var/folders/.../tokenizer.mjs:1:1)
+    ...
+```
+
+Not ideal (_and this is before any actual benchmarking_). The stack trace tells the whole story if you squint:
+`tokenize_loop → emit_token → emit_token_n → tokenize_loop → emit_token → ...`. We had an infinite-looking chain of mutual
+recursion that ate through the entire call stack.
+
+***
+
+# Tail Call Optimization
+
+Ok, so what's actually going on here?
+
+## The Short Version
+
+Within the functional programming paradigm, it's quite common for functions to call themselves recursively as the last step if some earlier base
+case isn't met. When a recursive call is the _very last thing_ a function does (_the "tail position"_), a smart runtime can avoid pushing a new
+stack frame entirely, it just jumps back to the top of the function. This is called [*tail call optimization*](https://en.wikipedia.org/wiki/Tail_call) (TCO).
+
+Consider a tail-recursive loop in Gleam:
+
+```gleam
+fn sum_loop(list: List(Int), acc: Int) -> Int {
+  case list {
+    [] -> acc
+    [first, ..rest] -> sum_loop(rest, acc + first)
+  }
+}
+```
+
+The recursive call to `sum_loop` is the _very last thing_ that happens. There's no work left after it returns. That's what makes it a tail
+call. Gleam compiles to both Erlang and Javascript. On Erlang's BEAM VM, tail calls are [optimized natively](https://learnyousomeerlang.com/recursion) as the BEAM was designed for this.
+But on Javascript, it depends on the engine.
+
+*V8 doesn't implement tail call optimization. And there's no indication it ever will.*
+
+V8 had it behind the `--harmony-tailcalls` flag around 2016, then removed it. The team [cited debugging concerns](https://github.com/tc39/proposal-ptc-syntax)
+(tail-called frames disappear from stack traces) and chose developer experience over spec compliance. SpiderMonkey
+(_Firefox_) never implemented it either. Thus, even though the [ES6 spec](https://262.ecma-international.org/6.0/#sec-tail-position-calls)
+mandates proper tail calls, but V8 and SpiderMonkey simply ignore that part of the spec.
+
+Deno uses V8 and so Deno doesn't have TCO.
+
+## What Gleam Does About It
+
+The smart folks on the Gleam core team have partially solved this with a loop transformation. When the Gleam JS backend detects a function that
+calls itself in the tail position, it compiles it to a `while(true)` loop instead of actual recursion, reassigning the arguments
+rather than making a new call. With this we get constant stack space. Problem solved!
+
+Except not always...
+
+## How `result.try` Breaks It
+
+Gleam's `use` syntax is sugar for passing a callback. This:
+
+```gleam
+use #(item, state) <- result.try(parse_something(state))
+parse_items_loop(state, [item, ..acc])
+```
+
+Desugars to:
+
+```gleam
+result.try(parse_something(state), fn(tuple) {
+  let #(item, state) = tuple
+  parse_items_loop(state, [item, ..acc])
+})
+```
+
+Which compiles to roughly this JS:
+
+```javascript
+function parse_items_loop(state, acc) {
+  return result_try(
+    parse_something(state),
+    (tuple) => {
+      let [item, state2] = tuple;
+      return parse_items_loop(state2, [item, ...acc]);
+    }
+  );
+}
+
+function result_try(result, callback) {
+  if (result.isOk()) {
+    return callback(result.value);
+  }
+  return result;
+}
+```
+
+The recursive `parse_items_loop` call is in tail position _of the closure_, but not of `parse_items_loop` itself. From `parse_items_loop`'s
+perspective, the last thing it does is call `result_try(...)`. And from `result_try`'s perspective, the last thing it does is call
+`callback(...)`. Neither of those is a self-call, so neither gets optimized into a loop.
+
+Every iteration adds two stack frames: one for `parse_items_loop` and one for `result_try`. With 5,000 expectations, that's 10,000+ frames.
+V8's stack holds roughly 10,000-15,000 frames.
+
+## Same Story for `bool.guard`
+
+Same pattern, different function. `use <- bool.guard(when: condition, return: Error(...))` wraps the recursive call in a thunk
+passed to `bool_guard`. The indirection hides the tail call from the compiler, an identical problem to `result.try`.
+
+## And Mutual Recursion
+
+This one is different. Our tokenizer had a chain across three separate functions:
+
+```
+tokenize_loop → emit_token → emit_token_n → tokenize_loop
+```
+
+`tokenize_loop` matches a character, calls `emit_token` to record it, which calls `emit_token_n` to advance the position,
+which calls back to `tokenize_loop` to process the next character. The final call _is_ in tail position of `emit_token_n`,
+and `emit_token_n` _is_ in tail position of `emit_token`, and so on up the chain. But Gleam's JS backend only optimizes
+_self_-tail-calls: function A calling function A. It can't see that this chain of three functions is effectively a loop.
+This is a [known open issue](https://github.com/gleam-lang/gleam/issues/3830).
+
+***
+
+# The Unwrapping
+
+So we unwrapped everything. We replaced higher-order functions with direct `case` expressions so the recursive call lands in tail position of
+the function itself.
+
+For `result.try`:
+
+```gleam
+// Before: closure hides the tail call
+use #(item, state) <- result.try(parse_something(state))
+parse_items_loop(state, [item, ..acc])
+
+// After: direct case, recursive call in tail position
+case parse_something(state) {
+  Ok(#(item, state)) -> parse_items_loop(state, [item, ..acc])
+  Error(e) -> Error(e)
+}
+```
+
+The compiled JS goes from nested closures to:
+
+```javascript
+function parse_items_loop(state, acc) {
+  while (true) {
+    const result = parse_something(state);
+    if (result.isOk()) {
+      let [item, state2] = result.value;
+      acc = [item, ...acc];
+      state = state2;
+      // falls through to next iteration — no stack growth
+    }
+    return new Error(result.error);
+  }
+}
+```
+
+For `bool.guard`, same idea: replace the thunk with a plain `case` so the recursive call is direct.
+
+For the mutual recursion in the tokenizer, we inlined `emit_token` and `emit_token_n` directly into `tokenize_loop`,
+collapsing the three-function chain into a single self-recursive function. One function calling itself. Optimizable.
+
+All three cases are the same fundamental issue: *an intermediary sits between the recursive call and the function that needs to loop*.
+Unwrapping removes the intermediary so the recursive call is a direct self-tail-call.
+
+This worked! The compiler stopped crashing. But we were fighting the engine *and more importantly, fighting the language*.
+
+***
+
+# Enter the Fine Folks Working on Safari
+
+[JavaScriptCore](https://developer.apple.com/documentation/javascriptcore), the engine behind Safari and *Bun*, is the only major
+JS engine that implements proper tail calls per the ES6 spec, and has since 2016. They solved the debugging problem with
+[ShadowChicken](https://webkit.org/blog/6240/ecmascript-6-proper-tail-calls-in-webkit/), a shadow stack that reconstructs
+eliminated frames in the inspector.
+
+The key difference: V8 doesn't optimize _any_ tail-position calls. JavaScriptCore optimizes _all_ of them, not just
+self-calls but any call in tail position of any function. So that `result_try` → `callback` → `parse_items_loop` chain...
+every call in that chain is in tail position of its caller. JavaScriptCore sees that and eliminates the frames. V8 just stacks them up
+until it overflows.
+
+*ASIDE*: we're not anti-Deno! It's a great runtime with a strong security model and excellent tooling. But for our specific case
+(_a deeply recursive compiler written in a functional language_), V8's lack of TCO was a fundamental constraint.
+So we switched to [Bun](https://bun.sh/).
+
+## Bun Migration 
+
+The migration was small:
+
+1. Remove `npm:` import prefixes from a handful of TypeScript files
+
+2. Swap `Deno.args` for `process.argv.slice(2)`
+
+3. Change the build command
+
+The compiled Gleam output is pure ESM that runs on any runtime without changes. We then undid all the manual unwrapping, restored `result.try`,
+`bool.guard`, and the natural mutual recursion in the tokenizer. The code is cleaner. It is idiomatic Gleam again. And it's faster!
+
+### Benchmarking
+
+Here's `v4.5.1` (_Deno, with all the manual TCO workarounds_) vs `v4.6.0` (_Bun, with natural recursive style restored_):
+
+#### Complexity Benchmarks
+
+```
+┌──────────────────────────┬────────────────┬──────────────┬─────────┐
+│ Corpus                   │ Deno (v4.5.1)  │ Bun (v4.6.0) │ Speedup │
+├──────────────────────────┼────────────────┼──────────────┼─────────┤
+│ small (2 bp, 4 exp)      │       71.9 ms  │     60.7 ms  │   1.18x │
+├──────────────────────────┼────────────────┼──────────────┼─────────┤
+│ medium (5 bp, 24 exp)    │      149.2 ms  │    114.8 ms  │   1.30x │
+├──────────────────────────┼────────────────┼──────────────┼─────────┤
+│ large (20 bp, 120 exp)   │      625.5 ms  │    405.8 ms  │   1.54x │
+├──────────────────────────┼────────────────┼──────────────┼─────────┤
+│ huge (50 bp, 600 exp)    │         5.0 s  │       2.5 s  │   2.00x │
+├──────────────────────────┼────────────────┼──────────────┼─────────┤
+│ insane (50 bp, ~6K exp)  │         8.1 s  │       4.2 s  │   1.92x │
+├──────────────────────────┼────────────────┼──────────────┼─────────┤
+│ absurd (50 bp, ~25K exp) │        26.3 s  │      13.5 s  │   1.95x │
+└──────────────────────────┴────────────────┴──────────────┴─────────┘
+```
+
+#### Scaling Benchmarks (single blueprint)
+
+```
+┌──────────────┬────────────────┬──────────────┬─────────┐
+│ Expectations │ Deno (v4.5.1)  │ Bun (v4.6.0) │ Speedup │
+├──────────────┼────────────────┼──────────────┼─────────┤
+│ 10           │      212.9 ms  │    146.5 ms  │   1.45x │
+├──────────────┼────────────────┼──────────────┼─────────┤
+│ 50           │      354.7 ms  │    246.6 ms  │   1.44x │
+├──────────────┼────────────────┼──────────────┼─────────┤
+│ 100          │      566.5 ms  │    376.1 ms  │   1.51x │
+├──────────────┼────────────────┼──────────────┼─────────┤
+│ 500          │         2.1 s  │       1.4 s  │   1.55x │
+├──────────────┼────────────────┼──────────────┼─────────┤
+│ 1,000        │         4.0 s  │       2.6 s  │   1.56x │
+├──────────────┼────────────────┼──────────────┼─────────┤
+│ 2,500        │        10.6 s  │       6.6 s  │   1.60x │
+├──────────────┼────────────────┼──────────────┼─────────┤
+│ 5,000        │        26.0 s  │      13.6 s  │   1.92x │
+└──────────────┴────────────────┴──────────────┴─────────┘
+```
+
+Here you can see the Bun (plus proper recursive design) version is anywhere from *1.2x to 2x faster* depending on corpus size. The speedup grows as the corpus gets larger, which makes
+sense because more expectations means deeper recursion and is where native TCO really shines.
+
+*ASIDE*: a caveat this isn't a pure apples-to-apples runtime comparison. v4.5.1 had the manual TCO workarounds in the code while
+v4.6.0 restored natural recursive style. The speedup reflects the combined effect of switching runtimes _and_ writing
+cleaner code. We haven't isolated how much comes from JavaScriptCore's raw speed vs. native TCO vs. the code changes themselves.
+
+#### Binary Size
+
+```bash
+➜ brew info caffeine_lang
+==> brickell-research/caffeine/caffeine_lang: stable 4.6.0
+Caffeine programming language
+https://caffeine-lang.run
+Installed
+/opt/homebrew/Cellar/caffeine_lang/4.6.0 (4 files, 62.1MB) *
+```
+
+Down from `121mb` to `62mb`. Nearly half. Bun's runtime is also significantly smaller than Deno's.
+
+***
+
+# Conclusion
+
+While we came to define a benchmark, we immediately hit a stack overflow, and following the TCO rabbit hole ended up switching runtimes. What a ride!
+
+Now with the benchmarking pipeline in place, we're set up to track performance as Caffeine evolves. Next up is getting these
+benchmarks running deterministically in GitHub Actions so we can catch regressions before they ship!
