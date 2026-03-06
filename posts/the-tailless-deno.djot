@@ -368,12 +368,12 @@ Installed
 /opt/homebrew/Cellar/caffeine_lang/4.6.0 (4 files, 62.1MB) *
 ```
 
-Down from `121mb` to `62mb`. Nearly half. Bun's runtime is also significantly smaller than Deno's.
+Down from `121mb` to `62mb`. Nearly half. As a bonus Bun's runtime is also significantly smaller than Deno's.
 
 ***
 
 # Conclusion
 
-If you're compiling a functional language to JavaScript and targeting V8, recursion patterns. Gleam's loopification handles direct self-calls, but anything routed through
+If you're compiling a functional language to JavaScript and targeting V8, recursion patterns matter. Gleam's loopification handles direct self-calls, but anything routed through
 callbacks or mutual recursion will consume the stack on any engine that doesn't implement PTC. Right now, only JavaScriptCore does, so if you're using a tool to compile
 to a binary, _Bun is the way_.
