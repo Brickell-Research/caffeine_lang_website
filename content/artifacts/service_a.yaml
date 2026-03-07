@@ -1,7 +1,0 @@
-slos:
-  - name: "Fetch User"
-    sli_type: "success_rate"
-    typed_instatiation_of_query_templatized_variables:
-      "gql_operation": "fetchUser"
-    threshold: 99.0
-    window_in_days: 7

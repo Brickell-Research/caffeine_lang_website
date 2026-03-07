@@ -68,7 +68,7 @@ To see why this matters, compare the old and new syntax for the same expectation
 * &quot;checkout_availability&quot;:
   Provides {
     env: &quot;production&quot;,
-    threshold: 99.95,
+    threshold: 99.95%,
     window_in_days: 30,
     relations: {
       hard: [&quot;Database is up&quot;],
@@ -84,7 +84,7 @@ To see why this matters, compare the old and new syntax for the same expectation
     env: &quot;production&quot;
 </code></pre><p>The guarantee, assumptions, and measurement are now explicit in the syntax rather than buried as opaque fields. The <code>with:</code> block only supplies values for
 the blueprint&#39;s <code>Requiring</code> fields — the <code>signals</code> defined in the blueprint are inherited as-is and are not the expectation&#39;s concern.</p><p>You&#39;ll also notice a new window syntax — <code>over 10d window</code>, <code>below 100ms</code> — replacing the raw numeric fields like <code>window_in_days: 30</code> and
-<code>threshold: 99.95</code>. Today&#39;s CQL interval parser only supports seconds, minutes, and hours (<code>s</code>, <code>m</code>, <code>h</code>); <code>v5.0.0</code> extends this to days (<code>d</code>), adds
+<code>threshold: 99.95%</code>. Today&#39;s CQL interval parser only supports seconds, minutes, and hours (<code>s</code>, <code>m</code>, <code>h</code>); <code>v5.0.0</code> extends this to days (<code>d</code>), adds
 milliseconds (<code>ms</code>) for latency thresholds, and introduces the inline threshold and latency syntax shown above. For clarity, the full set
 of supported units is: <code>ms</code> (milliseconds), <code>s</code> (seconds), <code>m</code> (minutes), <code>h</code> (hours), and <code>d</code> (days).</p><p>Due to the nature of the complex distributed systems we model, there are varying levels of optionality within these definitions. The bare minimum is just a
 guarantee.</p><pre><code data-lang="caffeine">&quot;Database is up&quot;:

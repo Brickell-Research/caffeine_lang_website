@@ -195,7 +195,7 @@ To see why this matters, compare the old and new syntax for the same expectation
 * "checkout_availability":
   Provides {
     env: "production",
-    threshold: 99.95,
+    threshold: 99.95%,
     window_in_days: 30,
     relations: {
       hard: ["Database is up"],
@@ -215,7 +215,7 @@ The guarantee, assumptions, and measurement are now explicit in the syntax rathe
 the blueprint's `Requiring` fields — the `signals` defined in the blueprint are inherited as-is and are not the expectation's concern.
 
 You'll also notice a new window syntax — `over 10d window`, `below 100ms` — replacing the raw numeric fields like `window_in_days: 30` and
-`threshold: 99.95`. Today's CQL interval parser only supports seconds, minutes, and hours (`s`, `m`, `h`); `v5.0.0` extends this to days (`d`), adds
+`threshold: 99.95%`. Today's CQL interval parser only supports seconds, minutes, and hours (`s`, `m`, `h`); `v5.0.0` extends this to days (`d`), adds
 milliseconds (`ms`) for latency thresholds, and introduces the inline threshold and latency syntax shown above. For clarity, the full set
 of supported units is: `ms` (milliseconds), `s` (seconds), `m` (minutes), `h` (hours), and `d` (days).
 

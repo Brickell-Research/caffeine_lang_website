@@ -226,14 +226,14 @@ Expectations for "Auth Success Rate"
   * "Signin Success Rate":
     Provides {
       window_in_days: 30,
-      threshold: 99.9,
+      threshold: 99.9%,
       endpoint: "sign-in",
       env: "production"
     }
   * "WhoAmI Success Rate":
     Provides {
       window_in_days: 30,
-      threshold: 99,
+      threshold: 99%,
       endpoint: "who-am-i",
       env: "production"
     }
@@ -242,7 +242,7 @@ Expectations for "Auth Latency"
   * "Signin Latency":
     Provides {
       window_in_days: 30,
-      threshold: 99.9,
+      threshold: 99.9%,
       endpoint: "sign-in",
       env: "production",
       threshold_in_seconds: 1
@@ -253,7 +253,7 @@ Expectations for "Auth Latency"
       # more strict about the latency than the success rate for
       # threshold as well (the % of 5m intervals where the latency
       # is within the threshold_in_seconds)
-      threshold: 99.9,
+      threshold: 99.9%,
       endpoint: "who-am-i",
       env: "production",
       threshold_in_seconds: 0.25
@@ -275,17 +275,17 @@ _common_basic (Provides): { window_in_days: 30 }
 Expectations for "Auth Success Rate"
   * "Signin Success Rate" extends [_common_basic, _common_sign_in]:
     Provides {
-      threshold: 99.9
+      threshold: 99.9%
     }
   * "WhoAmI Success Rate" extends [_common_basic, _common_who_am_i]:
     Provides {
-      threshold: 99
+      threshold: 99%
     }
 
 Expectations for "Auth Latency"
   * "Signin Latency" extends [_common_basic, _common_sign_in]:
     Provides {
-      threshold: 99.9,
+      threshold: 99.9%,
       threshold_in_seconds: 1
     }
   * "WhoAmI Latency" extends [_common_basic, _common_who_am_i]:
@@ -293,7 +293,7 @@ Expectations for "Auth Latency"
       # more strict about the latency than the success rate for
       # threshold as well (the % of 5m intervals where the latency
       # is within the threshold_in_seconds)
-      threshold: 99.9,
+      threshold: 99.9%,
       threshold_in_seconds: 0.25
     }
 ```

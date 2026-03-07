@@ -15,7 +15,7 @@ _name (Kind): { field: value, ... }
 **Two Kinds of Extendables:**
 
 | Kind         | Contains          | Allowed In                      |
-|--------------|-------------------|---------------------------------|
+| ------------ | ----------------- | ------------------------------- |
 | `(Requires)` | Type declarations | Blueprint files only            |
 | `(Provides)` | Literal values    | Blueprint and expectation files |
 
@@ -53,7 +53,7 @@ Expectations can only use `(Provides)` extendables:
 
 ```
 _defaults (Provides): { env: "production", window_in_days: 30 }
-_strict (Provides): { threshold: 99.99, window_in_days: 7 }
+_strict (Provides): { threshold: 99.99%, window_in_days: 7 }
 
 Expectations for "api_availability"
   * "critical_service" extends [_defaults, _strict]:
@@ -69,7 +69,7 @@ Expectations for "api_availability"
       status: true,
        env: "production",
        window_in_days: 30,
-       threshold: 99.99,
+       threshold: 99.99%,
        window_in_days: 7
     }
 ```

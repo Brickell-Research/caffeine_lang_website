@@ -3,5 +3,5 @@ Expectations for "Simple_SLO"
     Provides {
       service_name: "hello-world",
       excluded_service_name: "foobar",
-      threshold: 99.9,
+      threshold: 99.9%
     }

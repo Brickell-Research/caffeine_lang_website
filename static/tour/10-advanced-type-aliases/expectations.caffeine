@@ -4,11 +4,8 @@ Expectations for "api_availability"
   * "checkout_availability" extends [_common]:
     Provides {
       # env is default value here
-      threshold: 99.95
+      threshold: 99.95%
     }
 
   * "staging_checkout" extends [_common]:
-    Provides {
-      env: "staging",
-      threshold: 95.0
-    }
+    Provides { env: "staging", threshold: 95.0% }
