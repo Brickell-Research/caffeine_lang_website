@@ -6,7 +6,7 @@ import { marked } from 'https://esm.sh/marked@15';
 // ─── Lesson Definitions ─────────────────────────────────────────────────────
 // Each lesson maps to a folder in /tour/{id}/ containing:
 //   - lesson.md (body content)
-//   - measurements.caffeine (left editor)
+//   - datadog.caffeine (left editor)
 //   - expectations.caffeine (right editor)
 
 const lessonFolders = [
@@ -29,7 +29,7 @@ const lessonFolders = [
 async function fetchLesson(folder) {
   const [bodyMd, measurements, expectations] = await Promise.all([
     fetch(`/tour/${folder.id}/lesson.md`).then(r => r.text()),
-    fetch(`/tour/${folder.id}/measurements.caffeine`).then(r => r.text()),
+    fetch(`/tour/${folder.id}/datadog.caffeine`).then(r => r.text()),
     fetch(`/tour/${folder.id}/expectations.caffeine`).then(r => r.text()),
   ]);
   return {

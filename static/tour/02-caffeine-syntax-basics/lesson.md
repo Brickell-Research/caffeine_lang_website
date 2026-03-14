@@ -4,7 +4,7 @@ All Caffeine files end with the `.caffeine` file extension. There are two types 
 
 | File                             | Contains                                                                                                                   |
 |----------------------------------|----------------------------------------------------------------------------------------------------------------------------|
-| `measurements.caffeine`            | **Measurements** with optional type aliases and/or extendables.                                                              |
+| `datadog.caffeine`            | **Measurements** with optional type aliases and/or extendables.                                                              |
 | `ORG/TEAM/SERVICE.caffeine`      | **Expectation** with optional extendables. One file per org/team/service combination. As denoted, file path is meaningful. |
 
 Comments in Caffeine are _Ruby like_ and useful for surfacing tacit information about an expectation.

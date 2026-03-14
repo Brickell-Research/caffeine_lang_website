@@ -85,7 +85,7 @@ pub fn view() -> Element(Nil) {
                   html.text("Measurement"),
                 ]),
                 html.span([attribute.class("editor-filename")], [
-                  html.text("measurements.caffeine"),
+                  html.text("datadog.caffeine"),
                 ]),
               ]),
               html.div(
