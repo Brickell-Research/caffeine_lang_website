@@ -13,7 +13,8 @@ export function compile(measurementsText, expectationsText, configPath) {
   const result = compile_from_strings(
     measurementsText,
     expectationsText,
-    configPath
+    configPath,
+    "datadog"
   );
 
   if (result.isOk()) {
