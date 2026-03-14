@@ -13,7 +13,8 @@ export function compile(measurementsText, expectationsText, configPath) {
   const result = compile_from_strings(
     measurementsText,
     expectationsText,
-    configPath
+    configPath,
+    "datadog"
   );
 
   if (result.isOk()) {
@@ -34,7 +35,7 @@ export function setupCompileOutput(outputDisplay, getMeasurements, getExpectatio
     const outputCode = outputDisplay.querySelector('code') || outputDisplay;
 
     try {
-      const result = compile(getMeasurements(), getExpectations(), configPath);
+      const result = compile(getMeasurements(), getExpectations(), configPath, "datadog");
 
       outputCode.textContent = result;
       outputCode.className = 'language-hcl';
