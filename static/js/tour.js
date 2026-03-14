@@ -5,8 +5,8 @@ import { marked } from 'https://esm.sh/marked@15';
 
 // ─── Lesson Definitions ─────────────────────────────────────────────────────
 // Each lesson maps to a folder in /tour/{id}/ containing:
-//   - lesson.html (body content)
-//   - blueprints.caffeine (left editor)
+//   - lesson.md (body content)
+//   - measurements.caffeine (left editor)
 //   - expectations.caffeine (right editor)
 
 const lessonFolders = [
@@ -14,10 +14,10 @@ const lessonFolders = [
   { id: '01.5-getting-started', title: 'Getting Started', editorsDisabled: true },
   { id: '02-caffeine-syntax-basics', title: 'Syntax Basics', editorsDisabled: true },
   { id: '03-type-system', title: 'The Type System' , editorsDisabled: false },
-  { id: '04-artifacts-overview', title: 'Everything Starts with an Artifact', editorsDisabled: true },
-  { id: '05-artifacts-slos', title: 'Artifact - Service Level Objectives' , editorsDisabled: false },
-  { id: '06-artifacts-dependency-relations', title: '[Experimental] Artifact - Dependency Relations' , editorsDisabled: true },
-  { id: '07-blueprints-overview', title: 'Blueprints, The Template Layer' , editorsDisabled: false },
+  { id: '04-slo-parameters', title: 'SLO Parameters', editorsDisabled: true },
+  { id: '05-dependencies', title: 'Dependencies' , editorsDisabled: false },
+  { id: '06-unmeasured-expectations', title: 'Unmeasured Expectations' , editorsDisabled: true },
+  { id: '07-measurements-overview', title: 'Measurements: The Template Layer' , editorsDisabled: false },
   { id: '08-expectations-overview', title: 'Expectations: Declarative Assertions over Service Properties' , editorsDisabled: false },
   { id: '09-advanced-extendables', title: '[Advanced]: Extendables' , editorsDisabled: false },
   { id: '10-advanced-type-aliases', title: '[Advanced]: Type Aliases' , editorsDisabled: false },
@@ -27,15 +27,15 @@ const lessonFolders = [
 // ─── Lesson Loading ─────────────────────────────────────────────────────────
 
 async function fetchLesson(folder) {
-  const [bodyMd, blueprints, expectations] = await Promise.all([
+  const [bodyMd, measurements, expectations] = await Promise.all([
     fetch(`/tour/${folder.id}/lesson.md`).then(r => r.text()),
-    fetch(`/tour/${folder.id}/blueprints.caffeine`).then(r => r.text()),
+    fetch(`/tour/${folder.id}/measurements.caffeine`).then(r => r.text()),
     fetch(`/tour/${folder.id}/expectations.caffeine`).then(r => r.text()),
   ]);
   return {
     title: folder.title,
     body: marked.parse(bodyMd),
-    blueprints,
+    measurements,
     expectations,
   };
 }
@@ -99,26 +99,26 @@ function init() {
   }
 
   // Create CodeMirror editors
-  const bpContainer = document.getElementById('tour-blueprints-editor');
+  const measurementsContainer = document.getElementById('tour-measurements-editor');
   const expContainer = document.getElementById('tour-expectations-editor');
 
-  if (!bpContainer || !expContainer) {
+  if (!measurementsContainer || !expContainer) {
     console.error('Tour: Missing editor containers');
     return;
   }
 
-  let blueprintsEditor, expectationsEditor;
+  let measurementsEditor, expectationsEditor;
 
   const runCompile = setupCompileOutput(
     outputDisplay,
-    () => getContent(blueprintsEditor),
+    () => getContent(measurementsEditor),
     () => getContent(expectationsEditor),
     "tour/demo/service.caffeine"
   );
 
   const debouncedCompile = debounce(runCompile, 500);
 
-  blueprintsEditor = createCaffeineEditor(bpContainer, '', debouncedCompile);
+  measurementsEditor = createCaffeineEditor(measurementsContainer, '', debouncedCompile);
   expectationsEditor = createCaffeineEditor(expContainer, '', debouncedCompile);
 
   // Scroll fades for lesson panel
@@ -127,12 +127,12 @@ function init() {
   const updateLessonFade = setupScrollFade(lessonPanel, lessonContent);
 
   // Scroll fades for editor and output panels
-  const bpPanel = bpContainer.closest('.tour-editor-panel');
+  const measurementsPanel = measurementsContainer.closest('.tour-editor-panel');
   const expPanel = expContainer.closest('.tour-editor-panel');
   const outPanel = document.querySelector('.tour-output-panel');
   const outScroller = outPanel?.querySelector('.output-content');
 
-  const updateBpFade = setupScrollFade(bpPanel, bpContainer.querySelector('.cm-scroller'));
+  const updateMeasurementsFade = setupScrollFade(measurementsPanel, measurementsContainer.querySelector('.cm-scroller'));
   const updateExpFade = setupScrollFade(expPanel, expContainer.querySelector('.cm-scroller'));
   const updateOutFade = setupScrollFade(outPanel, outScroller);
 
@@ -157,13 +157,13 @@ function init() {
     if (folder.editorsDisabled) {
       editorsContainer.classList.add('editors-disabled');
       outputPanel.classList.add('editors-disabled');
-      setContent(blueprintsEditor, '# Editors not available for this lesson');
+      setContent(measurementsEditor, '# Editors not available for this lesson');
       setContent(expectationsEditor, '# Editors not available for this lesson');
       outputDisplay.innerHTML = '<code class="language-hcl">// Editors not available for this lesson</code>';
     } else {
       editorsContainer.classList.remove('editors-disabled');
       outputPanel.classList.remove('editors-disabled');
-      setContent(blueprintsEditor, lesson.blueprints);
+      setContent(measurementsEditor, lesson.measurements);
       setContent(expectationsEditor, lesson.expectations);
       runCompile();
     }
@@ -178,7 +178,7 @@ function init() {
     // Re-check scroll fades after content changes
     setTimeout(() => {
       updateLessonFade();
-      updateBpFade();
+      updateMeasurementsFade();
       updateExpFade();
       updateOutFade();
     }, 50);

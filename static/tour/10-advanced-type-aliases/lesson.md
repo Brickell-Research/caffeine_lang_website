@@ -1,4 +1,4 @@
-**Type Aliases** are reusable, named types. They let you define a constrained type once and reference it throughout your blueprints, reducing repetition and ensuring consistency.
+**Type Aliases** are reusable, named types. They let you define a constrained type once and reference it throughout your measurements, reducing repetition and ensuring consistency.
 
 **Syntax:**
 
@@ -14,7 +14,7 @@ field: List(_name)
 field: Dict(_name, String)
 ```
 
-Type aliases can be used in `requires` blocks, both within an extendable or within a blueprint definition:
+Type aliases can be used in `requires` blocks, both within an extendable or within a measurement definition:
 
 ```
 # Type Aliases
@@ -24,9 +24,9 @@ _indicators (Type): { numerator: String, denominator: String }
 # Extendables
 _common (Provides): { excluded_env: Optional(_env) }
 
-# Blueprints
-Blueprints for "SLO"
-  * "my_blueprint" extends [_common]:
+# Measurements
+Measurements
+  "my_measurement" extends [_common]:
     Requires {
       env: Defaulted(_env, "prod"),
       backup_env: Optional(_env),
@@ -39,7 +39,7 @@ Blueprints for "SLO"
 
 - Names must start with an underscore (`_`)
 - Must specify kind: `(Type)`
-- Must be at top of file (before extendables and blueprints)
+- Must be at top of file (before extendables and measurements)
 - File-scoped only (cannot reference across files)
 - Can alias refinement types (OneOf or InclusiveRange) or record types
 

@@ -1,0 +1,7 @@
+Expectations measured by "Simple_SLO"
+  * "My First SLO":
+  Provides {
+    service_name: "hello-world",
+    excluded_service_name: "foobar",
+    threshold: 99.9%
+    }

@@ -82,15 +82,15 @@ pub fn view() -> Element(Nil) {
             html.div([attribute.class("editor-panel tour-editor-panel")], [
               html.div([attribute.class("editor-header")], [
                 html.span([attribute.class("editor-label")], [
-                  html.text("Blueprint"),
+                  html.text("Measurement"),
                 ]),
                 html.span([attribute.class("editor-filename")], [
-                  html.text("blueprints.caffeine"),
+                  html.text("measurements.caffeine"),
                 ]),
               ]),
               html.div(
                 [
-                  attribute.id("tour-blueprints-editor"),
+                  attribute.id("tour-measurements-editor"),
                   attribute.class("editor"),
                 ],
                 [],

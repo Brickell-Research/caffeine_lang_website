@@ -1,0 +1,25 @@
+## ==== Type Aliases ====
+_env (Type): String { x | x in { "production", "staging", "testing" } }
+
+## ==== Extendables ====
+_auth_service_common (Requires): { env: _env, endpoint: String }
+
+## ==== Measurements ====
+"Auth Success Rate" extends [_auth_service_common]:
+  Requires { }
+  Provides {
+    indicators: {
+      valid: "sum:requests{status:valid, $$environment->env$$, $$endpoint->endpoint$$}",
+      total: "sum:requests{$$environment->env$$, $$endpoint->endpoint$$}"
+    },
+    evaluation: "total / valid"
+  }
+
+"Auth Latency" extends [_auth_service_common]:
+  Requires { threshold_in_seconds: Float }
+  Provides {
+    indicators: {
+      latency: "p75:latency{$$environment->env$$, $$endpoint->endpoint$$}"
+    },
+    evaluation: "time_slice(latency < $$threshold_in_seconds$$ per 5m)"
+  }

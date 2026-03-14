@@ -10,9 +10,9 @@ import { oneDark } from '@codemirror/theme-one-dark';
 // ─── Caffeine Language Mode ─────────────────────────────────────────────────
 
 const keywords = new Set([
-  'Blueprints', 'Expectations', 'Expects',
+  'Expectations', 'Unmeasured',
   'Requires', 'Provides',
-  'for', 'extends', 'in',
+  'measured', 'by', 'extends', 'in',
 ]);
 
 const types = new Set([

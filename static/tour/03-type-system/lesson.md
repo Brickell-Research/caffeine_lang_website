@@ -41,7 +41,7 @@ Records let you define structured parameters where each field has its own type. 
 | OneOf          | Value must be one of a finite set                    | `String { x \| x in { "a", "b", "c" } }`      |
 | InclusiveRange | Value must be within a numeric range (inclusive)     | `Float { x \| x in ( 0.0..100.0 ) }`          |
 
-> Try changing `service_name: "hello-world"` to `service_name: 10` within the **expectation** file below to see a type error. Don't get too hung up on what Expectations or Blueprints are. We will explain in lessons to come!
+> Try changing `service_name: "hello-world"` to `service_name: 10` within the **expectation** file below to see a type error. Don't get too hung up on what Expectations or Measurements are. We will explain in lessons to come!
 
 <br>
 

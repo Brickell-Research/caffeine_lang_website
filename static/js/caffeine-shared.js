@@ -9,9 +9,9 @@ export function debounce(fn, delay) {
   };
 }
 
-export function compile(blueprintsText, expectationsText, configPath) {
+export function compile(measurementsText, expectationsText, configPath) {
   const result = compile_from_strings(
-    blueprintsText,
+    measurementsText,
     expectationsText,
     configPath
   );
@@ -23,7 +23,7 @@ export function compile(blueprintsText, expectationsText, configPath) {
   }
 }
 
-export function setupCompileOutput(outputDisplay, getBlueprints, getExpectations, configPath) {
+export function setupCompileOutput(outputDisplay, getMeasurements, getExpectations, configPath) {
   function runCompile() {
     // Skip compilation if editors are disabled (tour mode)
     const outputPanel = outputDisplay.closest('.tour-output-panel');
@@ -34,7 +34,7 @@ export function setupCompileOutput(outputDisplay, getBlueprints, getExpectations
     const outputCode = outputDisplay.querySelector('code') || outputDisplay;
 
     try {
-      const result = compile(getBlueprints(), getExpectations(), configPath);
+      const result = compile(getMeasurements(), getExpectations(), configPath);
 
       outputCode.textContent = result;
       outputCode.className = 'language-hcl';

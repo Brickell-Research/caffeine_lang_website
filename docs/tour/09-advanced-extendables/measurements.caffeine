@@ -1,0 +1,12 @@
+"api_availability":
+  Requires {
+    status: Boolean,
+    env: String
+  }
+  Provides {
+    evaluation: "numerator / denominator",
+    indicators: {
+      numerator: "sum:http.requests{$$env->env$$, $$status->status:not$$}",
+      denominator: "sum:http.requests{$$env->env$$}"
+    },
+  }

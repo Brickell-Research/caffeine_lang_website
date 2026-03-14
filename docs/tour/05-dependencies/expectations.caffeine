@@ -1,0 +1,16 @@
+Expectations measured by "Simple_SLO"
+  * "checkout_slo":
+    Provides {
+      service_name: "checkout-api",
+      threshold: 99.9%,
+      depends_on: { hard: ["acme.platform.auth.login_slo"] }
+    }
+  * "payment_slo":
+    Provides {
+      service_name: "payment-api",
+      threshold: 99.5%,
+      depends_on: {
+        hard: ["acme.platform.auth.login_slo"],
+        soft: ["acme.platform.cache.redis_slo"]
+      }
+    }

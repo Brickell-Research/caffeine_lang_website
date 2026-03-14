@@ -1,0 +1,9 @@
+"Simple_SLO":
+  Requires { service_name: String }
+  Provides {
+    indicators: {
+      numerator: "sum:successes{$$service->service_name$$}",
+      denominator: "sum:total{$$service->service_name$$}"
+    },
+    evaluation: "numerator / denominator"
+  }

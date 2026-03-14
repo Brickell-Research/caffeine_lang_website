@@ -1,0 +1,19 @@
+# Type aliases for common constraints
+_env (Type): String { x | x in { "prod", "staging", "dev" } }
+
+# Extendable using type aliases
+_common (Requires): {
+  env: Defaulted(_env, "prod"),
+}
+
+"api_availability" extends [_common]:
+  Requires {
+    status: Boolean,
+  }
+  Provides {
+    evaluation: "numerator / denominator",
+    indicators: {
+      numerator: "sum:http.requests{$$env->env$$, $$status->status:not$$}",
+      denominator: "sum:http.requests{$$env->env$$}"
+  }
+  }
