@@ -1,0 +1,25 @@
+static/tour/09-advanced-extendables/measurements.caffeine
+  25b9d793179f81ec 11
+static/tour/10-advanced-type-aliases/measurements.caffeine
+  25b9d793179f81ec 5,8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.10",
+  "base_commit_sha": "27db66beaa884e3a97f0a43d5a8fe3ebe37c54bd",
+  "prompts": {
+    "25b9d793179f81ec": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "80725944-236c-4e4b-b156-d98443b9eab1",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "robertDurst <me@robdurst.com>",
+      "messages": [],
+      "total_additions": 8,
+      "total_deletions": 12,
+      "accepted_lines": 3,
+      "overriden_lines": 0
+    }
+  }
+}
