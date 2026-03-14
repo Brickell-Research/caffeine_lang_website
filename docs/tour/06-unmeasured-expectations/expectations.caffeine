@@ -3,7 +3,7 @@ Expectations measured by "Simple_SLO"
     Provides {
       service_name: "checkout-api",
       threshold: 99.9%,
-      depends_on: { hard: ["acme.infra.cloud.provider_uptime"] }
+      depends_on: { hard: ["tour.demo.service.provider_uptime"] }
     }
 
 Unmeasured Expectations
