@@ -35,4 +35,4 @@ The compiler validates dependencies at compile time:
 - No circular dependency chains
 - Hard dependency threshold ceiling — a service's threshold cannot exceed the composite availability of its hard dependencies
 
-> The example shows expectations with hard and soft dependencies declared via `depends_on`.
+> The example shows an expectation with a dependency declared via `depends_on`.
