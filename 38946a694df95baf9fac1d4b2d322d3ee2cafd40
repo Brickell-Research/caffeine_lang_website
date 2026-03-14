@@ -1,0 +1,25 @@
+static/tour/06-unmeasured-expectations/expectations.caffeine
+  25b9d793179f81ec 6
+static/tour/05-dependencies/expectations.caffeine
+  25b9d793179f81ec 5,12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.10",
+  "base_commit_sha": "38946a694df95baf9fac1d4b2d322d3ee2cafd40",
+  "prompts": {
+    "25b9d793179f81ec": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "80725944-236c-4e4b-b156-d98443b9eab1",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "robertDurst <me@robdurst.com>",
+      "messages": [],
+      "total_additions": 3,
+      "total_deletions": 5,
+      "accepted_lines": 3,
+      "overriden_lines": 0
+    }
+  }
+}
