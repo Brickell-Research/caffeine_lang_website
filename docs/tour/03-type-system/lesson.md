@@ -45,7 +45,7 @@ Records let you define structured parameters where each field has its own type. 
 
 <br>
 
-**Bonus:** if you chose to install the compiler locally, you can run the `caffeine types` command to get an overview of currently supported types. Here is what it looks like as of `v4.4.0`:
+**Bonus:** if you chose to install the compiler locally, you can run the `caffeine types` command to get an overview of currently supported types. Here is what it looks like as of `v5.0.0`:
 
 ```bash
 > ✗ caffeine types
