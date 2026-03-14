@@ -1,6 +1,6 @@
-Sometimes you need to declare an expectation for a service you don't directly measure, i.e. a third-party dependency or an external SLA. These are **Unmeasured Expectations**.
+Sometimes you need to declare an expectation for a service you don't directly measure — a third-party dependency or an external SLA. These are **Unmeasured Expectations**.
 
-Unmeasured Expectations have no measurement backing. They don't generate Terraform resources, but they do participate in the dependency graph (and thus show up in certain artifacts, i.e. a mermaid diagram). This makes them useful for:
+Unmeasured Expectations have no measurement backing. They don't generate Terraform resources, but they participate in the dependency graph. This makes them useful for:
 * representing third-party SLAs (e.g., "our cloud provider guarantees 99.95% uptime")
 * declaring expectations for external services that other expectations depend on
 * completing the dependency picture without requiring query instrumentation

@@ -8,8 +8,8 @@ Dependencies are declared via the optional `depends_on` field within an expectat
 
 | Type | Description |
 |------|-------------|
-| hard | Critical dependency: if it fails, this service fails |
-| soft | Non-critical: service continues in a degraded state |
+| hard | Critical dependency — if it fails, this service fails |
+| soft | Non-critical — service continues in a degraded state |
 
 **Syntax:**
 

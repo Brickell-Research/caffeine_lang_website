@@ -1,4 +1,4 @@
-Every expectation in Caffeine, if measured, defines an SLO. SLO measurements are defined through a set of well-known parameters. When you write a measurement, you specify the query structure and evaluation logic. When you write an expectation, you fill in the remaining values like the target threshold and observation window.
+Every SLO in Caffeine is defined through a set of parameters. When you write a measurement, you specify the query structure and evaluation logic. When you write an expectation, you fill in the remaining values like the target threshold and observation window.
 
 Here are the parameters that make up an SLO:
 
@@ -12,7 +12,7 @@ Here are the parameters that make up an SLO:
 | runbook        | `Optional(URL)`                                       | Optional runbook URL for the SLO description  |
 | depends_on     | `Optional({ hard: List(String), soft: List(String) })`| Optional dependency declarations              |
 
-In practice, a measurement typically provides the `indicators` and `evaluation` (the query structure), while the expectation provides the `threshold` and optionally overrides `window_in_days` and/or provides `depends_on` values.
+In practice, a measurement typically provides the `indicators` and `evaluation` (the query structure), while the expectation provides the `threshold` and optionally overrides `window_in_days`.
 
 The vendor (Datadog, Dynatrace, Honeycomb, or New Relic) is determined by the measurement filename (e.g., `datadog.caffeine`, `honeycomb.caffeine`).
 

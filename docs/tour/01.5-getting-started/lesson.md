@@ -14,6 +14,6 @@ Verify it worked:
 caffeine
 ```
 
-**Tip:** For the best experience, install the [Caffeine IDE extension](https://marketplace.visualstudio.com/items?itemName=BrickellResearch.caffeine-ide) for VS Code as well. Our `LSP` is a first class citizen and we've spent some time ensuring the best possible developer experience!
+**Tip:** For the best experience, install the [Caffeine IDE extension](https://marketplace.visualstudio.com/items?itemName=BrickellResearch.caffeine-ide) for VS Code.
 
 > Hit **Next** to continue to the language syntax.

@@ -16,7 +16,7 @@ Here are the user expectations we came up with:
 1. a user is able to sign in with valid credentials quickly (within 1 second) and successfully _nearly all the time_ (99.9% of the time). This is a **critical** feature requiring strict constraints. However, as stated, users only login once per session so waiting up to 1 second is fine.
 2. a user is able to fetch information about themselves mostly all the time (99% success rate), but it must return quickly (within 250ms). This is an operation users do numerous times per session.
 
-The first step here is to define the measurements. The typical process is:
+The first step here is to define the measurements for the `SLO` SLO parameter. The typical process is:
 
 1. figure out which type of SLO we're working with. For success rate we usually use a `Ratio` and for latency over time we use a `Time Slice`.
 2. determine the indicators needed to emulate the user journeys and satisfy the SLO types. This is the `indicators` attribute.
@@ -32,34 +32,34 @@ Ok, let's walk through this.
 First, let's define the structure of each measurement. Here is what the basic outline looks like. We will have two measurements, one for `Auth Success Rate` and one for `Auth Latency`.
 
 ```
-"Auth Success Rate":
-  Requires {}
-  Provides {}
-
-"Auth Latency":
-  Requires {}
-  Provides {}
+Measurements
+  "Auth Success Rate":
+    Requires {}
+    Provides {}
+  "Auth Latency":
+    Requires {}
+    Provides {}
 ```
 
 We already did the groundwork for step one by choosing the SLO types, for step two we fill in the indicators.
 
 ```
-"Auth Success Rate":
-  Requires {}
-  Provides {
-    indicators: {
-      valid: "sum:requests{status:valid}",
-      total: "sum:requests{}"
+Measurements
+  "Auth Success Rate":
+    Requires {}
+    Provides {
+      indicators: {
+        valid: "sum:requests{status:valid}",
+        total: "sum:requests{}"
+      }
     }
-  }
-
-"Auth Latency":
-  Requires {}
-  Provides {
-    indicators: {
-      latency: "p75:latency{}"
+  "Auth Latency":
+    Requires {}
+    Provides {
+      indicators: {
+        latency: "p75:latency{}"
+      }
     }
-  }
 ```
 
 Again, there is a lot of thinking and iteration to ensure your indicators (SLIs) properly reflect the user experience you intend to emulate/capture. This topic is beyond the scope of the tour.
@@ -67,58 +67,58 @@ Again, there is a lot of thinking and iteration to ensure your indicators (SLIs)
 For step (3) we want to ensure we're (a) pointing at the right environment and (b) filtering to the correct endpoint. So, we update our indicator strings and requires blocks. For now we'll just type these two attributes as `String` and `String`.
 
 ```
-"Auth Success Rate":
-  Requires {
-    env: String,
-    endpoint: String
-  }
-  Provides {
-    indicators: {
-      valid: "sum:requests{status:valid, $$environment->env$$, $$endpoint->endpoint$$}",
-      total: "sum:requests{$$environment->env$$, $$endpoint->endpoint$$}"
+Measurements
+  "Auth Success Rate":
+    Requires {
+      env: String,
+      endpoint: String
     }
-  }
-
-"Auth Latency":
-  Requires {
-    env: String,
-    endpoint: String
-  }
-  Provides {
-    indicators: {
-      latency: "p75:latency{$$environment->env$$, $$endpoint->endpoint$$}"
+    Provides {
+      indicators: {
+        valid: "sum:requests{status:valid, $$environment->env$$, $$endpoint->endpoint$$}",
+        total: "sum:requests{$$environment->env$$, $$endpoint->endpoint$$}"
+      }
     }
-  }
+  "Auth Latency":
+    Requires {
+      env: String,
+      endpoint: String
+    }
+    Provides {
+      indicators: {
+        latency: "p75:latency{$$environment->env$$, $$endpoint->endpoint$$}"
+      }
+    }
 ```
 
 For step (4), we now have all our indicators and know which type of SLO we're working with, so we can declare the `evaluation` within the `provides` block. We'll also complete step (5) too since it's straightforward. For the Time Slice we actually have an extra `require` to add for the `threshold_in_seconds`.
 
 ```
-"Auth Success Rate":
-  Requires {
-    env: String,
-    endpoint: String
-  }
-  Provides {
-    indicators: {
-      valid: "sum:requests{status:valid, $$environment->env$$, $$endpoint->endpoint$$}",
-      total: "sum:requests{$$environment->env$$, $$endpoint->endpoint$$}"
-    },
-    evaluation: "total / valid",
-  }
-
-"Auth Latency":
-  Requires {
-    env: String,
-    endpoint: String,
-    threshold_in_seconds: Float
-  }
-  Provides {
-    indicators: {
-      latency: "p75:latency{$$environment->env$$, $$endpoint->endpoint$$}"
-    },
-    evaluation: "time_slice(latency < $$threshold_in_seconds$$ per 5m)",
-  }
+Measurements
+  "Auth Success Rate":
+    Requires {
+      env: String,
+      endpoint: String
+    }
+    Provides {
+      indicators: {
+        valid: "sum:requests{status:valid, $$environment->env$$, $$endpoint->endpoint$$}",
+        total: "sum:requests{$$environment->env$$, $$endpoint->endpoint$$}"
+      },
+      evaluation: "total / valid",
+    }
+  "Auth Latency":
+    Requires {
+      env: String,
+      endpoint: String,
+      threshold_in_seconds: Float
+    }
+    Provides {
+      indicators: {
+        latency: "p75:latency{$$environment->env$$, $$endpoint->endpoint$$}"
+      },
+      evaluation: "time_slice(latency < $$threshold_in_seconds$$ per 5m)",
+    }
 ```
 
 And we have our measurements fully defined! If unsure, reference the SLO parameter definition in the `SLO Parameters - Service Level Objectives` lesson.
@@ -130,24 +130,24 @@ We could stop here, however we'll reduce duplication with a couple extendables.
 _auth_service_common (Requires): { env: String, endpoint: String }
 
 ## ==== Measurements ====
-"Auth Success Rate" extends [_auth_service_common]:
-  Requires {}
-  Provides {
-    indicators: {
-      valid: "sum:requests{status:valid, $$environment->env$$, $$endpoint->endpoint$$}",
-      total: "sum:requests{$$environment->env$$, $$endpoint->endpoint$$}"
-    },
-    evaluation: "total / valid"
-  }
-
-"Auth Latency"  extends [_auth_service_common]:
-  Requires { threshold_in_seconds: Float }
-  Provides {
-    indicators: {
-      latency: "p75:latency{$$environment->env$$, $$endpoint->endpoint$$}"
-    },
-    evaluation: "time_slice(latency < $$threshold_in_seconds$$ per 5m)"
-  }
+Measurements
+  "Auth Success Rate" extends [_auth_service_common]:
+    Requires {}
+    Provides {
+      indicators: {
+        valid: "sum:requests{status:valid, $$environment->env$$, $$endpoint->endpoint$$}",
+        total: "sum:requests{$$environment->env$$, $$endpoint->endpoint$$}"
+      },
+      evaluation: "total / valid"
+    }
+  "Auth Latency"  extends [_auth_service_common]:
+    Requires { threshold_in_seconds: Float }
+    Provides {
+      indicators: {
+        latency: "p75:latency{$$environment->env$$, $$endpoint->endpoint$$}"
+      },
+      evaluation: "time_slice(latency < $$threshold_in_seconds$$ per 5m)"
+    }
 ```
 
 Furthermore, while there are 100s of endpoints (our auth service is huge!!!) we know that there are only a handful of environments. We could specify this refinement type within the extendable, however we'll leverage the type alias so that other, future measurements can make use of it as well.
@@ -160,24 +160,24 @@ _env (Type): String { x | x in { "testing", "staging", "production" } }
 _auth_service_common (Requires): { env: _env, endpoint: String }
 
 ## ==== Measurements ====
-"Auth Success Rate" extends [_auth_service_common]:
-  Requires {}
-  Provides {
-    indicators: {
-      valid: "sum:requests{status:valid, $$environment->env$$, $$endpoint->endpoint$$}",
-      total: "sum:requests{$$environment->env$$, $$endpoint->endpoint$$}"
-    },
-    evaluation: "total / valid"
-  }
-
-"Auth Latency"  extends [_auth_service_common]:
-  Requires { threshold_in_seconds: Float }
-  Provides {
-    indicators: {
-      latency: "p75:latency{$$environment->env$$, $$endpoint->endpoint$$}"
-    },
-    evaluation: "time_slice(latency < $$threshold_in_seconds$$ per 5m)"
-  }
+Measurements
+  "Auth Success Rate" extends [_auth_service_common]:
+    Requires {}
+    Provides {
+      indicators: {
+        valid: "sum:requests{status:valid, $$environment->env$$, $$endpoint->endpoint$$}",
+        total: "sum:requests{$$environment->env$$, $$endpoint->endpoint$$}"
+      },
+      evaluation: "total / valid"
+    }
+  "Auth Latency"  extends [_auth_service_common]:
+    Requires { threshold_in_seconds: Float }
+    Provides {
+      indicators: {
+        latency: "p75:latency{$$environment->env$$, $$endpoint->endpoint$$}"
+      },
+      evaluation: "time_slice(latency < $$threshold_in_seconds$$ per 5m)"
+    }
 ```
 
 With our measurements now complete, we'll move on to expectations. For this example, our team owns all these expectations AND they're all for the same service. Thus, we put these within the same file. Let's setup the structure for our four expectations:
@@ -256,7 +256,7 @@ Expectations measured by "Auth Latency"
     }
 ```
 
-And finally if we want, we can leverage a few extendables to reduce duplication.
+And finally if we want, we can leverage a couple extendables to reduce duplication.
 
 
 ```

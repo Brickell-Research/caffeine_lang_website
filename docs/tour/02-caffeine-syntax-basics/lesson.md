@@ -4,7 +4,7 @@ All Caffeine files end with the `.caffeine` file extension. There are two types 
 
 | File                             | Contains                                                                                                                   |
 |----------------------------------|----------------------------------------------------------------------------------------------------------------------------|
-| `VENDOR_NAME.caffeine`            | **Measurements** with optional type aliases and/or extendables.                                                              |
+| `measurements.caffeine`            | **Measurements** with optional type aliases and/or extendables.                                                              |
 | `ORG/TEAM/SERVICE.caffeine`      | **Expectation** with optional extendables. One file per org/team/service combination. As denoted, file path is meaningful. |
 
 Comments in Caffeine are _Ruby like_ and useful for surfacing tacit information about an expectation.
@@ -26,23 +26,17 @@ The literals of the language are fairly straightforward, following the cue of ma
 
 **Indentation:**
 
-Caffeine uses indentation to denote structure. Blocks under `*` items must be indented and each name following a `*` must be unique per file. Furthermore, each block following the `*` line must be twice indented. See below.
+Caffeine uses indentation to denote structure. Blocks under `*` items must be indented and each name following a `*` must be unique per file. Furthermore, each block following the `*` line must be twice indented.
 
-**A measurement:**
 ```
-"My_Measurement":
-  Requires { ... }
-  Provides { ... }
-```
-
-**An expectation:**
-```
-Expectations measured by "My_Measurement"
-  * "Some Expectation":
+Measurements
+  "My_Measurement":
+    Requires { ... }
     Provides { ... }
 ```
 
 There are just a few keywords in the Caffeine language. Here they are along with their significance/meaning:
+* `Measurements`: prefaces measurement(s) declaration(s) for one or more SLO parameters
 * `Expectations measured by`: prefaces expectation(s) declaration(s) for a specific measurement
 * `Requires`: signifies a requirements block
 * `Provides`: signifies a provide block
