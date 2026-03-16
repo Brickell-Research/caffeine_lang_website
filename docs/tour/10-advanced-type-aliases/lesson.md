@@ -25,13 +25,12 @@ _indicators (Type): { numerator: String, denominator: String }
 _common (Provides): { excluded_env: Optional(_env) }
 
 # Measurements
-Measurements
-  "my_measurement" extends [_common]:
-    Requires {
-      env: Defaulted(_env, "prod"),
-      backup_env: Optional(_env),
-      all_envs: List(_env),
-      indicators: _indicators
+"my_measurement" extends [_common]:
+  Requires {
+    env: Defaulted(_env, "prod"),
+    backup_env: Optional(_env),
+    all_envs: List(_env),
+    indicators: _indicators
     }
 ```
 

@@ -28,7 +28,7 @@ The literals of the language are fairly straightforward, following the cue of ma
 
 Caffeine uses indentation to denote structure.
 
-**Measurements:** ``Provides` and `Requires` indented on new lines following the measurement name.
+**Measurements:** `Provides` and `Requires` indented on new lines following the measurement name.
 ```
 "My_Measurement":
   Requires { ... }
