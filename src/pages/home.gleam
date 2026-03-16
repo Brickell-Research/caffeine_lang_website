@@ -26,8 +26,8 @@ pub fn view() -> Element(Nil) {
             [html.text("Get Started (" <> version.latest_version <> ")")],
           ),
           html.a(
-            [attribute.href("/blog"), attribute.class("btn btn-secondary")],
-            [html.text("Read the Blog")],
+            [attribute.href("/tour"), attribute.class("btn btn-secondary")],
+            [html.text("Take the Tour")],
           ),
         ]),
       ]),
