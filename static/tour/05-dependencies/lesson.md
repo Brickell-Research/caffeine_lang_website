@@ -8,8 +8,8 @@ Dependencies are declared via the optional `depends_on` field within an expectat
 
 | Type | Description |
 |------|-------------|
-| hard | Critical dependency — if it fails, this service fails |
-| soft | Non-critical — service continues in a degraded state |
+| hard | Critical dependency: if it fails, this service fails |
+| soft | Non-critical: service continues in a degraded state |
 
 **Syntax:**
 
@@ -33,6 +33,6 @@ Targets use dot-separated paths matching the expectation file structure: `ORG.TE
 The compiler validates dependencies at compile time:
 - All referenced targets must exist
 - No circular dependency chains
-- Hard dependency threshold ceiling — a service's threshold cannot exceed the composite availability of its hard dependencies
+- Hard dependency threshold ceiling: a service's threshold cannot exceed the composite availability of its hard dependencies
 
 > The example shows an expectation with a dependency declared via `depends_on`.

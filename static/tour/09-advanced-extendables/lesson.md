@@ -31,18 +31,17 @@ _name (Kind): { field: value, ... }
 ```
 _common_req (Requires): { env: String, window_in_days: Integer }
 
-Measurements
-  "api_availability" extends [_base_slo, _common_req]:
-    Requires { threshold: Float }
-    Provides { evaluation: "numerator / denominator" }
+"api_availability" extends [_common_req]:
+  Requires { threshold: Float }
+  Provides { evaluation: "numerator / denominator" }
 ```
 
 Within the compiler, this then would be interpreted as:
 
 ```
-Measurements
-  "api_availability":
-    Requires { threshold: Float, env: String, window_in_days: Integer }
+"api_availability":
+  Requires { threshold: Float, env: String, window_in_days: Integer }
+  Provides { evaluation: "numerator / denominator" }
 ```
 
 **In Expectation Files:**
@@ -50,7 +49,7 @@ Measurements
 Expectations can only use `(Provides)` extendables:
 
 ```
-_defaults (Provides): { env: "production", window_in_days: 30 }
+_defaults (Provides): { env: "production" }
 _strict (Provides): { threshold: 99.99%, window_in_days: 7 }
 
 Expectations measured by "api_availability"
@@ -66,7 +65,6 @@ Expectations measured by "api_availability"
     Provides { 
       status: true,
        env: "production",
-       window_in_days: 30,
        threshold: 99.99%,
        window_in_days: 7
     }

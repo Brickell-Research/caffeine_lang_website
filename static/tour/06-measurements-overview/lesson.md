@@ -1,14 +1,13 @@
-A **measurement** is a common, partially specified abstraction over one or more SLO parameters. It may `provide` for the `requires` from one or more SLO parameters it inherits from and then specify some `requires` of its own.
+A **measurement** is a common, partially specified abstraction over one or more SLO parameters. It may `provide` for the `requires` from one or more SLO parameters it inherits from and then specify some `requires` of its own. Its purpose is to fulfill the subset of SLO parameters specific to measuring an SLO, i.e. the `indicators` (or queries) and the `evaluation` (or how the queries are evalutated).
 
 It may **not** override any `requires` from its inherited SLO parameters, nor specify `provides` for its own `requires` or `requires` that don't exist.
 
 **Basic Syntax:**
 
 ```
-Measurements "<SLO ParameterName>"
-  "<measurement_name>":
-    Requires { <params_expectations_must_provide> }
-    Provides { <values_this_measurement_fulfills> }
+"Measurement_Name":
+  Requires { <params_expectations_must_provide> }
+  Provides { <values_this_measurement_fulfills> }
 ```
 
 **Note:** `Requires` must come before `Provides` in measurements. The compiler enforces this ordering.
@@ -19,19 +18,6 @@ Measurements "<SLO ParameterName>"
 |------------|-------------|------------------------------------------------------|
 | `Requires` | Types only  | Parameters that expectations must provide values for |
 | `Provides` | Values only | Fulfilled values that all expectations inherit       |
-
-**Multi-SLO Parameter Measurements:**
-
-A measurement can implement multiple SLO parameters using `+`. Parameters from all SLO parameters are merged:
-
-```
-Measurements + "depends_on"
-  "tracked_slo":
-    Requires { ... }  # Params from both SLO parameters
-    Provides { ... }  # Values for both SLO parameters
-```
-
-As stated in the `depends_on` lesson, this is _the only way_ to leverage `depends_on` SLO parameters at this time.
 
 **Template Variables:**
 

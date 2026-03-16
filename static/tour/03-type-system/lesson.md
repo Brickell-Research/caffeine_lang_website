@@ -9,6 +9,7 @@ Caffeine's type system consists of the following.
 | Boolean | True or false                                      | `true`           |
 | Integer | Whole numbers                                      | `123`            |
 | Float   | Decimal numbers                                    | `12.34`          |
+| Percentage   | A float with a `%` appended on the end        | `99.0%`          |
 | String  | Any collection of characters between double quotes | `"Hello World!"` |
 | URL     | A String starting with http:// or https://         | `"https://example.com"` |
 
@@ -66,6 +67,9 @@ PrimitiveTypes: "Base value types for simple data"
   Float: "Decimal numbers"
     syntax: Float
     e.g. 3.14, 99.9, 0.0
+  Percentage: "A numeric value between 0.0 and 100.0 representing a percentage"
+    syntax: Percentage
+    e.g. 99.9%
   URL: "A valid URL starting with http:// or https://"
     syntax: URL
     e.g. "https://example.com"

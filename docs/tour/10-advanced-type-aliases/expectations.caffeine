@@ -8,4 +8,7 @@ Expectations measured by "api_availability"
     }
 
   * "staging_checkout" extends [_common]:
-    Provides { env: "staging", threshold: 95.0% }
+    Provides {
+       env: "staging", 
+       threshold: 95.0% 
+      }

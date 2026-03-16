@@ -16,7 +16,7 @@ Expectation files follow a meaningful path structure:
 - Path: `expectations/ORG/TEAM/SERVICE.caffeine`
 - Example: `expectations/acme/payments/checkout.caffeine`
 
-This path becomes part of the expectation's identity and is used in cross-file references. Furthermore SLO parameters may surface some of this information. As an example, the `SLO` SLO parameter will append tags which can then be used to filter and partition `SLOs` within the vendor's UI:
+This path becomes part of the expectation's identity and is used in cross-file references. Furthermore SLO parameters may surface some of this information. As an example, Caffeine will append tags which can then be used to filter and partition `SLOs` within the vendor's UI:
 
 ```
 # for the above filepath
