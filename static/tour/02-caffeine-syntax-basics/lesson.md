@@ -7,11 +7,28 @@ All Caffeine files end with the `.caffeine` file extension. There are two types 
 | `measurements/VENDOR.caffeine`   | **Measurements** with optional type aliases and/or extendables.                                                              |
 | `ORG/TEAM/SERVICE.caffeine`      | **Expectation** with optional extendables. One file per org/team/service combination. As denoted, file path is meaningful. |
 
-Comments in Caffeine are _Ruby like_ and useful for surfacing tacit information about an expectation.
+Comments in Caffeine are _Ruby like_ and useful for surfacing tacit information about an expectation. The number of leading hashes determines how the comment is treated by codegen:
+
+| Prefix | Meaning                                                                                                                              |
+|--------|--------------------------------------------------------------------------------------------------------------------------------------|
+| `#`    | Informal inline note. Round-trips through the formatter; ignored by codegen.                                                         |
+| `##`   | Section header. Round-trips through the formatter; ignored by codegen.                                                               |
+| `###`  | Doc comment. When placed immediately above an `*` SLO entry, the lines are joined and emitted as the Datadog SLO `description`.      |
 
 ```
-# Single-line comments start with a hash
+Expectations measured by "api_availability"
+  ## Section header — ignored by codegen.
+  ### Tracks the checkout flow availability.
+  ### Owner: payments team.
+  * "checkout":
+    Provides { env: "production", threshold: 99.95 }
+
+  # informal note — ignored by codegen
+  * "payment":
+    Provides { env: "production", threshold: 99.99 }
 ```
+
+If a runbook URL is also provided, the description and runbook are combined into an HCL heredoc on the generated `datadog_service_level_objective`.
 
 The literals of the language are fairly straightforward, following the cue of many other programming languages.
 

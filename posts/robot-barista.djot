@@ -1,0 +1,17 @@
+---
+title = "Robot Barista"
+date = "2026-05-10"
+summary = "Our Robot Barista moment: _________"
+author = "Rob Durst"
+tags = ["Evals"]
+---
+
+Even in this new world, a world of non-determinism and vibes, reliability is still important (if predictability, a little less so). And I believe that with
+this we can bring many of the same philosophies, some processes, same practices... and same tools. In our 5.0 blog post we discussed how Caffeine is a manifestation
+of the assumption/guarantee model. Our next release is us extending this model to support true, agentic applications (no longer just focused on ones "created
+agentically").
+
+***
+
+The original premise of Caffeine is a model for defining system expectations. On top of this we built a layer of assumptions and furthermore we clarified
+that blueprints are really just measurements.

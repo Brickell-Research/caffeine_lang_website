@@ -19,7 +19,7 @@ pub fn view() -> Element(Nil) {
           html.a(
             [
               attribute.href(
-                "https://github.com/Brickell-Research/caffeine_lang/releases",
+                "https://github.com/Brickell-Research/caffeine/releases",
               ),
               attribute.class("btn btn-primary"),
             ],
@@ -56,7 +56,7 @@ pub fn view() -> Element(Nil) {
           html.a(
             [
               attribute.href(
-                "https://github.com/Brickell-Research/caffeine_lang/releases",
+                "https://github.com/Brickell-Research/caffeine/releases",
               ),
             ],
             [html.text("GitHub Releases")],

@@ -3,8 +3,8 @@
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-CAFFEINE_REPO="${CAFFEINE_REPO:-$PROJECT_DIR/../caffeine}"
-VERSION_FILE="$CAFFEINE_REPO/caffeine_lang/src/caffeine_lang/common/constants.gleam"
+CAFFEINE_LANG_REPO="${CAFFEINE_LANG_REPO:-$PROJECT_DIR/../caffeine_lang}"
+VERSION_FILE="$CAFFEINE_LANG_REPO/src/caffeine_lang/constants.gleam"
 OUTPUT_FILE="$PROJECT_DIR/src/version.gleam"
 
 if [ -f "$VERSION_FILE" ]; then
