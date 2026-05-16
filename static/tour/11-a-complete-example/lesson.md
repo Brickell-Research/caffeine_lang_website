@@ -190,27 +190,26 @@ With our measurements now complete, we'll move on to expectations. For this exam
 Note that we can call these whatever we want (and frankly the names here are pretty lackluster).
 
 ```
-Expectations measured by "Auth Success Rate"
-  "Signin Success Rate":
-    Provides {}
+"Signin Success Rate":
+  Guarantees __% over __ window as measured by "Auth Success Rate" with: {}
 
-  "WhoAmI Success Rate":
-    Provides {}
+"WhoAmI Success Rate":
+  Guarantees __% over __ window as measured by "Auth Success Rate" with: {}
 
-Expectations measured by "Auth Latency"
-  "Signin Latency":
-    Provides {}
+"Signin Latency":
+  Guarantees __% over __ window as measured by "Auth Latency" with: {}
 
-  "WhoAmI Latency":
-    Provides {}
+"WhoAmI Latency":
+  Guarantees __% over __ window as measured by "Auth Latency" with: {}
 ```
 
-So if you recall, there are two `SLO` SLO parameter specific `provides` we need to satisfy:
+The `Guarantees` clause carries:
 
-* a `window_in_days` which is an `Integer` (defaults to 30 if not specified)
-* a `threshold` which is a `Percentage` between 0.0 and 100.0
+* a percentage target (e.g. `99.9%`)
+* an `over <duration> window` clause (e.g. `over 30d window`)
+* a `as measured by "<MeasurementName>" with: { ... }` tail that names the measurement and supplies its parameters
 
-Furthermore, each measurement requires:
+Each measurement requires:
 
 * an `endpoint` name that is a `String`
 * an `env` which is `testing`, `staging`, or `production`
@@ -220,84 +219,62 @@ And finally, specific to `Auth Latency` we need the `threshold_in_seconds` which
 With values according to the expectations of our users we came up with above we get:
 
 ```
-Expectations measured by "Auth Success Rate"
-  "Signin Success Rate":
-    Provides {
-      window_in_days: 30,
-      threshold: 99.9%,
-      endpoint: "sign-in",
-      env: "production"
-    }
+"Signin Success Rate":
+  Guarantees 99.9% over 30d window as measured by "Auth Success Rate" with: {
+    endpoint: "sign-in",
+    env: "production"
+  }
 
-  "WhoAmI Success Rate":
-    Provides {
-      window_in_days: 30,
-      threshold: 99%,
-      endpoint: "who-am-i",
-      env: "production"
-    }
+"WhoAmI Success Rate":
+  Guarantees 99% over 30d window as measured by "Auth Success Rate" with: {
+    endpoint: "who-am-i",
+    env: "production"
+  }
 
-Expectations measured by "Auth Latency"
-  "Signin Latency":
-    Provides {
-      window_in_days: 30,
-      threshold: 99.9%,
-      endpoint: "sign-in",
-      env: "production",
-      threshold_in_seconds: 1
-    }
+"Signin Latency":
+  Guarantees 99.9% over 30d window as measured by "Auth Latency" with: {
+    endpoint: "sign-in",
+    env: "production",
+    threshold_in_seconds: 1
+  }
 
-  "WhoAmI Latency":
-    Provides {
-      window_in_days: 30,
-      # more strict about the latency than the success rate for
-      # threshold as well (the % of 5m intervals where the latency
-      # is within the threshold_in_seconds)
-      threshold: 99.9%,
-      endpoint: "who-am-i",
-      env: "production",
-      threshold_in_seconds: 0.25
-    }
+"WhoAmI Latency":
+  # more strict about the latency than the success rate for
+  # threshold as well (the % of 5m intervals where the latency
+  # is within the threshold_in_seconds)
+  Guarantees 99.9% over 30d window as measured by "Auth Latency" with: {
+    endpoint: "who-am-i",
+    env: "production",
+    threshold_in_seconds: 0.25
+  }
 ```
 
-And finally if we want, we can leverage a couple extendables to reduce duplication.
-
+And finally if we want, we can leverage a couple extendables to reduce duplication. Note that `threshold` and `window` are no longer extendable fields — they live in the `Guarantees` clause itself. Extendables only contribute fields to the `with: {...}` blueprint arguments:
 
 ```
 ## ==== Extendables ====
-_common_sign_in (Provides): { endpoint: "sign-in",  env: "production" }
-_common_who_am_i (Provides): { endpoint: "who-am-i",  env: "production" }
-# optionally we can even observe 30 days is a good
-# window_in_days for all expectations in this file
-_common_basic (Provides): { window_in_days: 30 }
+_common_sign_in (Provides): { endpoint: "sign-in", env: "production" }
+_common_who_am_i (Provides): { endpoint: "who-am-i", env: "production" }
 
 ## ==== Expectations ====
-Expectations measured by "Auth Success Rate"
-  "Signin Success Rate" extends [_common_basic, _common_sign_in]:
-    Provides {
-      threshold: 99.9%
-    }
+"Signin Success Rate" extends [_common_sign_in]:
+  Guarantees 99.9% over 30d window as measured by "Auth Success Rate" with: {}
 
-  "WhoAmI Success Rate" extends [_common_basic, _common_who_am_i]:
-    Provides {
-      threshold: 99%
-    }
+"WhoAmI Success Rate" extends [_common_who_am_i]:
+  Guarantees 99% over 30d window as measured by "Auth Success Rate" with: {}
 
-Expectations measured by "Auth Latency"
-  "Signin Latency" extends [_common_basic, _common_sign_in]:
-    Provides {
-      threshold: 99.9%,
-      threshold_in_seconds: 1
-    }
+"Signin Latency" extends [_common_sign_in]:
+  Guarantees 99.9% over 30d window as measured by "Auth Latency" with: {
+    threshold_in_seconds: 1
+  }
 
-  "WhoAmI Latency" extends [_common_basic, _common_who_am_i]:
-    Provides {
-      # more strict about the latency than the success rate for
-      # threshold as well (the % of 5m intervals where the latency
-      # is within the threshold_in_seconds)
-      threshold: 99.9%,
-      threshold_in_seconds: 0.25
-    }
+"WhoAmI Latency" extends [_common_who_am_i]:
+  # more strict about the latency than the success rate for
+  # threshold as well (the % of 5m intervals where the latency
+  # is within the threshold_in_seconds)
+  Guarantees 99.9% over 30d window as measured by "Auth Latency" with: {
+    threshold_in_seconds: 0.25
+  }
 ```
 
 And with that, we just need to compile everything, apply it, and we're well on our way to more reliably operating our production systems 🎉. In the name of Caffeine, go find a good ☕️ from your local cafe to celebrate! **You are now officially a Caffeine barista!**

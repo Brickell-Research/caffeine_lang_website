@@ -16,16 +16,19 @@ Comments in Caffeine are _Ruby like_ and useful for surfacing tacit information 
 | `###`  | Doc comment. When placed immediately above an `*` SLO entry, the lines are joined and emitted as the Datadog SLO `description`.      |
 
 ```
-Expectations measured by "api_availability"
-  ## Section header — ignored by codegen.
-  ### Tracks the checkout flow availability.
-  ### Owner: payments team.
-  * "checkout":
-    Provides { env: "production", threshold: 99.95 }
+## Section header — ignored by codegen.
+### Tracks the checkout flow availability.
+### Owner: payments team.
+"checkout":
+  Guarantees 99.95% over 30d window as measured by "api_availability" with: {
+    env: "production"
+  }
 
-  # informal note — ignored by codegen
-  * "payment":
-    Provides { env: "production", threshold: 99.99 }
+# informal note — ignored by codegen
+"payment":
+  Guarantees 99.99% over 30d window as measured by "api_availability" with: {
+    env: "production"
+  }
 ```
 
 If a runbook URL is also provided, the description and runbook are combined into an HCL heredoc on the generated `datadog_service_level_objective`.
@@ -52,17 +55,23 @@ Caffeine uses indentation to denote structure.
   Provides { ... }
 ```
 
-**Expectations:** single indented bullet list of expectation names beneath the `Expecations` declaration followed by their `Provides` blocks indented twice.
+**Expectations:** each expectation stands alone with its own quoted name. The body has an optional `Assumes:` section (dependencies) and a required `Guarantees N% over <duration> window [as measured by "M" with: {...}]` clause.
 ```
-Expectations measured by "My_Measurement"
-  * "Some Expectation":
-    Provides {}
+"Some Expectation":
+  Guarantees 99.9% over 30d window as measured by "My_Measurement" with: {}
 ```
 
-There are just a few keywords in the Caffeine language. Here they are along with their significance/meaning:
-* `Expectations measured by`: prefaces expectation(s) declaration(s) for a specific measurement
-* `Requires`: signifies a requirements block
-* `Provides`: signifies a provide block
+The Caffeine language uses these keywords:
+* `Guarantees`: introduces the SLO target clause
+* `over` / `window`: bracket the rolling window duration on a Guarantees clause
+* `as measured by`: links an expectation to its measurement
+* `with`: introduces the parameter struct for the measurement
+* `Assumes`: starts the dependency section
+* `hard dependency on` / `soft dependency on`: declare a dependency line inside `Assumes`
+* `below`: optional latency clause on a `time_slice` Guarantees
+* `Requires`: signifies the measurement parameter block
+* `Provides`: signifies a measurement provide block
 * `Type`: signifies a type alias
+* `success_rate` / `time_slice`: optional declared expectation type on a measurement header
 
 > Continue on to learn about the Caffeine `Type System`.
