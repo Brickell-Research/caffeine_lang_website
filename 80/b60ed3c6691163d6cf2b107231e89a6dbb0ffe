@@ -1,0 +1,22 @@
+posts/five-point-oh.djot
+  138479757fa7b2f2 7,9-11,13,24,32,46,58-60,66,68,71,73,86,92-93,95-97,99,102-104,108,123,127,130-131,133,135-136,139-140,143-155,157-169,171-172,177,180,182-183,186-194,200-211,213,216-220,225-227,231,234,240-242,244,250-251,254,256,266,268,270,272,274-277
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "80b60ed3c6691163d6cf2b107231e89a6dbb0ffe",
+  "prompts": {
+    "138479757fa7b2f2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0f4f22b6-ebea-43ca-b852-5374b5403294",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "robertDurst <me@robdurst.com>",
+      "total_additions": 501,
+      "total_deletions": 369,
+      "accepted_lines": 115,
+      "overriden_lines": 0
+    }
+  }
+}
