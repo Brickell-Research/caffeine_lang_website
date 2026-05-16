@@ -1,0 +1,16 @@
+static/tour/01.5-getting-started/lesson.md
+  h_55b93de7ce5e50 17
+docs/tour/01.5-getting-started/lesson.md
+  h_55b93de7ce5e50 17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "26c0bb32472ec3111bfb2b979b4cf847d3324484",
+  "prompts": {},
+  "humans": {
+    "h_55b93de7ce5e50": {
+      "author": "robertDurst <me@robdurst.com>"
+    }
+  }
+}
