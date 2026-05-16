@@ -46,28 +46,29 @@ Within the compiler, this then would be interpreted as:
 
 **In Expectation Files:**
 
-Expectations can only use `(Provides)` extendables:
+Expectations can only use `(Provides)` extendables. The merged fields land in the expectation's `with: {...}` args:
 
 ```
 _defaults (Provides): { env: "production" }
-_strict (Provides): { threshold: 99.99%, window_in_days: 7 }
+_owner (Provides): { service_owner: "platform-team" }
 
-Expectations measured by "api_availability"
-  "critical_service" extends [_defaults, _strict]:
-    Provides { status: true }
+"critical_service" extends [_defaults, _owner]:
+  Guarantees 99.99% over 7d window as measured by "api_availability" with: {
+    status: true
+  }
 ```
 
-Within the compiler, this then would be interpreted as:
+Within the compiler, this is equivalent to:
 
 ```
-Expectations measured by "api_availability"
-  "critical_service":
-    Provides { 
-      status: true,
-       env: "production",
-       threshold: 99.99%,
-       window_in_days: 7
-    }
+"critical_service":
+  Guarantees 99.99% over 7d window as measured by "api_availability" with: {
+    status: true,
+    env: "production",
+    service_owner: "platform-team"
+  }
 ```
+
+Threshold (`99.99%`) and window (`7d`) live in the `Guarantees` clause itself — they're not extendable fields anymore. Use extendables to share blueprint-parameter values across expectations.
 
 > See if you can clean up the expectations below. _I like my cappuccino dry!_

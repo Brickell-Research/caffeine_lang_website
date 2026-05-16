@@ -1,13 +1,8 @@
-Expectations measured by "Simple_SLO"
-  * "checkout_availability":
-    Provides {
-      service_name: "checkout-api",
-      threshold: 99.9%,
-      depends_on: { 
-        hard: ["tour.demo.service.provider_uptime"] 
-      }
-    }
-
-Unmeasured Expectations
-  * "provider_uptime":
-    Provides { threshold: 99.95%, window_in_days: 30 }
+"checkout_availability":
+  Assumes:
+    hard dependency on "tour.demo.service.provider_uptime"
+  Guarantees 99.9% over 30d window as measured by "Simple_SLO" with: {
+    service_name: "checkout-api"
+  }
+"provider_uptime":
+  Guarantees 99.95% over 30d window

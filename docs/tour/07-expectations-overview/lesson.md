@@ -1,13 +1,31 @@
-An **expectation** is the instantiation or "complete providing for" the combined requirements of its measurement and its measurement's SLO parameters. It only has a `provides` block and _must_ specify the totality of all `requires` from the chain it inherits.
+An **expectation** is the instantiation or "complete providing for" the combined requirements of its measurement and its measurement's SLO parameters. It declares a `Guarantees ...` clause that carries the threshold, window, and (optionally) a reference to the measurement plus its parameter values via `with: {...}`. An optional `Assumes:` section declares dependencies.
 
-It may not override any `provides` from its inherited SLO parameters, nor specify `provides` for `requires` that don't exist.
+The expectation _must_ specify the totality of all `Requires` from the chain it inherits, may not override any field from an inherited extendable, and may not introduce parameters that the measurement doesn't declare.
 
 **Basic Syntax:**
 
 ```
-Expectations measured by "<MeasurementName>"
-  "<expectation_name>":
-    Provides { <all_required_values> }
+"<expectation_name>":
+  Guarantees <threshold>% over <window> window as measured by "<MeasurementName>" with: {
+    <all_required_values>
+  }
+```
+
+For expectations with no backing measurement (e.g. third-party SLAs), omit the `as measured by ... with: ...` tail:
+
+```
+"<expectation_name>":
+  Guarantees 99.95% over 30d window
+```
+
+To declare dependencies between expectations:
+
+```
+"<expectation_name>":
+  Assumes:
+    hard dependency on "org.team.service.upstream_slo"
+    soft dependency on "org.team.service.cache_slo"
+  Guarantees 99.9% over 30d window as measured by "M" with: {}
 ```
 
 **File Location:**
