@@ -15,6 +15,13 @@ pub fn view() -> Element(Nil) {
           html.span([attribute.class("version-badge")], [
             html.text(version.latest_version),
           ]),
+          html.a(
+            [
+              attribute.href("https://archive-5-6-0.caffeine-lang.run/tour"),
+              attribute.class("archive-link"),
+            ],
+            [html.text("v5.6.0 archive →")],
+          ),
         ]),
         html.div([attribute.class("tour-progress")], [
           html.div([attribute.class("tour-progress-bar")], [

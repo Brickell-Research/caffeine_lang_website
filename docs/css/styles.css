@@ -1055,6 +1055,19 @@ a:hover {
   border-radius: 3px;
 }
 
+.archive-link {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.archive-link:hover {
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+}
+
 
 .editor-panel,
 .output-panel {
