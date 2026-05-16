@@ -1,0 +1,16 @@
+docs/tour/02-caffeine-syntax-basics/lesson.md
+  h_55b93de7ce5e50 13,18
+static/tour/02-caffeine-syntax-basics/lesson.md
+  h_55b93de7ce5e50 13,18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "96e7f4df7a67018f7737bed071a888b92230907f",
+  "prompts": {},
+  "humans": {
+    "h_55b93de7ce5e50": {
+      "author": "robertDurst <me@robdurst.com>"
+    }
+  }
+}
