@@ -141,7 +141,7 @@ pub fn post_view(post: Post) -> Element(Nil) {
     PageMeta(
       title: post.title,
       description: Some(post.summary),
-      url: Some("https://caffeine-lang.org/blog/" <> post.slug),
+      url: Some("https://caffeine-lang.run/blog/" <> post.slug),
     )
 
   // Add TOC div before post content
