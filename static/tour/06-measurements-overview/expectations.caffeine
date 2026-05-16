@@ -1,7 +1,5 @@
-Expectations measured by "Simple_SLO"
-  * "My First SLO":
-    Provides {
-      service_name: "hello-world",
-      excluded_service_name: "foobar",
-      threshold: 99.9%
-    }
+"My First SLO":
+  Guarantees 99.9% over 30d window as measured by "Simple_SLO" with: {
+    service_name: "hello-world",
+    excluded_service_name: "foobar"
+  }

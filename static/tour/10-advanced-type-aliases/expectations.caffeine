@@ -1,14 +1,12 @@
 _common (Provides): { window_in_days: 30, status: true }
 
-Expectations measured by "api_availability"
-  * "checkout_availability" extends [_common]:
-    Provides {
-      # env is default value here
+"checkout_availability" extends [_common]:
+  Guarantees 99.9% over 30d window as measured by "api_availability" with: {
+    # env is default value here
       threshold: 99.95%
-    }
+  }
 
-  * "staging_checkout" extends [_common]:
-    Provides {
-       env: "staging", 
-       threshold: 95.0% 
-      }
+"staging_checkout" extends [_common]:
+  Guarantees 95.0% over 30d window as measured by "api_availability" with: {
+    env: "staging"
+  }
