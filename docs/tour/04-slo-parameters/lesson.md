@@ -14,7 +14,7 @@ Here are the parameters that make up an SLO:
 
 In practice, a measurement typically provides the `indicators` and `evaluation` (the query structure), while the expectation provides the `threshold` and optionally overrides `window_in_days`.
 
-The vendor (Datadog, Dynatrace, Honeycomb, or New Relic) is determined by the measurement filename (e.g., `datadog.caffeine`, `honeycomb.caffeine`).
+The vendor (Datadog, Dynatrace, Honeycomb, or New Relic) is determined by the measurement filename (e.g., `datadog.caffeine`, `honeycomb.caffeine`). At this time, only Datadog is supported.
 
 **Evaluation Expressions**
 

@@ -1,7 +1,8 @@
-"api_availability":
+_env (Requires): { env: String }
+
+"api_availability" extends [_env]:
   Requires {
     status: Boolean,
-    env: String
   }
   Provides {
     evaluation: "numerator / denominator",

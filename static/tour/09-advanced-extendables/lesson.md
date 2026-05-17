@@ -69,6 +69,6 @@ Within the compiler, this is equivalent to:
   }
 ```
 
-Threshold (`99.99%`) and window (`7d`) live in the `Guarantees` clause itself — they're not extendable fields anymore. Use extendables to share blueprint-parameter values across expectations.
+**Note:** threshold (`99.99%`) and window (`7d`) live in the `Guarantees` clause itself and are not extendable fields.
 
 > See if you can clean up the expectations below. _I like my cappuccino dry!_
